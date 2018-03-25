@@ -2,7 +2,7 @@ package org.soraworld.violet.config;
 
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.Plugin;
-import org.soraworld.violet.constant.Constant;
+import org.soraworld.violet.constant.Violets;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -26,7 +26,7 @@ public class Config extends IIConfig {
 
     @Nonnull
     protected String defaultChatHead() {
-        return Constant.PLUGIN_NAME;
+        return Violets.PLUGIN_NAME;
     }
 
 }

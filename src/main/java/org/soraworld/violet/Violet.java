@@ -6,10 +6,11 @@ import org.soraworld.violet.command.IICommand;
 import org.soraworld.violet.config.Config;
 import org.soraworld.violet.config.IIConfig;
 import org.soraworld.violet.config.IILang;
-import org.soraworld.violet.constant.Constant;
+import org.soraworld.violet.constant.Violets;
 import org.soraworld.violet.listener.EventListener;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,9 +33,9 @@ public class Violet extends VioletPlugin {
         return listeners;
     }
 
-    @Nonnull
+    @Nullable
     protected IICommand registerCommand(IIConfig config) {
-        return new CommandViolet(Constant.PLUGIN_ID, config, this);
+        return new CommandViolet(Violets.PLUGIN_ID, config, this);
     }
 
     public static String translate(String key, Object... args) {

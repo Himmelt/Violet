@@ -1,6 +1,6 @@
 # English Language File
 # Please use UTF-8 encoding
-# (Please use GB2312 encoding on zh_CN Windows OS for Chinese language file)
+# Please use GB2312 encoding on zh_CN Windows OS for Chinese language file
 
 chatHead: "[Violet] "
 
@@ -12,3 +12,6 @@ configLoaded: "&aConfig file loaded."
 configLoadFailed: "&cConfig file load failed !!!"
 debugON: "DEBUG mode &aON&r ."
 debugOFF: "DEBUG mode &cOFF&r ."
+onlyPlayer: "Only in-game player can execute this cmd."
+invalidArg: "Arg is empty or invalid."
+onlyPlayerOrInvalidArg: "Arg is empty or invalid , add valid arg or execute it in game."

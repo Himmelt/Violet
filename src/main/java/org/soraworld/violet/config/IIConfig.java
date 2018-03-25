@@ -3,38 +3,38 @@ package org.soraworld.violet.config;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
+import org.soraworld.violet.constant.Violets;
 
 import javax.annotation.Nonnull;
 import java.io.File;
 
 public abstract class IIConfig {
 
-    private final File file;
-    private final YamlConfiguration yaml = new YamlConfiguration();
-
     public final IILang iiLang;
     public final Plugin plugin;
     public final IIChat iiChat;
 
-    private boolean debug = false;
+    protected boolean debug = false;
+    protected final File config_file;
+    protected final YamlConfiguration config_yaml = new YamlConfiguration();
 
     public IIConfig(File path, Plugin plugin) {
-        this.file = new File(path, "config.yml");
+        this.config_file = new File(path, "config.yml");
         this.iiLang = new IILang(new File(path, "lang"), this);
         this.plugin = plugin;
         this.iiChat = new IIChat(defaultChatHead(), defaultChatColor());
     }
 
     public boolean load() {
-        if (!file.exists()) {
-            setLang(yaml.getString("lang"));
+        if (!config_file.exists()) {
+            setLang(config_yaml.getString("lang"));
             save();
             return true;
         }
         try {
-            yaml.load(file);
-            debug = yaml.getBoolean("debug");
-            setLang(yaml.getString("lang"));
+            config_yaml.load(config_file);
+            debug = config_yaml.getBoolean("debug");
+            setLang(config_yaml.getString("lang"));
             loadOptions();
         } catch (Throwable e) {
             if (debug) e.printStackTrace();
@@ -46,10 +46,10 @@ public abstract class IIConfig {
 
     public boolean save() {
         try {
-            yaml.set("debug", debug);
-            yaml.set("lang", iiLang.getLang());
+            config_yaml.set("debug", debug);
+            config_yaml.set("lang", iiLang.getLang());
             saveOptions();
-            yaml.save(file);
+            config_yaml.save(config_file);
         } catch (Throwable e) {
             if (debug) e.printStackTrace();
             iiChat.console("&cConfig file save exception !!!");
@@ -68,7 +68,7 @@ public abstract class IIConfig {
 
     public void setLang(String lang) {
         iiLang.setLang(lang);
-        iiChat.setHead(iiLang.format("chatHead"));
+        iiChat.setHead(iiLang.format(Violets.KEY_CHAT_HEAD));
     }
 
     public String getLang() {

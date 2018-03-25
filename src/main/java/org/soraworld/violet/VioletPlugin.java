@@ -9,6 +9,7 @@ import org.soraworld.violet.config.IIConfig;
 import org.soraworld.violet.util.ListUtil;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,7 +52,7 @@ public abstract class VioletPlugin extends JavaPlugin {
     @Nonnull
     protected abstract List<Listener> registerEvents(IIConfig config);
 
-    @Nonnull
+    @Nullable
     protected abstract IICommand registerCommand(IIConfig config);
 
 }

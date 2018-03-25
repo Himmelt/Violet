@@ -8,11 +8,11 @@ import java.io.InputStream;
 
 public class IILang {
 
-    private File file;
     private String lang;
+    private File lang_file;
     private final File path;
     private final IIConfig config;
-    private final YamlConfiguration yaml = new YamlConfiguration();
+    private final YamlConfiguration lang_yaml = new YamlConfiguration();
 
     IILang(File path, IIConfig config) {
         this.path = path;
@@ -25,7 +25,7 @@ public class IILang {
             lang = "en_us";
         }
         this.lang = lang;
-        this.file = new File(path, lang + ".yml");
+        this.lang_file = new File(path, lang + ".yml");
         load();
     }
 
@@ -34,18 +34,18 @@ public class IILang {
     }
 
     private void load() {
-        if (!file.exists()) {
+        if (!lang_file.exists()) {
             try {
                 path.mkdirs();
                 InputStream input = this.getClass().getResourceAsStream("/lang/" + lang + ".yml");
-                FileUtil.copyInputStreamToFile(input, file);
+                FileUtil.copyInputStreamToFile(input, lang_file);
             } catch (Throwable e) {
                 if (config.debug()) e.printStackTrace();
                 config.iiChat.console("&cLang file load exception !!!");
             }
         }
         try {
-            yaml.load(file);
+            lang_yaml.load(lang_file);
         } catch (Throwable e) {
             if (config.debug()) e.printStackTrace();
             config.iiChat.console("&cLang file load exception !!!");
@@ -53,7 +53,7 @@ public class IILang {
     }
 
     public String format(String key, Object... args) {
-        String value = yaml.getString(key);
+        String value = lang_yaml.getString(key);
         return String.format(value == null ? key : value, args);
     }
 
