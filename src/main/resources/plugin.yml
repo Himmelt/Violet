@@ -1,0 +1,16 @@
+name: Violet
+version: 1.7.10-1.0.0
+author: Himmelt
+main: org.soraworld.violet.Violet
+website: https://github.com/Himmelt/Violet
+description: Violet Library Plugin.
+
+commands:
+  violet:
+    description: "Violet - https://github.com/Himmelt/Violet"
+    usage: "/violet save|reload|lang|debug..."
+    permission: violet.admin
+    permission-message: "You have no permission <violet.admin>"
+permissions:
+  violet.admin:
+    default: op

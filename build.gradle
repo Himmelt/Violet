@@ -1,0 +1,24 @@
+apply plugin: 'java'
+
+group 'org.soraworld.violet'
+version '1.7.10-1.0.0'
+description = 'Violet Library Plugin'
+archivesBaseName = "Violet"
+
+sourceCompatibility = targetCompatibility = '1.7'
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.7'
+}
+
+repositories {
+    jcenter()
+    maven {
+        name = 'spigot'
+        url = 'https://hub.spigotmc.org/nexus/content/groups/public/'
+    }
+}
+
+dependencies {
+    compile 'org.spigotmc:spigot-api:1.8-R0.1-SNAPSHOT'
+    compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
+}
