@@ -1,9 +1,18 @@
+plugins {
+    id "com.jfrog.bintray" version "1.8.0"
+}
+
 apply plugin: 'java'
 
 group 'org.soraworld.violet'
 version '1.7.10-1.0.0'
 description = 'Violet Library Plugin'
 archivesBaseName = "Violet"
+
+bintray {
+    user = 'bintray_user'
+    key = 'bintray_api_key'
+}
 
 sourceCompatibility = targetCompatibility = '1.7'
 compileJava {
