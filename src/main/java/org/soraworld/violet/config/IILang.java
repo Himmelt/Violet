@@ -37,7 +37,7 @@ public class IILang {
         if (!lang_file.exists()) {
             try {
                 path.mkdirs();
-                InputStream input = this.getClass().getResourceAsStream("/lang/" + lang + ".yml");
+                InputStream input = config.getClass().getResourceAsStream("/lang/" + lang + ".yml");
                 FileUtil.copyInputStreamToFile(input, lang_file);
             } catch (Throwable e) {
                 if (config.debug()) e.printStackTrace();
