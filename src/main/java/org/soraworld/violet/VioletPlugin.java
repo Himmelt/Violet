@@ -43,7 +43,7 @@ public abstract class VioletPlugin extends JavaPlugin {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
-        return command == null ? new ArrayList<String>() : command.onTabComplete(sender, cmd, alias, args);
+        return command == null ? new ArrayList<String>() : command.getTabCompletions(ListUtil.arrayList(args));
     }
 
     @Nonnull

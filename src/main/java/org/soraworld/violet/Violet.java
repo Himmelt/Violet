@@ -35,7 +35,7 @@ public class Violet extends VioletPlugin {
 
     @Nullable
     protected IICommand registerCommand(IIConfig config) {
-        return new CommandViolet(Violets.PLUGIN_ID, config, this);
+        return new CommandViolet(Violets.PLUGIN_ID, null, config, this);
     }
 
     public static String translate(String lang, String key, Object... args) {

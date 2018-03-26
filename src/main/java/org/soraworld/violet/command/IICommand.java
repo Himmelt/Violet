@@ -1,8 +1,8 @@
 package org.soraworld.violet.command;
 
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabExecutor;
+import org.soraworld.violet.Violet;
+import org.soraworld.violet.config.IIConfig;
 import org.soraworld.violet.util.ListUtil;
 
 import javax.annotation.Nonnull;
@@ -11,23 +11,26 @@ import java.util.Collection;
 import java.util.List;
 import java.util.TreeMap;
 
-public abstract class IICommand implements TabExecutor {
+public abstract class IICommand {
 
     private final String name;
+    private final String perm;
+    private final IIConfig config;
     private final List<String> aliases;
     private final TreeMap<String, IICommand> subs = new TreeMap<>();
 
-    public IICommand(String name, String... aliases) {
+    public IICommand(String name, String perm, IIConfig config, String... aliases) {
         this.name = name;
+        this.perm = perm;
+        this.config = config;
         this.aliases = ListUtil.arrayList(aliases);
     }
 
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String lable, String[] args) {
-        return execute(sender, ListUtil.arrayList(args));
-    }
-
     public boolean execute(CommandSender sender, ArrayList<String> args) {
+        if (perm != null && !sender.hasPermission(perm)) {
+            config.iiChat.send(sender, Violet.translate(config.getLang(), "noCommandPerm", perm));
+            return false;
+        }
         if (args.size() >= 1) {
             IICommand sub = subs.get(args.remove(0));
             if (sub != null) {
@@ -41,7 +44,7 @@ public abstract class IICommand implements TabExecutor {
     }
 
     @Nonnull
-    private String getUsage() {
+    protected String getUsage() {
         return "";
     }
 
@@ -55,17 +58,12 @@ public abstract class IICommand implements TabExecutor {
         }
     }
 
-    @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        return getTabCompletions(sender, ListUtil.arrayList(args));
-    }
-
-    private List<String> getTabCompletions(CommandSender sender, ArrayList<String> args) {
+    public List<String> getTabCompletions(ArrayList<String> args) {
         if (args.size() == 1) {
             return getMatchList(args.get(0), subs.keySet());
         } else if (args.size() >= 2) {
             IICommand sub = subs.get(args.remove(0));
-            if (sub != null) return sub.getTabCompletions(sender, args);
+            if (sub != null) return sub.getTabCompletions(args);
             else return new ArrayList<>();
         } else {
             return new ArrayList<>(subs.keySet());
