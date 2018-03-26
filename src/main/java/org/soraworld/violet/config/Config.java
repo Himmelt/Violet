@@ -9,8 +9,11 @@ import java.io.File;
 
 public class Config extends IIConfig {
 
+    public final VLang vLang;
+
     public Config(File path, Plugin plugin) {
         super(path, plugin);
+        this.vLang = new VLang(new File(path, "lang"), this);
     }
 
     protected void loadOptions() {
@@ -26,7 +29,7 @@ public class Config extends IIConfig {
 
     @Nonnull
     protected String defaultChatHead() {
-        return Violets.PLUGIN_NAME;
+        return "[" + Violets.PLUGIN_NAME + "] ";
     }
 
 }

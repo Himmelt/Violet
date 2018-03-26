@@ -5,7 +5,7 @@ import org.soraworld.violet.command.CommandViolet;
 import org.soraworld.violet.command.IICommand;
 import org.soraworld.violet.config.Config;
 import org.soraworld.violet.config.IIConfig;
-import org.soraworld.violet.config.IILang;
+import org.soraworld.violet.config.VLang;
 import org.soraworld.violet.constant.Violets;
 import org.soraworld.violet.listener.EventListener;
 
@@ -17,12 +17,12 @@ import java.util.List;
 
 public class Violet extends VioletPlugin {
 
-    private static IILang iiLang;
+    private static VLang vLang;
 
     @Nonnull
     protected IIConfig registerConfig(File path) {
-        IIConfig config = new Config(path, this);
-        iiLang = config.iiLang;
+        Config config = new Config(path, this);
+        vLang = config.vLang;
         return config;
     }
 
@@ -38,9 +38,9 @@ public class Violet extends VioletPlugin {
         return new CommandViolet(Violets.PLUGIN_ID, config, this);
     }
 
-    public static String translate(String key, Object... args) {
-        if (iiLang == null) return String.format(key, args);
-        return iiLang.format(key, args);
+    public static String translate(String lang, String key, Object... args) {
+        if (vLang == null) return key;
+        return vLang.format(lang, key, args);
     }
 
 }

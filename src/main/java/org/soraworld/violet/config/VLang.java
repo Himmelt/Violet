@@ -1,0 +1,73 @@
+package org.soraworld.violet.config;
+
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.soraworld.violet.util.FileUtil;
+
+import java.io.File;
+import java.io.InputStream;
+import java.util.HashMap;
+
+public class VLang {
+
+    private final File path;
+    private final IIConfig config;
+    private final HashMap<String, File> files = new HashMap<>();
+    private final HashMap<String, YamlConfiguration> yamls = new HashMap<>();
+
+    VLang(File path, IIConfig config) {
+        this.path = path;
+        this.config = config;
+    }
+
+    private File getLangFile(String lang) {
+        File file = files.get(lang);
+        if (file == null) {
+            file = new File(path, lang + ".yml");
+            files.put(lang, file);
+        }
+        return file;
+    }
+
+    private YamlConfiguration getLangYaml(String lang) {
+        YamlConfiguration yaml = yamls.get(lang);
+        if (yaml == null) {
+            yaml = new YamlConfiguration();
+            yamls.put(lang, yaml);
+            load(lang);
+        }
+        return yaml;
+    }
+
+    private void load(String lang) {
+        File lang_file = getLangFile(lang);
+        if (!lang_file.exists()) {
+            try {
+                path.mkdirs();
+                InputStream input = this.getClass().getResourceAsStream("/lang/" + lang + ".yml");
+                FileUtil.copyInputStreamToFile(input, lang_file);
+            } catch (Throwable e) {
+                if (config.debug()) e.printStackTrace();
+                config.iiChat.console("&cLang file extract exception !!!");
+                //TODO fall back
+            }
+        }
+        try {
+            getLangYaml(lang).load(lang_file);
+        } catch (Throwable e) {
+            if (config.debug()) e.printStackTrace();
+            config.iiChat.console("&cLang file load exception !!!");
+            // TODO fall back
+        }
+    }
+
+    public String format(String lang, String key, Object... args) {
+        String value = getLangYaml(lang).getString(key);
+        if (value == null || value.isEmpty()) {
+            if ("en_us".equals(lang)) return key;
+            return format("en_us", key, args);
+        } else {
+            return String.format(value, args);
+        }
+    }
+
+}

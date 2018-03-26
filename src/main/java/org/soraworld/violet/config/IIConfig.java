@@ -68,7 +68,11 @@ public abstract class IIConfig {
 
     public void setLang(String lang) {
         iiLang.setLang(lang);
-        iiChat.setHead(iiLang.format(Violets.KEY_CHAT_HEAD));
+        if (iiLang.hasKey(Violets.KEY_CHAT_HEAD)) {
+            iiChat.setHead(iiLang.format(Violets.KEY_CHAT_HEAD));
+        } else {
+            iiChat.setHead(defaultChatHead());
+        }
     }
 
     public String getLang() {
