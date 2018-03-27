@@ -27,14 +27,15 @@ public abstract class IICommand {
     }
 
     public boolean execute(CommandSender sender, ArrayList<String> args) {
-        if (perm != null && !sender.hasPermission(perm)) {
-            config.iiChat.send(sender, Violet.translate(config.getLang(), Violets.KEY_NO_CMD_PERM, perm));
-            return false;
-        }
         if (args.size() >= 1) {
             IICommand sub = subs.get(args.remove(0));
             if (sub != null) {
-                return sub.execute(sender, args);
+                if (sub.canRun(sender)) {
+                    return sub.execute(sender, args);
+                } else {
+                    config.iiChat.send(sender, Violet.translate(config.getLang(), Violets.KEY_NO_CMD_PERM, sub.perm));
+                    return true;
+                }
             }
         }
         if (!getUsage().isEmpty()) {
@@ -70,5 +71,8 @@ public abstract class IICommand {
         }
     }
 
+    public boolean canRun(CommandSender sender) {
+        return perm == null || sender.hasPermission(perm);
+    }
 
 }
