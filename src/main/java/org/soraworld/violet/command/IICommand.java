@@ -3,11 +3,11 @@ package org.soraworld.violet.command;
 import org.bukkit.command.CommandSender;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.config.IIConfig;
+import org.soraworld.violet.constant.Violets;
 import org.soraworld.violet.util.ListUtil;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -28,7 +28,7 @@ public abstract class IICommand {
 
     public boolean execute(CommandSender sender, ArrayList<String> args) {
         if (perm != null && !sender.hasPermission(perm)) {
-            config.iiChat.send(sender, Violet.translate(config.getLang(), "noCommandPerm", perm));
+            config.iiChat.send(sender, Violet.translate(config.getLang(), Violets.KEY_NO_CMD_PERM, perm));
             return false;
         }
         if (args.size() >= 1) {
@@ -60,7 +60,7 @@ public abstract class IICommand {
 
     public List<String> getTabCompletions(ArrayList<String> args) {
         if (args.size() == 1) {
-            return getMatchList(args.get(0), subs.keySet());
+            return ListUtil.getMatchList(args.get(0), subs.keySet());
         } else if (args.size() >= 2) {
             IICommand sub = subs.get(args.remove(0));
             if (sub != null) return sub.getTabCompletions(args);
@@ -70,15 +70,5 @@ public abstract class IICommand {
         }
     }
 
-    private static List<String> getMatchList(String arg, Collection<String> possibles) {
-        if (arg.isEmpty()) return new ArrayList<>(possibles);
-        ArrayList<String> list = new ArrayList<>();
-        for (String s : possibles) {
-            if (s.startsWith(arg)) {
-                list.add(s);
-            }
-        }
-        return list;
-    }
 
 }

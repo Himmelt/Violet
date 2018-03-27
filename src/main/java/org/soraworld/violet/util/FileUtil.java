@@ -8,6 +8,7 @@ public class FileUtil {
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
 
     public static void copyInputStreamToFile(InputStream source, File destination) throws IOException {
+        if (source == null || destination == null) return;
         try {
             FileOutputStream output = openOutputStream(destination, false);
             try {
