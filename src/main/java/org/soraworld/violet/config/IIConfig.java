@@ -20,9 +20,9 @@ public abstract class IIConfig {
 
     public IIConfig(File path, Plugin plugin) {
         this.config_file = new File(path, "config.yml");
+        this.iiChat = new IIChat(defaultChatHead(), defaultChatColor());
         this.iiLang = new IILang(new File(path, "lang"), this);
         this.plugin = plugin;
-        this.iiChat = new IIChat(defaultChatHead(), defaultChatColor());
     }
 
     public boolean load() {
