@@ -89,4 +89,6 @@ public abstract class IIConfig {
     @Nonnull
     protected abstract String defaultChatHead();
 
+    public abstract String defaultAdminPerm();
+
 }

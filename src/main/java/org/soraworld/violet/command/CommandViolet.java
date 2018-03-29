@@ -12,7 +12,7 @@ public class CommandViolet extends IICommand {
 
     public CommandViolet(String name, String perm, final IIConfig config, final Plugin plugin) {
         super(name, perm, config);
-        addSub(new IICommand("lang", null, config) {
+        addSub(new IICommand("lang", config.defaultAdminPerm(), config) {
             @Override
             public boolean execute(CommandSender sender, ArrayList<String> args) {
                 if (args.isEmpty()) {
@@ -24,7 +24,7 @@ public class CommandViolet extends IICommand {
                 return true;
             }
         });
-        addSub(new IICommand("save", null, config) {
+        addSub(new IICommand("save", config.defaultAdminPerm(), config) {
             @Override
             public boolean execute(CommandSender sender, ArrayList<String> args) {
                 if (config.save()) {
@@ -35,7 +35,7 @@ public class CommandViolet extends IICommand {
                 return true;
             }
         });
-        addSub(new IICommand("debug", null, config) {
+        addSub(new IICommand("debug", config.defaultAdminPerm(), config) {
             @Override
             public boolean execute(CommandSender sender, ArrayList<String> args) {
                 if (config.debug()) {
@@ -48,7 +48,7 @@ public class CommandViolet extends IICommand {
                 return true;
             }
         });
-        addSub(new IICommand("reload", null, config) {
+        addSub(new IICommand("reload", config.defaultAdminPerm(), config) {
             @Override
             public boolean execute(CommandSender sender, ArrayList<String> args) {
                 if (config.load()) {

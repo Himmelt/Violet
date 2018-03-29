@@ -32,4 +32,9 @@ public class Config extends IIConfig {
         return "[" + Violets.PLUGIN_NAME + "] ";
     }
 
+    @Override
+    public String defaultAdminPerm() {
+        return Violets.PERM_ADMIN;
+    }
+
 }

@@ -22,4 +22,6 @@ public final class Violets {
     public static final String KEY_INVALID_FLOAT = "invalidFloat";
     public static final String KEY_ONLY_PLAYER_OR_INVALID_ARG = "onlyPlayerOrInvalidArg";
 
+    public static final String PERM_ADMIN = PLUGIN_ID + ".admin";
+
 }
