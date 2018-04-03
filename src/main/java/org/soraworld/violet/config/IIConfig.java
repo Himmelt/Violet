@@ -1,8 +1,10 @@
 package org.soraworld.violet.config;
 
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
+import org.soraworld.violet.Violet;
 import org.soraworld.violet.constant.Violets;
 
 import javax.annotation.Nonnull;
@@ -77,6 +79,34 @@ public abstract class IIConfig {
 
     public String getLang() {
         return iiLang.getLang();
+    }
+
+    public void send(CommandSender sender, String key, Object... args) {
+        iiChat.send(sender, iiLang.format(key, args));
+    }
+
+    public void broadcast(String key, Object... args) {
+        iiChat.broadcast(iiLang.format(key, args));
+    }
+
+    public void console(String key, Object... args) {
+        iiChat.console(iiLang.format(key, args));
+    }
+
+    public void println(String message) {
+        iiChat.console(message);
+    }
+
+    public void sendV(CommandSender sender, String key, Object... args) {
+        iiChat.send(sender, Violet.translate(getLang(), key, args));
+    }
+
+    public void broadcastV(String key, Object... args) {
+        iiChat.broadcast(Violet.translate(getLang(), key, args));
+    }
+
+    public void consoleV(String key, Object... args) {
+        iiChat.console(Violet.translate(getLang(), key, args));
     }
 
     protected abstract void loadOptions();

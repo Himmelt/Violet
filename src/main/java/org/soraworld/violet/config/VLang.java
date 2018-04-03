@@ -47,7 +47,7 @@ public class VLang {
                 FileUtil.copyInputStreamToFile(input, lang_file);
             } catch (Throwable e) {
                 if (config.debug()) e.printStackTrace();
-                config.iiChat.console("&cLang file extract exception !!!");
+                config.println("&cLang file extract exception !!!");
                 //TODO fall back
             }
         }
@@ -55,7 +55,7 @@ public class VLang {
             getLangYaml(lang).load(lang_file);
         } catch (Throwable e) {
             if (config.debug()) e.printStackTrace();
-            config.iiChat.console("&cLang file load exception !!!");
+            config.println("&cLang file load exception !!!");
             // TODO fall back
         }
     }

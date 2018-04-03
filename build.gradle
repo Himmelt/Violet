@@ -5,7 +5,7 @@ plugins {
 apply plugin: 'java'
 
 group = 'org.soraworld.violet'
-version = '1.7.10-1.0.5'
+version = '1.7.10-1.0.7'
 description = 'Violet Library Plugin'
 archivesBaseName = "Violet"
 

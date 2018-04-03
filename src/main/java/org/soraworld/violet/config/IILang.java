@@ -41,10 +41,10 @@ public class IILang {
                 FileUtil.copyInputStreamToFile(input, lang_file);
             } catch (Throwable e) {
                 if (config.debug()) e.printStackTrace();
-                config.iiChat.console("&cLang file extract exception !!!");
+                config.println("&cLang file extract exception !!!");
                 if (!"en_us".equals(lang)) {
                     setLang("en_us");
-                    config.iiChat.console("&cLang fall back to en_us .");
+                    config.println("&cLang fall back to en_us .");
                 }
             }
         }
@@ -52,16 +52,16 @@ public class IILang {
             lang_yaml.load(lang_file);
         } catch (Throwable e) {
             if (config.debug()) e.printStackTrace();
-            config.iiChat.console("&cLang file load exception !!!");
+            config.println("&cLang file load exception !!!");
             if (!"en_us".equals(lang)) {
                 setLang("en_us");
-                config.iiChat.console("&cLang fall back to en_us .");
+                config.println("&cLang fall back to en_us .");
             }
         }
     }
 
     public boolean hasKey(String key) {
-        return lang_yaml != null && lang_yaml.getKeys(false).contains(key);
+        return lang_yaml.getKeys(false).contains(key);
     }
 
     public String format(String key, Object... args) {

@@ -2,7 +2,6 @@ package org.soraworld.violet.command;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
-import org.soraworld.violet.Violet;
 import org.soraworld.violet.config.IIConfig;
 import org.soraworld.violet.constant.Violets;
 
@@ -16,10 +15,10 @@ public class CommandViolet extends IICommand {
             @Override
             public boolean execute(CommandSender sender, ArrayList<String> args) {
                 if (args.isEmpty()) {
-                    config.iiChat.send(sender, Violet.translate(config.getLang(), Violets.KEY_GET_LANG, config.getLang()));
+                    config.sendV(sender, Violets.KEY_GET_LANG, config.getLang());
                 } else {
                     config.setLang(args.get(0));
-                    config.iiChat.send(sender, Violet.translate(config.getLang(), Violets.KEY_SET_LANG, config.getLang()));
+                    config.sendV(sender, Violets.KEY_SET_LANG, config.getLang());
                 }
                 return true;
             }
@@ -28,9 +27,9 @@ public class CommandViolet extends IICommand {
             @Override
             public boolean execute(CommandSender sender, ArrayList<String> args) {
                 if (config.save()) {
-                    config.iiChat.send(sender, Violet.translate(config.getLang(), Violets.KEY_CFG_SAVE));
+                    config.sendV(sender, Violets.KEY_CFG_SAVE);
                 } else {
-                    config.iiChat.send(sender, Violet.translate(config.getLang(), Violets.KEY_CFG_SAVE_FAIL));
+                    config.sendV(sender, Violets.KEY_CFG_SAVE_FAIL);
                 }
                 return true;
             }
@@ -40,10 +39,10 @@ public class CommandViolet extends IICommand {
             public boolean execute(CommandSender sender, ArrayList<String> args) {
                 if (config.debug()) {
                     config.debug(false);
-                    config.iiChat.send(sender, Violet.translate(config.getLang(), Violets.KEY_DEBUG_OFF));
+                    config.sendV(sender, Violets.KEY_DEBUG_OFF);
                 } else {
                     config.debug(true);
-                    config.iiChat.send(sender, Violet.translate(config.getLang(), Violets.KEY_DEBUG_ON));
+                    config.sendV(sender, Violets.KEY_DEBUG_ON);
                 }
                 return true;
             }
@@ -52,9 +51,9 @@ public class CommandViolet extends IICommand {
             @Override
             public boolean execute(CommandSender sender, ArrayList<String> args) {
                 if (config.load()) {
-                    config.iiChat.send(sender, Violet.translate(config.getLang(), Violets.KEY_CFG_LOAD));
+                    config.sendV(sender, Violets.KEY_CFG_LOAD);
                 } else {
-                    config.iiChat.send(sender, Violet.translate(config.getLang(), Violets.KEY_CFG_LOAD_FAIL));
+                    config.sendV(sender, Violets.KEY_CFG_LOAD_FAIL);
                 }
                 return true;
             }
