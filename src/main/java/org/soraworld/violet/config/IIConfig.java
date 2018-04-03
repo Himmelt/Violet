@@ -113,6 +113,8 @@ public abstract class IIConfig {
 
     protected abstract void saveOptions();
 
+    public abstract void afterLoad();
+
     @Nonnull
     protected abstract ChatColor defaultChatColor();
 

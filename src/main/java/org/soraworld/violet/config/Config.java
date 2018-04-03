@@ -22,6 +22,10 @@ public class Config extends IIConfig {
     protected void saveOptions() {
     }
 
+    public void afterLoad() {
+
+    }
+
     @Nonnull
     protected ChatColor defaultChatColor() {
         return ChatColor.DARK_PURPLE;

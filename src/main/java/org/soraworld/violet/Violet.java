@@ -38,6 +38,14 @@ public class Violet extends VioletPlugin {
         return new CommandViolet(Violets.PLUGIN_ID, null, config, this);
     }
 
+    protected void afterEnable() {
+
+    }
+
+    protected void beforeDisable() {
+
+    }
+
     public static String translate(String lang, String key, Object... args) {
         if (vLang == null) return key;
         return vLang.format(lang, key, args);

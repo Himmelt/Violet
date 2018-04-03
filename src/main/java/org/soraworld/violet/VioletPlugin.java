@@ -23,16 +23,19 @@ public abstract class VioletPlugin extends JavaPlugin {
     public void onEnable() {
         config = registerConfig(this.getDataFolder());
         config.load();
+        config.afterLoad();
         config.save();
         List<Listener> listeners = registerEvents(config);
         for (Listener listener : listeners) {
             this.getServer().getPluginManager().registerEvents(listener, this);
         }
         command = registerCommand(config);
+        afterEnable();
     }
 
     @Override
     public void onDisable() {
+        beforeDisable();
         config.save();
     }
 
@@ -54,5 +57,9 @@ public abstract class VioletPlugin extends JavaPlugin {
 
     @Nullable
     protected abstract IICommand registerCommand(IIConfig config);
+
+    protected abstract void afterEnable();
+
+    protected abstract void beforeDisable();
 
 }
