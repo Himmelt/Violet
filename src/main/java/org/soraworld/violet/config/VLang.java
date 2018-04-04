@@ -1,6 +1,5 @@
 package org.soraworld.violet.config;
 
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.soraworld.violet.util.FileUtil;
 
 import java.io.File;
@@ -12,7 +11,7 @@ public class VLang {
     private final File path;
     private final IIConfig config;
     private final HashMap<String, File> files = new HashMap<>();
-    private final HashMap<String, YamlConfiguration> yamls = new HashMap<>();
+    private final HashMap<String, IIYamlConfig> yamls = new HashMap<>();
 
     VLang(File path, IIConfig config) {
         this.path = path;
@@ -28,10 +27,10 @@ public class VLang {
         return file;
     }
 
-    private YamlConfiguration getLangYaml(String lang) {
-        YamlConfiguration yaml = yamls.get(lang);
+    private IIYamlConfig getLangYaml(String lang) {
+        IIYamlConfig yaml = yamls.get(lang);
         if (yaml == null) {
-            yaml = new YamlConfiguration();
+            yaml = new IIYamlConfig();
             yamls.put(lang, yaml);
             load(lang);
         }

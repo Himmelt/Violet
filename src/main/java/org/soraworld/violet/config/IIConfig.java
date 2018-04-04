@@ -2,7 +2,6 @@ package org.soraworld.violet.config;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.constant.Violets;
@@ -18,7 +17,7 @@ public abstract class IIConfig {
 
     protected boolean debug = false;
     protected final File config_file;
-    protected final YamlConfiguration config_yaml = new YamlConfiguration();
+    protected final IIYamlConfig config_yaml = new IIYamlConfig();
 
     public IIConfig(File path, Plugin plugin) {
         this.config_file = new File(path, "config.yml");
