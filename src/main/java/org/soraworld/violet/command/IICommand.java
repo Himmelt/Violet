@@ -89,7 +89,7 @@ public abstract class IICommand {
         }
     }
 
-    public boolean canRun(CommandSender sender) {
+    private boolean canRun(CommandSender sender) {
         return perm == null || sender.hasPermission(perm);
     }
 

@@ -1,21 +1,20 @@
-# ÖĞÎÄÓïÑÔÎÄ¼ş(Chinese Language File)
-# ÔÚÖĞÎÄwindowsÏµÍ³ÏÂÇëÊ¹ÓÃGB2312±àÂë
-# Please use GB2312 encoding on zh_CN Windows OS for Chinese language file
+# ä¸­æ–‡è¯­è¨€æ–‡ä»¶(Chinese Language File)
+# è¯·ä½¿ç”¨ UTF-8 ç¼–ç 
 
-chatHead: "[×ÏÂŞÀ¼] "
+chatHead: "[ç´«ç½—å…°] "
 
-getLang: "µ±Ç°ÓïÑÔÎª &e%s&r ."
-setLang: "µ±Ç°ÓïÑÔÉèÖÃÎª &e%s&r ."
-configSaved: "&aÅäÖÃÎÄ¼şÒÑ±£´æ."
-configSaveFailed: "&cÅäÖÃÎÄ¼ş±£´æÊ§°Ü !!!"
-configLoaded: "&aÅäÖÃÎÄ¼şÒÑ¼ÓÔØ."
-configLoadFailed: "&cÅäÖÃÎÄ¼ş¼ÓÔØÊ§°Ü !!!"
-debugON: "µ÷ÊÔÄ£Ê½ÒÑ &a¿ªÆô&r ."
-debugOFF: "µ÷ÊÔÄ£Ê½ÒÑ &c¹Ø±Õ&r ."
-onlyPlayer: "¸ÃÃüÁîÖ»ÄÜÓÉÍæ¼ÒÔÚÓÎÏ·ÄÚÖ´ĞĞ."
-invalidArg: "²ÎÊıÎª¿Õ»òÎŞĞ§ , ÇëÕıÈ·ÊäÈë²ÎÊı."
-onlyPlayerOrInvalidArg: "²ÎÊıÎª¿Õ»ò²ÎÊıÎŞĞ§ , Çë²¹È«ÓĞĞ§²ÎÊı »ò ÔÚÓÎÏ·ÄÚÖ´ĞĞ."
-noCommandPerm: "ÄãĞèÒªÈ¨ÏŞ <&c%s&r> ²ÅÄÜÖ´ĞĞ´ËÃüÁî."
+getLang: "å½“å‰è¯­è¨€ä¸º &e%s&r ."
+setLang: "å½“å‰è¯­è¨€è®¾ç½®ä¸º &e%s&r ."
+configSaved: "&aé…ç½®æ–‡ä»¶å·²ä¿å­˜."
+configSaveFailed: "&cé…ç½®æ–‡ä»¶ä¿å­˜å¤±è´¥ !!!"
+configLoaded: "&aé…ç½®æ–‡ä»¶å·²åŠ è½½."
+configLoadFailed: "&cé…ç½®æ–‡ä»¶åŠ è½½å¤±è´¥ !!!"
+debugON: "è°ƒè¯•æ¨¡å¼å·² &aå¼€å¯&r ."
+debugOFF: "è°ƒè¯•æ¨¡å¼å·² &cå…³é—­&r ."
+onlyPlayer: "è¯¥å‘½ä»¤åªèƒ½ç”±ç©å®¶åœ¨æ¸¸æˆå†…æ‰§è¡Œ."
+invalidArg: "å‚æ•°ä¸ºç©ºæˆ–æ— æ•ˆ , è¯·æ­£ç¡®è¾“å…¥å‚æ•°."
+onlyPlayerOrInvalidArg: "å‚æ•°ä¸ºç©ºæˆ–å‚æ•°æ— æ•ˆ , è¯·è¡¥å…¨æœ‰æ•ˆå‚æ•° æˆ– åœ¨æ¸¸æˆå†…æ‰§è¡Œ."
+noCommandPerm: "ä½ éœ€è¦æƒé™ <&c%s&r> æ‰èƒ½æ‰§è¡Œæ­¤å‘½ä»¤."
 
-invalidInt: "²ÎÊı²»ÊÇÓĞĞ§ÕûÊı."
-invalidFloat: "²ÎÊı²»ÊÇÓĞĞ§Ğ¡Êı."
+invalidInt: "å‚æ•°ä¸æ˜¯æœ‰æ•ˆæ•´æ•°."
+invalidFloat: "å‚æ•°ä¸æ˜¯æœ‰æ•ˆå°æ•°."
