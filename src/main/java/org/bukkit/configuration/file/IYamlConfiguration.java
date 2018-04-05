@@ -5,22 +5,23 @@ import com.google.common.io.Files;
 import org.apache.commons.lang.Validate;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.IDumperOptions;
+import org.yaml.snakeyaml.IYaml;
 import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.*;
 
 public class IYamlConfiguration extends YamlConfiguration {
 
-    private final DumperOptions yamlOptions = new DumperOptions();
+    private final IDumperOptions yamlOptions = new IDumperOptions();
     private final Representer yamlRepresent = new YamlRepresenter();
-    private final Yaml yaml = new Yaml(new YamlConstructor(), yamlRepresent, yamlOptions);
+    private final IYaml yaml = new IYaml(new YamlConstructor(), yamlRepresent, yamlOptions);
 
     @Override
     public String saveToString() {
         yamlOptions.setIndent(options().indent());
+        yamlOptions.setIndicatorIndent(options().indent());
         yamlOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        yamlOptions.setPrettyFlow(true);
         yamlOptions.setAllowUnicode(true);
         yamlRepresent.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 
