@@ -1,5 +1,6 @@
 package org.soraworld.violet.config;
 
+import org.bukkit.configuration.file.IYamlConfiguration;
 import org.soraworld.violet.util.FileUtil;
 
 import java.io.File;
@@ -11,7 +12,7 @@ public class IILang {
     private File lang_file;
     private final File path;
     private final IIConfig config;
-    private final IIYamlConfig lang_yaml = new IIYamlConfig();
+    private final IYamlConfiguration lang_yaml = new IYamlConfiguration();
 
     IILang(File path, IIConfig config) {
         this.path = path;

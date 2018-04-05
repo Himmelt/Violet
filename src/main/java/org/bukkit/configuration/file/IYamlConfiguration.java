@@ -1,19 +1,16 @@
-package org.soraworld.violet.config;
+package org.bukkit.configuration.file;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.apache.commons.lang.Validate;
 import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.configuration.file.YamlConstructor;
-import org.bukkit.configuration.file.YamlRepresenter;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.*;
 
-public class IIYamlConfig extends YamlConfiguration {
+public class IYamlConfiguration extends YamlConfiguration {
 
     private final DumperOptions yamlOptions = new DumperOptions();
     private final Representer yamlRepresent = new YamlRepresenter();
@@ -23,6 +20,7 @@ public class IIYamlConfig extends YamlConfiguration {
     public String saveToString() {
         yamlOptions.setIndent(options().indent());
         yamlOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        yamlOptions.setPrettyFlow(true);
         yamlOptions.setAllowUnicode(true);
         yamlRepresent.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 
