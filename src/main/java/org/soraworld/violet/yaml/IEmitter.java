@@ -1,8 +1,10 @@
-package org.yaml.snakeyaml.emitter;
+package org.soraworld.violet.yaml;
 
 import org.yaml.snakeyaml.DumperOptions.ScalarStyle;
 import org.yaml.snakeyaml.DumperOptions.Version;
-import org.yaml.snakeyaml.IDumperOptions;
+import org.yaml.snakeyaml.emitter.Emitable;
+import org.yaml.snakeyaml.emitter.EmitterException;
+import org.yaml.snakeyaml.emitter.ScalarAnalysis;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.events.*;
 import org.yaml.snakeyaml.nodes.Tag;
@@ -51,8 +53,8 @@ public final class IEmitter implements Emitable {
 
     private final Writer stream;
 
-    private final ArrayStack<EmitterState> states;
-    private EmitterState state;
+    private final ArrayStack<IEmitterState> states;
+    private IEmitterState state;
 
     private final Queue<Event> events;
     private Event event;
@@ -172,7 +174,7 @@ public final class IEmitter implements Emitable {
         }
     }
 
-    private class ExpectStreamStart implements EmitterState {
+    private class ExpectStreamStart implements IEmitterState {
         public void expect() {
             if (event instanceof StreamStartEvent) {
                 writeStreamStart();
@@ -183,19 +185,19 @@ public final class IEmitter implements Emitable {
         }
     }
 
-    private class ExpectNothing implements EmitterState {
+    private class ExpectNothing implements IEmitterState {
         public void expect() {
             throw new EmitterException("expecting nothing, but got " + event);
         }
     }
 
-    private class ExpectFirstDocumentStart implements EmitterState {
+    private class ExpectFirstDocumentStart implements IEmitterState {
         public void expect() throws IOException {
             new ExpectDocumentStart(true).expect();
         }
     }
 
-    private class ExpectDocumentStart implements EmitterState {
+    private class ExpectDocumentStart implements IEmitterState {
         private boolean first;
 
         public ExpectDocumentStart(boolean first) {
@@ -250,7 +252,7 @@ public final class IEmitter implements Emitable {
         }
     }
 
-    private class ExpectDocumentEnd implements EmitterState {
+    private class ExpectDocumentEnd implements IEmitterState {
         public void expect() throws IOException {
             if (event instanceof DocumentEndEvent) {
                 writeIndent();
@@ -266,7 +268,7 @@ public final class IEmitter implements Emitable {
         }
     }
 
-    private class ExpectDocumentRoot implements EmitterState {
+    private class ExpectDocumentRoot implements IEmitterState {
         public void expect() throws IOException {
             states.push(new ExpectDocumentEnd());
             expectNode(true, false, false);
@@ -329,7 +331,7 @@ public final class IEmitter implements Emitable {
         state = new ExpectFirstFlowSequenceItem();
     }
 
-    private class ExpectFirstFlowSequenceItem implements EmitterState {
+    private class ExpectFirstFlowSequenceItem implements IEmitterState {
         public void expect() throws IOException {
             if (event instanceof SequenceEndEvent) {
                 indent = indents.pop();
@@ -346,7 +348,7 @@ public final class IEmitter implements Emitable {
         }
     }
 
-    private class ExpectFlowSequenceItem implements EmitterState {
+    private class ExpectFlowSequenceItem implements IEmitterState {
         public void expect() throws IOException {
             if (event instanceof SequenceEndEvent) {
                 indent = indents.pop();
@@ -381,7 +383,7 @@ public final class IEmitter implements Emitable {
         state = new ExpectFirstFlowMappingKey();
     }
 
-    private class ExpectFirstFlowMappingKey implements EmitterState {
+    private class ExpectFirstFlowMappingKey implements IEmitterState {
         public void expect() throws IOException {
             if (event instanceof MappingEndEvent) {
                 indent = indents.pop();
@@ -404,7 +406,7 @@ public final class IEmitter implements Emitable {
         }
     }
 
-    private class ExpectFlowMappingKey implements EmitterState {
+    private class ExpectFlowMappingKey implements IEmitterState {
         public void expect() throws IOException {
             if (event instanceof MappingEndEvent) {
                 indent = indents.pop();
@@ -435,7 +437,7 @@ public final class IEmitter implements Emitable {
         }
     }
 
-    private class ExpectFlowMappingSimpleValue implements EmitterState {
+    private class ExpectFlowMappingSimpleValue implements IEmitterState {
         public void expect() throws IOException {
             writeIndicator(":", false, false, false);
             states.push(new ExpectFlowMappingKey());
@@ -443,7 +445,7 @@ public final class IEmitter implements Emitable {
         }
     }
 
-    private class ExpectFlowMappingValue implements EmitterState {
+    private class ExpectFlowMappingValue implements IEmitterState {
         public void expect() throws IOException {
             if (canonical || column > bestWidth || prettyFlow) {
                 writeIndent();
@@ -460,13 +462,13 @@ public final class IEmitter implements Emitable {
         state = new ExpectFirstBlockSequenceItem();
     }
 
-    private class ExpectFirstBlockSequenceItem implements EmitterState {
+    private class ExpectFirstBlockSequenceItem implements IEmitterState {
         public void expect() throws IOException {
             new ExpectBlockSequenceItem(true).expect();
         }
     }
 
-    private class ExpectBlockSequenceItem implements EmitterState {
+    private class ExpectBlockSequenceItem implements IEmitterState {
         private boolean first;
 
         public ExpectBlockSequenceItem(boolean first) {
@@ -492,13 +494,13 @@ public final class IEmitter implements Emitable {
         state = new ExpectFirstBlockMappingKey();
     }
 
-    private class ExpectFirstBlockMappingKey implements EmitterState {
+    private class ExpectFirstBlockMappingKey implements IEmitterState {
         public void expect() throws IOException {
             new ExpectBlockMappingKey(true).expect();
         }
     }
 
-    private class ExpectBlockMappingKey implements EmitterState {
+    private class ExpectBlockMappingKey implements IEmitterState {
         private boolean first;
 
         public ExpectBlockMappingKey(boolean first) {
@@ -523,7 +525,7 @@ public final class IEmitter implements Emitable {
         }
     }
 
-    private class ExpectBlockMappingSimpleValue implements EmitterState {
+    private class ExpectBlockMappingSimpleValue implements IEmitterState {
         public void expect() throws IOException {
             writeIndicator(":", false, false, false);
             states.push(new ExpectBlockMappingKey(false));
@@ -531,7 +533,7 @@ public final class IEmitter implements Emitable {
         }
     }
 
-    private class ExpectBlockMappingValue implements EmitterState {
+    private class ExpectBlockMappingValue implements IEmitterState {
         public void expect() throws IOException {
             writeIndent();
             writeIndicator(":", true, false, true);

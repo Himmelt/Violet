@@ -1,7 +1,7 @@
 package org.soraworld.violet.config;
 
-import org.bukkit.configuration.file.IYamlConfiguration;
 import org.soraworld.violet.util.FileUtil;
+import org.soraworld.violet.yaml.IYamlConfiguration;
 
 import java.io.File;
 import java.io.InputStream;

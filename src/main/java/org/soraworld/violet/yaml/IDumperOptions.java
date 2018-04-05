@@ -1,5 +1,6 @@
-package org.yaml.snakeyaml;
+package org.soraworld.violet.yaml;
 
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.emitter.Emitter;
 import org.yaml.snakeyaml.error.YAMLException;
 

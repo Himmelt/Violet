@@ -1,12 +1,13 @@
-package org.bukkit.configuration.file;
+package org.soraworld.violet.yaml;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.apache.commons.lang.Validate;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.file.YamlConstructor;
+import org.bukkit.configuration.file.YamlRepresenter;
 import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.IDumperOptions;
-import org.yaml.snakeyaml.IYaml;
 import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.*;

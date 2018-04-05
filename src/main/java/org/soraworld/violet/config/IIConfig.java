@@ -2,10 +2,10 @@ package org.soraworld.violet.config;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.IYamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.constant.Violets;
+import org.soraworld.violet.yaml.IYamlConfiguration;
 
 import javax.annotation.Nonnull;
 import java.io.File;

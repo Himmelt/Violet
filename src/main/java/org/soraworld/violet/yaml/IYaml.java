@@ -1,7 +1,8 @@
-package org.yaml.snakeyaml;
+package org.soraworld.violet.yaml;
 
 import org.bukkit.configuration.file.YamlConstructor;
-import org.yaml.snakeyaml.emitter.IEmitter;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.Tag;
