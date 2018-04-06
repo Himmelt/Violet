@@ -1,5 +1,6 @@
 package org.soraworld.violet.yaml;
 
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.ScalarStyle;
 import org.yaml.snakeyaml.DumperOptions.Version;
 import org.yaml.snakeyaml.emitter.Emitable;
@@ -78,7 +79,6 @@ public final class IEmitter implements Emitable {
 
     private boolean allowUnicode;
     private int bestIndent;
-    private int indicatorIndent;
     private int bestWidth;
     private char[] bestLineBreak;
 
@@ -89,9 +89,9 @@ public final class IEmitter implements Emitable {
 
     private ScalarAnalysis analysis;
     private Character style;
-    private IDumperOptions options;
+    private DumperOptions options;
 
-    public IEmitter(Writer stream, IDumperOptions opts) {
+    public IEmitter(Writer stream, DumperOptions opts) {
         this.stream = stream;
         this.states = new ArrayStack<>(100);
         this.state = new ExpectStreamStart();
@@ -111,7 +111,6 @@ public final class IEmitter implements Emitable {
         this.allowUnicode = opts.isAllowUnicode();
         this.bestIndent = 2;
         if ((opts.getIndent() > MIN_INDENT) && (opts.getIndent() < MAX_INDENT)) this.bestIndent = opts.getIndent();
-        this.indicatorIndent = opts.getIndicatorIndent();
         this.bestWidth = 80;
         if (opts.getWidth() > this.bestIndent * 2) this.bestWidth = opts.getWidth();
         this.bestLineBreak = opts.getLineBreak().getString().toCharArray();
@@ -457,8 +456,8 @@ public final class IEmitter implements Emitable {
     }
 
     private void expectBlockSequence() {
-        boolean indentless = (mappingContext && !indention);
-        increaseIndent(false, indentless);
+        boolean indent_less = (mappingContext && !indention);
+        increaseIndent(false, indent_less);
         state = new ExpectFirstBlockSequenceItem();
     }
 
@@ -481,7 +480,7 @@ public final class IEmitter implements Emitable {
                 state = states.pop();
             } else {
                 writeIndent();
-                if (first) writeWhitespace(indicatorIndent);
+                if (first) writeWhitespace(bestIndent);
                 writeIndicator("-", true, false, true);
                 if (first) increaseIndent(false, false);
                 states.push(new ExpectBlockSequenceItem(false));

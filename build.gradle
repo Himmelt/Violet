@@ -5,7 +5,7 @@ plugins {
 apply plugin: 'java'
 
 group = 'org.soraworld.violet'
-version = '1.7.10-1.1.1'
+version = '1.7.10-1.1.2'
 description = 'Violet Library Plugin'
 archivesBaseName = "Violet"
 
@@ -29,6 +29,5 @@ repositories {
 
 dependencies {
     compile 'org.spigotmc:spigot-api:1.8-R0.1-SNAPSHOT'
-//    compile group: 'org.yaml', name: 'snakeyaml', version: '1.20'
     compile 'com.google.code.findbugs:jsr305:3.0.2'
 }

@@ -14,16 +14,15 @@ import java.io.*;
 
 public class IYamlConfiguration extends YamlConfiguration {
 
-    private final IDumperOptions yamlOptions = new IDumperOptions();
+    private final DumperOptions dumperOptions = new DumperOptions();
     private final Representer yamlRepresent = new YamlRepresenter();
-    private final IYaml yaml = new IYaml(new YamlConstructor(), yamlRepresent, yamlOptions);
+    private final IYaml yaml = new IYaml(new YamlConstructor(), yamlRepresent, dumperOptions);
 
     @Override
     public String saveToString() {
-        yamlOptions.setIndent(options().indent());
-        yamlOptions.setIndicatorIndent(options().indent());
-        yamlOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        yamlOptions.setAllowUnicode(true);
+        dumperOptions.setIndent(options().indent());
+        dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+        dumperOptions.setAllowUnicode(true);
         yamlRepresent.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
 
         String header = buildHeader();

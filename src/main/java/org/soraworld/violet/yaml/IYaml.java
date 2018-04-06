@@ -18,19 +18,16 @@ import java.util.List;
 
 public class IYaml extends Yaml {
 
-    private IDumperOptions yamlOptions;
-
-    public IYaml(YamlConstructor constructor, Representer represent, IDumperOptions yamlOptions) {
-        super(constructor, represent, yamlOptions);
-        this.yamlOptions = yamlOptions;
+    public IYaml(YamlConstructor constructor, Representer represent, DumperOptions dumperOptions) {
+        super(constructor, represent, dumperOptions);
     }
 
     public void dumpAll(Iterator<?> data, Writer output) {
-        dumpAll(data, output, yamlOptions.getExplicitRoot());
+        dumpAll(data, output, dumperOptions.getExplicitRoot());
     }
 
     private void dumpAll(Iterator<?> data, Writer output, Tag rootTag) {
-        Serializer serializer = new Serializer(new IEmitter(output, yamlOptions), resolver, yamlOptions, rootTag);
+        Serializer serializer = new Serializer(new IEmitter(output, dumperOptions), resolver, dumperOptions, rootTag);
         try {
             serializer.open();
             while (data.hasNext()) {
