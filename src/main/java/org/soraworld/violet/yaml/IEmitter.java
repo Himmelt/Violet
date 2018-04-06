@@ -481,8 +481,9 @@ public final class IEmitter implements Emitable {
                 state = states.pop();
             } else {
                 writeIndent();
-                writeWhitespace(indicatorIndent);
+                if (first) writeWhitespace(indicatorIndent);
                 writeIndicator("-", true, false, true);
+                if (first) increaseIndent(false, false);
                 states.push(new ExpectBlockSequenceItem(false));
                 expectNode(false, false, false);
             }
