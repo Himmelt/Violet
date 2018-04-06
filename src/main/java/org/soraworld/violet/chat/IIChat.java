@@ -33,7 +33,7 @@ public class IIChat {
         if (rawHead != null && !rawHead.isEmpty()) {
             PLAIN_HEAD = rawHead;
             COLOR_HEAD = prefix + PLAIN_HEAD.replace('&', ChatColor.COLOR_CHAR) + ChatColor.RESET;
-            CHAT_HEAD = format(rawHead);
+            CHAT_HEAD = format(prefix + rawHead);
         }
     }
 
@@ -152,13 +152,14 @@ public class IIChat {
         return component;
     }
 
-    public void sendMessage(Player player, IChatBaseComponent message, IChatBaseComponent... siblings) {
+    public void sendMessage(Player player, IChatBaseComponent... siblings) {
         if (player instanceof CraftPlayer) {
             EntityPlayer playerMP = ((CraftPlayer) player).getHandle();
+            IChatBaseComponent chatMessage = CHAT_HEAD.f();
             for (IChatBaseComponent component : siblings) {
-                message.addSibling(component);
+                chatMessage.addSibling(component);
             }
-            playerMP.b(CHAT_HEAD.addSibling(message));
+            playerMP.b(chatMessage);
         }
     }
 
