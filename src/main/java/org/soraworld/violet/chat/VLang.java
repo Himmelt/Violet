@@ -1,5 +1,6 @@
-package org.soraworld.violet.config;
+package org.soraworld.violet.chat;
 
+import org.soraworld.violet.config.IIConfig;
 import org.soraworld.violet.util.FileUtil;
 import org.soraworld.violet.yaml.IYamlConfiguration;
 
@@ -14,7 +15,7 @@ public class VLang {
     private final HashMap<String, File> files = new HashMap<>();
     private final HashMap<String, IYamlConfiguration> yamls = new HashMap<>();
 
-    VLang(File path, IIConfig config) {
+    public VLang(File path, IIConfig config) {
         this.path = path;
         this.config = config;
     }

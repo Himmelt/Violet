@@ -5,7 +5,7 @@ plugins {
 apply plugin: 'java'
 
 group = 'org.soraworld.violet'
-version = '1.7.10-1.1.2'
+version = '1.7.10-1.1.4'
 description = 'Violet Library Plugin'
 archivesBaseName = "Violet"
 
@@ -28,6 +28,7 @@ repositories {
 }
 
 dependencies {
-    compile 'org.spigotmc:spigot-api:1.8-R0.1-SNAPSHOT'
+    //compile 'org.spigotmc:spigot-api:1.8-R0.1-SNAPSHOT'
+    compile files('lib/spigot-1.7.10.jar')
     compile 'com.google.code.findbugs:jsr305:3.0.2'
 }

@@ -1,11 +1,11 @@
 package org.soraworld.violet;
 
 import org.bukkit.event.Listener;
+import org.soraworld.violet.chat.VLang;
 import org.soraworld.violet.command.CommandViolet;
 import org.soraworld.violet.command.IICommand;
 import org.soraworld.violet.config.Config;
 import org.soraworld.violet.config.IIConfig;
-import org.soraworld.violet.config.VLang;
 import org.soraworld.violet.constant.Violets;
 import org.soraworld.violet.listener.EventListener;
 

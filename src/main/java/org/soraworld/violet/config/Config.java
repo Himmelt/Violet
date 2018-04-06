@@ -2,6 +2,7 @@ package org.soraworld.violet.config;
 
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.Plugin;
+import org.soraworld.violet.chat.VLang;
 import org.soraworld.violet.constant.Violets;
 
 import javax.annotation.Nonnull;

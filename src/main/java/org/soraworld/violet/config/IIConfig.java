@@ -4,6 +4,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 import org.soraworld.violet.Violet;
+import org.soraworld.violet.chat.IIChat;
+import org.soraworld.violet.chat.IILang;
 import org.soraworld.violet.constant.Violets;
 import org.soraworld.violet.yaml.IYamlConfiguration;
 
