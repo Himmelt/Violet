@@ -9,12 +9,12 @@ import org.yaml.snakeyaml.emitter.ScalarAnalysis;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.events.*;
 import org.yaml.snakeyaml.nodes.Tag;
-import org.yaml.snakeyaml.reader.StreamReader;
 import org.yaml.snakeyaml.scanner.Constant;
 import org.yaml.snakeyaml.util.ArrayStack;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.regex.Pattern;
@@ -24,6 +24,8 @@ public final class IEmitter implements Emitable {
     private static final Map<Character, String> ESCAPE_REPLACEMENTS = new HashMap<>();
     public static final int MIN_INDENT = 1;
     public static final int MAX_INDENT = 10;
+
+    private static final Method getVersion;
 
     private static final char[] SPACE = {' '};
 
@@ -43,6 +45,14 @@ public final class IEmitter implements Emitable {
         ESCAPE_REPLACEMENTS.put('\u00A0', "_");
         ESCAPE_REPLACEMENTS.put('\u2028', "L");
         ESCAPE_REPLACEMENTS.put('\u2029', "P");
+
+        Method method = null;
+        try {
+            method = DocumentStartEvent.class.getDeclaredMethod("getVersion");
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        getVersion = method;
     }
 
     private final static Map<String, String> DEFAULT_TAG_PREFIXES = new LinkedHashMap<>();
@@ -206,12 +216,12 @@ public final class IEmitter implements Emitable {
         public void expect() throws IOException {
             if (event instanceof DocumentStartEvent) {
                 DocumentStartEvent ev = (DocumentStartEvent) event;
-                if ((ev.getVersion() != null || ev.getTags() != null) && openEnded) {
+                if ((getVersion(ev) != null || ev.getTags() != null) && openEnded) {
                     writeIndicator("...", true, false, false);
                     writeIndent();
                 }
-                if (ev.getVersion() != null) {
-                    String versionText = prepareVersion(ev.getVersion());
+                if (getVersion(ev) != null) {
+                    String versionText = prepareVersion(getVersion(ev));
                     writeVersionDirective(versionText);
                 }
                 tagPrefixes = new LinkedHashMap<>(DEFAULT_TAG_PREFIXES);
@@ -226,7 +236,7 @@ public final class IEmitter implements Emitable {
                     }
                 }
                 boolean implicit = first && !ev.getExplicit() && !canonical
-                        && ev.getVersion() == null
+                        && getVersion(ev) == null
                         && (ev.getTags() == null || ev.getTags().isEmpty())
                         && !checkEmptyDocument();
                 if (!implicit) {
@@ -706,11 +716,27 @@ public final class IEmitter implements Emitable {
         style = null;
     }
 
-    private String prepareVersion(Version version) {
-        if (version.getArray()[0] != 1) {
-            throw new EmitterException("unsupported YAML version: " + version);
+    private String prepareVersion(Object object) {
+        if (object instanceof Version) {
+            Version version = (Version) object;
+            Integer[] versions = version.getArray();
+            if (versions == null || versions[0] != 1) {
+                throw new EmitterException("unsupported YAML version: " + version);
+            }
+            return prepareVersion(versions);
+        } else if (object instanceof Integer[]) {
+            return prepareVersion((Integer[]) object);
         }
-        return version.getRepresentation();
+        throw new EmitterException("unsupported YAML version: unknown");
+    }
+
+    private String prepareVersion(Integer[] versions) {
+        Integer major = versions[0];
+        Integer minor = versions[1];
+        if (major != 1) {
+            throw new EmitterException("unsupported YAML version: " + versions[0] + "." + versions[1]);
+        }
+        return major.toString() + "." + minor.toString();
     }
 
     private final static Pattern HANDLE_FORMAT = Pattern.compile("^![-_\\w]*!$");
@@ -789,7 +815,13 @@ public final class IEmitter implements Emitable {
     private ScalarAnalysis analyzeScalar(String scalar) {
         // Empty scalar is a special case.
         if (scalar.length() == 0) {
-            return new ScalarAnalysis(scalar, true, false, false, true, true, false);
+            ScalarAnalysis analysis;
+            try {
+                analysis = new ScalarAnalysis(scalar, true, false, false, true, true, false);
+            } catch (Throwable e) {
+                analysis = new ScalarAnalysis(scalar, true, false, false, true, true, true, false);
+            }
+            return analysis;
         }
         // Indicators and special characters.
         boolean blockIndicators = false;
@@ -946,8 +978,14 @@ public final class IEmitter implements Emitable {
             allowBlockPlain = false;
         }
 
-        return new ScalarAnalysis(scalar, false, lineBreaks, allowFlowPlain, allowBlockPlain,
-                allowSingleQuoted, allowBlock);
+        ScalarAnalysis analysis;
+        try {
+            analysis = new ScalarAnalysis(scalar, false, lineBreaks, allowFlowPlain, allowBlockPlain, allowSingleQuoted, allowBlock);
+        } catch (Throwable e) {
+            analysis = new ScalarAnalysis(scalar, false, lineBreaks, allowFlowPlain, allowBlockPlain, allowSingleQuoted, true, allowBlock);
+        }
+        return analysis;
+
     }
 
     void flushStream() throws IOException {
@@ -1110,7 +1148,7 @@ public final class IEmitter implements Emitable {
                     String data;
                     if (ESCAPE_REPLACEMENTS.containsKey(ch)) {
                         data = "\\" + ESCAPE_REPLACEMENTS.get(ch);
-                    } else if (!this.allowUnicode || !StreamReader.isPrintable(ch)) {
+                    } else if (!this.allowUnicode || !isPrintable(ch)) {
                         // if !allowUnicode or the character is not printable,
                         // we must encode it
                         if (ch <= '\u00FF') {
@@ -1354,6 +1392,23 @@ public final class IEmitter implements Emitable {
             }
             end++;
         }
+    }
+
+    public static boolean isPrintable(final char c) {
+        return (c >= '\u0020' && c <= '\u007E') || c == '\n' || c == '\r' || c == '\t'
+                || c == '\u0085' || (c >= '\u00A0' && c <= '\uD7FF')
+                || (c >= '\uE000' && c <= '\uFFFD');
+    }
+
+    public Object getVersion(Object object) {
+        if (getVersion != null) {
+            try {
+                return getVersion.invoke(object);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
+        return new Object();
     }
 
 }
