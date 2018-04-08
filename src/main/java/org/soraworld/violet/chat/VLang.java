@@ -48,16 +48,14 @@ public class VLang {
                 FileUtil.copyInputStreamToFile(input, lang_file);
             } catch (Throwable e) {
                 if (config.debug()) e.printStackTrace();
-                config.println("&cLang file extract exception !!!");
-                //TODO fall back
+                config.println("&cLang file " + lang + " extract exception !!!");
             }
         }
         try {
             getLangYaml(lang).load(lang_file);
         } catch (Throwable e) {
             if (config.debug()) e.printStackTrace();
-            config.println("&cLang file load exception !!!");
-            // TODO fall back
+            config.println("&cLang file " + lang + " load exception !!!");
         }
     }
 

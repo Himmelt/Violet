@@ -21,7 +21,7 @@ public class IIChat {
     private static final Pattern FORMAT = Pattern.compile("((?<!&)&[0-9a-fk-or])+");
 
     public IIChat(@Nonnull String chatHead, @Nonnull ChatColor prefix) {
-        PLAIN_HEAD = chatHead;//"[" + Constant.PLUGIN_NAME + "] ";
+        PLAIN_HEAD = chatHead;
         COLOR_HEAD = prefix + PLAIN_HEAD + ChatColor.RESET;
         ChatModifier style = new ChatModifier();
         style.setColor(EnumChatFormat.b(prefix.name()));

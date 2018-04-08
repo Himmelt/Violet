@@ -42,7 +42,7 @@ public class IILang {
                 FileUtil.copyInputStreamToFile(input, lang_file);
             } catch (Throwable e) {
                 if (config.debug()) e.printStackTrace();
-                config.println("&cLang file extract exception !!!");
+                config.println("&cLang file " + lang + " extract exception !!!");
                 if (!"en_us".equals(lang)) {
                     setLang("en_us");
                     config.println("&cLang fall back to en_us .");
@@ -53,7 +53,7 @@ public class IILang {
             lang_yaml.load(lang_file);
         } catch (Throwable e) {
             if (config.debug()) e.printStackTrace();
-            config.println("&cLang file load exception !!!");
+            config.println("&cLang file " + lang + " load exception !!!");
             if (!"en_us".equals(lang)) {
                 setLang("en_us");
                 config.println("&cLang fall back to en_us .");

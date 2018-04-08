@@ -7,7 +7,6 @@ import org.soraworld.violet.command.IICommand;
 import org.soraworld.violet.config.Config;
 import org.soraworld.violet.config.IIConfig;
 import org.soraworld.violet.constant.Violets;
-import org.soraworld.violet.listener.EventListener;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -28,9 +27,7 @@ public class Violet extends VioletPlugin {
 
     @Nonnull
     protected List<Listener> registerEvents(IIConfig config) {
-        ArrayList<Listener> listeners = new ArrayList<>();
-        listeners.add(new EventListener(config, this));
-        return listeners;
+        return new ArrayList<>();
     }
 
     @Nullable

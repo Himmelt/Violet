@@ -24,9 +24,7 @@ public abstract class VioletPlugin extends JavaPlugin {
         config = registerConfig(this.getDataFolder());
         config.load();
         config.afterLoad();
-        config.save();
-        List<Listener> listeners = registerEvents(config);
-        for (Listener listener : listeners) {
+        for (Listener listener : registerEvents(config)) {
             this.getServer().getPluginManager().registerEvents(listener, this);
         }
         command = registerCommand(config);
