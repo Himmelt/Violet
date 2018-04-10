@@ -50,6 +50,7 @@ public abstract class IIConfig {
 
     public boolean save() {
         try {
+            config_yaml.clear();
             config_yaml.set("debug", debug);
             config_yaml.set("lang", iiLang.getLang());
             saveOptions();
@@ -68,7 +69,6 @@ public abstract class IIConfig {
 
     public void debug(boolean debug) {
         this.debug = debug;
-        save();
     }
 
     public void setLang(String lang) {
@@ -78,7 +78,6 @@ public abstract class IIConfig {
         } else {
             iiChat.setHead(defaultChatHead());
         }
-        save();
     }
 
     public String getLang() {

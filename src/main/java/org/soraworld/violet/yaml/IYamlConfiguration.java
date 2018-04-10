@@ -70,4 +70,8 @@ public class IYamlConfiguration extends YamlConfiguration {
         }
     }
 
+    public void clear() {
+        map.clear();
+    }
+
 }

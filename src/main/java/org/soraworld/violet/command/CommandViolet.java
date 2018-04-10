@@ -18,6 +18,7 @@ public class CommandViolet extends IICommand {
                     config.sendV(sender, Violets.KEY_GET_LANG, config.getLang());
                 } else {
                     config.setLang(args.get(0));
+                    config.save();
                     config.sendV(sender, Violets.KEY_SET_LANG, config.getLang());
                 }
                 return true;
