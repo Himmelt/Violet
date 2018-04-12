@@ -14,6 +14,7 @@ class CommandViolet(name: String, perm: String, config: IIConfig, plugin: Plugin
                     config.sendV(sender, Violets.KEY_GET_LANG, config.lang)
                 } else {
                     config.lang = args[0]
+                    config.save()
                     config.sendV(sender, Violets.KEY_SET_LANG, config.lang)
                 }
                 return true

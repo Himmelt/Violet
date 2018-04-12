@@ -25,7 +25,6 @@ abstract class IIConfig(path: File, val plugin: Plugin) {
             iiLang.lang = lang
             if (iiLang.hasKey(Violets.KEY_CHAT_HEAD)) iiChat.setHead(iiLang.format(Violets.KEY_CHAT_HEAD))
             else iiChat.setHead(defaultChatHead())
-            save()
         }
 
     init {
@@ -56,6 +55,7 @@ abstract class IIConfig(path: File, val plugin: Plugin) {
 
     fun save(): Boolean {
         try {
+            config_yaml.clear()
             config_yaml.set("debug", debug)
             config_yaml.set("lang", iiLang.lang)
             saveOptions()
@@ -75,7 +75,6 @@ abstract class IIConfig(path: File, val plugin: Plugin) {
 
     fun debug(debug: Boolean) {
         this.debug = debug
-        save()
     }
 
     fun send(sender: CommandSender, key: String, vararg args: Any) {
