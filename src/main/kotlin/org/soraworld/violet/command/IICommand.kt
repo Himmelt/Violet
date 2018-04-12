@@ -14,7 +14,7 @@ abstract class IICommand(private val name: String, private val perm: String?, pr
 
     constructor(name: String, config: IIConfig, vararg aliases: String) : this(name, null, config, false, *aliases)
 
-    constructor(name: String, perm: String, config: IIConfig, vararg aliases: String) : this(name, perm, config, false, *aliases)
+    constructor(name: String, perm: String?, config: IIConfig, vararg aliases: String) : this(name, perm, config, false, *aliases)
 
     open fun execute(sender: CommandSender, args: MutableList<String>): Boolean {
         if (args.isEmpty()) return false
@@ -25,7 +25,7 @@ abstract class IICommand(private val name: String, private val perm: String?, pr
                 sub.onlyPlayer -> config.sendV(sender, Violets.KEY_ONLY_PLAYER)
                 else -> sub.execute(sender, args)
             }
-        } else config.sendV(sender, Violets.KEY_NO_CMD_PERM, sub.perm)
+        } else config.sendV(sender, Violets.KEY_NO_CMD_PERM, sub.perm!!)
         return true
     }
 

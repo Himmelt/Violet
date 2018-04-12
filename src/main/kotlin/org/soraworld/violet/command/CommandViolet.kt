@@ -5,7 +5,7 @@ import org.bukkit.plugin.Plugin
 import org.soraworld.violet.config.IIConfig
 import org.soraworld.violet.constant.Violets
 
-class CommandViolet(name: String, perm: String, config: IIConfig, plugin: Plugin) : IICommand(name, perm, config) {
+class CommandViolet(name: String, perm: String?, config: IIConfig, plugin: Plugin) : IICommand(name, perm, config) {
 
     init {
         addSub(object : IICommand("lang", config.defaultAdminPerm(), config) {

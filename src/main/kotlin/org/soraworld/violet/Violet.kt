@@ -18,11 +18,11 @@ class Violet : VioletPlugin() {
         return config
     }
 
-    override fun registerEvents(config: IIConfig): List<Listener> {
+    override fun registerEvents(): List<Listener> {
         return ArrayList()
     }
 
-    override fun registerCommand(config: IIConfig): IICommand? {
+    override fun registerCommand(): IICommand? {
         return CommandViolet(Violets.PLUGIN_ID, null, config, this)
     }
 
@@ -35,9 +35,7 @@ class Violet : VioletPlugin() {
     }
 
     companion object {
-
         private var vLang: VLang? = null
-
         fun translate(lang: String, key: String, vararg args: Any): String {
             return if (vLang == null) key else vLang!!.format(lang, key, *args)
         }
