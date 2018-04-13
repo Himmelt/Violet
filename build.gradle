@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.2.31'
+    ext.kotlin_version = '1.2.30'
     repositories {
         jcenter()
     }
@@ -16,8 +16,7 @@ apply plugin: 'java'
 apply plugin: 'kotlin'
 
 group = 'org.soraworld.violet'
-version = '1.7.10-1.1.6'
-description = 'Violet Library Plugin'
+version = '1.7.10-1.1.7'
 archivesBaseName = "Violet"
 
 bintray {
@@ -25,9 +24,9 @@ bintray {
     key = 'bintray_api_key'
 }
 
-sourceCompatibility = targetCompatibility = '1.7'
+sourceCompatibility = targetCompatibility = '1.8'
 compileJava {
-    sourceCompatibility = targetCompatibility = '1.7'
+    sourceCompatibility = targetCompatibility = '1.8'
 }
 
 repositories {
@@ -41,11 +40,10 @@ repositories {
 dependencies {
     compile 'org.spigotmc:spigot-api:1.8-R0.1-SNAPSHOT'
     compile files('lib/spigot-1.7.10.jar')
-    compile 'com.google.code.findbugs:jsr305:3.0.2'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 
 jar {
     includeEmptyDirs = false
-    exclude 'org/yaml/snakeyaml'
+    exclude 'org/cfgYaml/snakeyaml'
 }

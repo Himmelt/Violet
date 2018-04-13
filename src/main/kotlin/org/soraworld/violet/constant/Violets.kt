@@ -5,7 +5,7 @@ object Violets {
     const val PLUGIN_ID = "violet"
     const val PLUGIN_NAME = "Violet"
 
-    const val KEY_CHAT_HEAD = "chatHead"
+    const val KEY_CHAT_HEAD = "plainHead"
     const val KEY_GET_LANG = "getLang"
     const val KEY_SET_LANG = "setLang"
     const val KEY_CFG_SAVE = "configSaved"

@@ -1,11 +1,10 @@
 package org.soraworld.violet.command
 
 import org.bukkit.command.CommandSender
-import org.bukkit.plugin.Plugin
 import org.soraworld.violet.config.IIConfig
 import org.soraworld.violet.constant.Violets
 
-class CommandViolet(name: String, perm: String?, config: IIConfig, plugin: Plugin) : IICommand(name, perm, config) {
+class CommandViolet(name: String, perm: String?, config: IIConfig) : IICommand(name, perm, config) {
 
     init {
         addSub(object : IICommand("lang", config.defaultAdminPerm(), config) {
@@ -32,11 +31,11 @@ class CommandViolet(name: String, perm: String?, config: IIConfig, plugin: Plugi
         })
         addSub(object : IICommand("debug", config.defaultAdminPerm(), config) {
             override fun execute(sender: CommandSender, args: MutableList<String>): Boolean {
-                if (config.debug()) {
-                    config.debug(false)
+                if (config.debug) {
+                    config.debug = false
                     config.sendV(sender, Violets.KEY_DEBUG_OFF)
                 } else {
-                    config.debug(true)
+                    config.debug = true
                     config.sendV(sender, Violets.KEY_DEBUG_ON)
                 }
                 return true
