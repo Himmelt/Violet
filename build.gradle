@@ -37,13 +37,21 @@ repositories {
     }
 }
 
+configurations {
+    shade
+    compile.extendsFrom(shade)
+}
+
 dependencies {
     compile 'org.spigotmc:spigot-api:1.8-R0.1-SNAPSHOT'
     compile files('lib/spigot-1.7.10.jar')
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    shade "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 
 jar {
+    configurations.shade.copyRecursive().setTransitive(false).each {
+        artifact -> from(zipTree(artifact))
+    }
     includeEmptyDirs = false
-    exclude 'org/cfgYaml/snakeyaml'
+    exclude 'org/yaml/snakeyaml'
 }
