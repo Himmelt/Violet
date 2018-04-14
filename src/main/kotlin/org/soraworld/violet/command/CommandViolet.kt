@@ -7,7 +7,7 @@ import org.soraworld.violet.constant.Violets
 class CommandViolet(name: String, perm: String?, config: IIConfig) : IICommand(name, perm, config) {
 
     init {
-        addSub(object : IICommand("lang", config.defaultAdminPerm(), config) {
+        addSub(object : IICommand("lang", config.adminPerm, config) {
             override fun execute(sender: CommandSender, args: MutableList<String>): Boolean {
                 if (args.isEmpty()) {
                     config.sendV(sender, Violets.KEY_GET_LANG, config.lang)
@@ -19,7 +19,7 @@ class CommandViolet(name: String, perm: String?, config: IIConfig) : IICommand(n
                 return true
             }
         })
-        addSub(object : IICommand("save", config.defaultAdminPerm(), config) {
+        addSub(object : IICommand("save", config.adminPerm, config) {
             override fun execute(sender: CommandSender, args: MutableList<String>): Boolean {
                 if (config.save()) {
                     config.sendV(sender, Violets.KEY_CFG_SAVE)
@@ -29,7 +29,7 @@ class CommandViolet(name: String, perm: String?, config: IIConfig) : IICommand(n
                 return true
             }
         })
-        addSub(object : IICommand("debug", config.defaultAdminPerm(), config) {
+        addSub(object : IICommand("debug", config.adminPerm, config) {
             override fun execute(sender: CommandSender, args: MutableList<String>): Boolean {
                 if (config.debug) {
                     config.debug = false
@@ -41,7 +41,7 @@ class CommandViolet(name: String, perm: String?, config: IIConfig) : IICommand(n
                 return true
             }
         })
-        addSub(object : IICommand("reload", config.defaultAdminPerm(), config) {
+        addSub(object : IICommand("reload", config.adminPerm, config) {
             override fun execute(sender: CommandSender, args: MutableList<String>): Boolean {
                 if (config.load()) {
                     config.sendV(sender, Violets.KEY_CFG_LOAD)

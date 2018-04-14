@@ -6,7 +6,6 @@ import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer
 import org.bukkit.entity.Player
-import org.soraworld.violet.Violet
 import org.soraworld.violet.constant.Violets
 import org.soraworld.violet.util.FileUtil
 import org.soraworld.violet.yaml.IYamlConfiguration
@@ -19,36 +18,30 @@ abstract class IIConfig(path: File) {
     /*
     * IIConfig Properties
     * */
-    private val cfgYaml = IYamlConfiguration()
-    private val cfgFile = File(path, "config.yml")
-    var debug = false
-    var lang = "en_us"
+    private val cfgYaml: IYamlConfiguration = IYamlConfiguration()
+    private val cfgFile: File = File(path, "config.yml")
+    abstract val adminPerm: String
+    var debug: Boolean = false
+    var lang: String = "en_us"
         set(lang) {
             field = lang
-            plainHead = if (hasKey(Violets.KEY_CHAT_HEAD)) formatKey(Violets.KEY_CHAT_HEAD) else defaultChatHead()
+            setHead(formatKey(Violets.KEY_CHAT_HEAD))
         }
 
     /*
     * IILang Properties
     * */
-    private val langPath = File(path, "lang")
-    private val langFiles = HashMap<String, File>()
-    private val langYamls = HashMap<String, IYamlConfiguration>()
+    private val langPath: File = File(path, "lang")
+    private val langFiles: HashMap<String, File> = HashMap()
+    private val langYamls: HashMap<String, IYamlConfiguration> = HashMap()
 
     /*
     * IIChat Properties
     * */
-    private var colorHead = ""
-    private var styleHead = ChatComponentText("")
-    var headColor = ChatColor.RESET
-    var plainHead = ""
-        set(text) {
-            if (text.isNotBlank()) {
-                colorHead = headColor.toString() + text.replace('&', ChatColor.COLOR_CHAR) + ChatColor.RESET
-                styleHead = formatStyle(headColor.toString() + text)
-                field = styleHead.c()
-            }
-        }
+    private var colorHead: String = ""
+    private var styleHead: IChatBaseComponent = ChatComponentText("")
+    abstract val headColor: ChatColor
+    abstract var plainHead: String
 
 
     /*
@@ -56,6 +49,7 @@ abstract class IIConfig(path: File) {
     * */
 
     fun load(): Boolean {
+        vcfg = this
         if (!cfgFile.exists()) {
             lang = cfgYaml.getString("lang")
             save()
@@ -68,7 +62,7 @@ abstract class IIConfig(path: File) {
             loadOptions()
         } catch (e: Throwable) {
             if (debug) e.printStackTrace()
-            console("&cConfig file load exception !!!")
+            consoleK("&cConfig file load exception !!!")
             return false
         }
         return true
@@ -83,7 +77,7 @@ abstract class IIConfig(path: File) {
             cfgYaml.save(cfgFile)
         } catch (e: Throwable) {
             if (debug) e.printStackTrace()
-            console("&cConfig file save exception !!!")
+            consoleK("&cConfig file save exception !!!")
             return false
         }
         return true
@@ -94,17 +88,19 @@ abstract class IIConfig(path: File) {
     * IIConfig Abstract Methods
     * */
 
+    fun get(path: String, def: Any): Any {
+        return cfgYaml[path, def]
+    }
+
+    fun set(path: String, value: Any) {
+        cfgYaml[path] = value
+    }
+
     protected abstract fun loadOptions()
 
     protected abstract fun saveOptions()
 
     abstract fun afterLoad()
-
-    protected abstract fun defaultChatColor(): ChatColor
-
-    protected abstract fun defaultChatHead(): String
-
-    abstract fun defaultAdminPerm(): String
 
 
     /*
@@ -156,7 +152,7 @@ abstract class IIConfig(path: File) {
     }
 
     fun formatKey(key: String, vararg args: Any): String {
-        return formatLangKey(lang, key, args)
+        return formatLangKey(lang, key, *args)
     }
 
     fun formatLangKey(lang: String, key: String, vararg args: Any): String {
@@ -170,6 +166,14 @@ abstract class IIConfig(path: File) {
     /*
     * IIChat Methods
     * */
+
+    fun setHead(text: String) {
+        if (text.isNotBlank()) {
+            colorHead = headColor.toString() + text.replace('&', ChatColor.COLOR_CHAR) + ChatColor.RESET
+            styleHead = formatStyle(headColor.toString() + text)
+            plainHead = styleHead.c()
+        }
+    }
 
     fun send(sender: CommandSender, key: String, vararg args: Any) {
         sender.sendMessage(colorHead + colorize(formatKey(key, *args)))
@@ -187,24 +191,28 @@ abstract class IIConfig(path: File) {
         Bukkit.broadcastMessage(colorHead + colorize(formatKey(key, *args)))
     }
 
-    fun console(key: String, vararg args: Any) {
-        println(formatKey(key, *args))
-    }
-
-    fun println(message: String) {
+    fun console(message: String) {
         Bukkit.getConsoleSender().sendMessage(colorHead + colorize(message))
     }
 
+    fun consoleK(key: String, vararg args: Any) {
+        console(formatKey(key, *args))
+    }
+
+    fun println(message: String) {
+        System.out.println(plainHead + message)
+    }
+
     fun sendV(sender: CommandSender, key: String, vararg args: Any) {
-        sender.sendMessage(colorHead + colorize(Violet.translate(lang, key, *args)))
+        sender.sendMessage(colorHead + colorize(translate(lang, key, *args)))
     }
 
     fun broadcastV(key: String, vararg args: Any) {
-        Bukkit.broadcastMessage(colorHead + colorize(Violet.translate(lang, key, *args)))
+        Bukkit.broadcastMessage(colorHead + colorize(translate(lang, key, *args)))
     }
 
     fun consoleV(key: String, vararg args: Any) {
-        println(Violet.translate(lang, key, *args))
+        console(translate(lang, key, *args))
     }
 
 
@@ -214,7 +222,8 @@ abstract class IIConfig(path: File) {
 
     companion object {
 
-        private val FORMAT = Pattern.compile("((?<!&)&[0-9a-fk-or])+")
+        private var vcfg: IIConfig? = null
+        private val FORMAT: Pattern = Pattern.compile("((?<!&)&[0-9a-fk-or])+")
 
         private fun parseStyle(text: String): ChatModifier {
             var style = ChatModifier()
@@ -250,7 +259,7 @@ abstract class IIConfig(path: File) {
         }
 
         @JvmOverloads
-        fun formatStyle(text: String, ca: EnumClickAction? = null, cv: String? = null, ha: EnumHoverAction? = null, hv: String? = null): ChatComponentText {
+        fun formatStyle(text: String, ca: EnumClickAction? = null, cv: String? = null, ha: EnumHoverAction? = null, hv: String? = null): IChatBaseComponent {
             val matcher = FORMAT.matcher(text)
             val component = ChatComponentText("")
             var head = 0
@@ -272,6 +281,10 @@ abstract class IIConfig(path: File) {
 
         private fun colorize(message: String): String {
             return message.replace('&', ChatColor.COLOR_CHAR)
+        }
+
+        fun translate(lang: String, key: String, vararg args: Any): String {
+            return vcfg?.formatLangKey(lang, key, *args) ?: key
         }
 
     }

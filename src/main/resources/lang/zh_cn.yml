@@ -3,6 +3,7 @@
 
 chatHead: "[紫罗兰] "
 
+getVersion: "当前插件版本 &a%s"
 getLang: "当前语言为 &e%s&r ."
 setLang: "当前语言设置为 &e%s&r ."
 configSaved: "&a配置文件已保存."

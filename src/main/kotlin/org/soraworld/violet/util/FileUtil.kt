@@ -4,8 +4,8 @@ import java.io.*
 
 object FileUtil {
 
-    private const val EOF = -1
-    private const val DEFAULT_BUFFER_SIZE = 1024 * 4
+    private const val EOF: Int = -1
+    private const val DEFAULT_BUFFER_SIZE: Int = 1024 * 4
 
     @Throws(IOException::class)
     fun copyInputStreamToFile(source: InputStream?, destination: File?) {

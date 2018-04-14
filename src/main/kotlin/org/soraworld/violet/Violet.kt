@@ -10,31 +10,17 @@ import java.io.File
 class Violet : VioletPlugin() {
 
     override fun registerConfig(path: File): IIConfig {
-        val config = VioletConfig(path)
-        staticConfig = config
-        return config
+        return VioletConfig(path)
     }
 
-    override fun registerEvents() {
-    }
+    override fun registerEvents() {}
 
     override fun registerCommand(): IICommand? {
-        return CommandViolet(Violets.PLUGIN_ID, null, config)
+        return CommandViolet(Violets.PLUGIN_ID, config.adminPerm, config)
     }
 
-    override fun afterEnable() {
+    override fun afterEnable() {}
 
-    }
-
-    override fun beforeDisable() {
-
-    }
-
-    companion object {
-        var staticConfig: IIConfig? = null
-        fun translate(lang: String, key: String, vararg args: Any): String {
-            return staticConfig?.formatLangKey(lang, key, args) ?: key
-        }
-    }
+    override fun beforeDisable() {}
 
 }

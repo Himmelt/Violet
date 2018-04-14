@@ -2,26 +2,28 @@ package org.soraworld.violet.constant
 
 object Violets {
 
-    const val PLUGIN_ID = "violet"
-    const val PLUGIN_NAME = "Violet"
+    const val PLUGIN_ID: String = "violet"
+    const val PLUGIN_NAME: String = "Violet"
+    const val PLUGIN_VERSION: String = "1.1.7"
 
-    const val KEY_CHAT_HEAD = "plainHead"
-    const val KEY_GET_LANG = "getLang"
-    const val KEY_SET_LANG = "setLang"
-    const val KEY_CFG_SAVE = "configSaved"
-    const val KEY_CFG_SAVE_FAIL = "configSaveFailed"
-    const val KEY_CFG_LOAD = "configLoaded"
-    const val KEY_CFG_LOAD_FAIL = "configLoadFailed"
-    const val KEY_NO_CMD_PERM = "noCommandPerm"
-    const val KEY_DEBUG_ON = "debugON"
-    const val KEY_DEBUG_OFF = "debugOFF"
+    const val KEY_CHAT_HEAD: String = "chatHead"
+    const val KEY_GET_VERSION: String = "getVersion"
+    const val KEY_GET_LANG: String = "getLang"
+    const val KEY_SET_LANG: String = "setLang"
+    const val KEY_CFG_SAVE: String = "configSaved"
+    const val KEY_CFG_SAVE_FAIL: String = "configSaveFailed"
+    const val KEY_CFG_LOAD: String = "configLoaded"
+    const val KEY_CFG_LOAD_FAIL: String = "configLoadFailed"
+    const val KEY_NO_CMD_PERM: String = "noCommandPerm"
+    const val KEY_DEBUG_ON: String = "debugON"
+    const val KEY_DEBUG_OFF: String = "debugOFF"
 
-    const val KEY_ONLY_PLAYER = "onlyPlayer"
-    const val KEY_INVALID_ARG = "invalidArg"
-    const val KEY_INVALID_INT = "invalidInt"
-    const val KEY_INVALID_FLOAT = "invalidFloat"
-    const val KEY_ONLY_PLAYER_OR_INVALID_ARG = "onlyPlayerOrInvalidArg"
+    const val KEY_ONLY_PLAYER: String = "onlyPlayer"
+    const val KEY_INVALID_ARG: String = "invalidArg"
+    const val KEY_INVALID_INT: String = "invalidInt"
+    const val KEY_INVALID_FLOAT: String = "invalidFloat"
+    const val KEY_ONLY_PLAYER_OR_INVALID_ARG: String = "onlyPlayerOrInvalidArg"
 
-    const val PERM_ADMIN = "$PLUGIN_ID.admin"
+    const val PERM_ADMIN: String = "$PLUGIN_ID.admin"
 
 }

@@ -3,6 +3,7 @@
 
 chatHead: "[Violet] "
 
+getVersion: "Current plugin version &a%s"
 getLang: "Current language is &e%s&r ."
 setLang: "Current language is set to &e%s&r ."
 configSaved: "&aConfig file saved."

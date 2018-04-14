@@ -1,15 +1,15 @@
 package org.soraworld.violet.command
 
+import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.soraworld.violet.config.IIConfig
 import org.soraworld.violet.constant.Violets
-import org.soraworld.violet.util.ListUtil
 import java.util.*
 
 abstract class IICommand(private val name: String, private val perm: String?, private val config: IIConfig, private val onlyPlayer: Boolean, vararg aliases: String) {
 
-    private val subs = TreeMap<String, IICommand>()
+    private val subs: TreeMap<String, IICommand> = TreeMap()
     private val aliases: List<String> = aliases.asList()
 
     constructor(name: String, config: IIConfig, vararg aliases: String) : this(name, null, config, false, *aliases)
@@ -44,7 +44,7 @@ abstract class IICommand(private val name: String, private val perm: String?, pr
     fun getTabCompletions(args: MutableList<String>?): MutableList<String> {
         return args?.let {
             when {
-                it.size == 1 -> ListUtil.getMatchList(it[0], subs.keys)
+                it.size == 1 -> getMatchList(it[0], subs.keys)
                 else -> subs[it.removeAt(0)]?.getTabCompletions(it)
             }
         } ?: ArrayList()
@@ -52,6 +52,37 @@ abstract class IICommand(private val name: String, private val perm: String?, pr
 
     private fun canRun(sender: CommandSender): Boolean {
         return perm == null || sender.hasPermission(perm)
+    }
+
+    companion object {
+
+        fun getMatchList(text: String, possibles: Collection<String>): MutableList<String> {
+            if (text.isEmpty()) return possibles.toMutableList()
+            val list = ArrayList<String>()
+            for (s in possibles) {
+                if (s.startsWith(text)) {
+                    list.add(s)
+                }
+            }
+            return list
+        }
+
+        fun getMatchWorlds(text: String): List<String> {
+            val list = ArrayList<String>()
+            for (world in Bukkit.getWorlds()) {
+                if (world.name.startsWith(text)) list.add(world.name)
+            }
+            return list
+        }
+
+        fun getMatchPlayers(text: String): List<String> {
+            val list = ArrayList<String>()
+            for (player in Bukkit.getOnlinePlayers()) {
+                if (player.name.startsWith(text)) list.add(player.name)
+            }
+            return list
+        }
+
     }
 
 }
