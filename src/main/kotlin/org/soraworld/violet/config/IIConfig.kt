@@ -162,7 +162,7 @@ abstract class IIConfig(path: File) {
     fun formatLangKey(lang: String, key: String, vararg args: Any): String {
         val value = langYaml(lang).getString(key)
         return if (value == null || value.isBlank())
-            if (lang == "en_us") key else formatKey("en_us", key, *args)
+            if (lang == "en_us") key else formatLangKey("en_us", key, *args)
         else String.format(value, *args)
     }
 

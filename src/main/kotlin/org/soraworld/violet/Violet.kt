@@ -32,7 +32,7 @@ class Violet : VioletPlugin() {
 
     companion object {
         var staticConfig: IIConfig? = null
-        fun translate(key: String, lang: String, vararg args: Any): String {
+        fun translate(lang: String, key: String, vararg args: Any): String {
             return staticConfig?.formatLangKey(lang, key, args) ?: key
         }
     }
