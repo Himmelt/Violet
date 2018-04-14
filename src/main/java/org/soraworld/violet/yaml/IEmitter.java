@@ -985,7 +985,6 @@ public final class IEmitter implements Emitable {
             analysis = new ScalarAnalysis(scalar, false, lineBreaks, allowFlowPlain, allowBlockPlain, allowSingleQuoted, true, allowBlock);
         }
         return analysis;
-
     }
 
     void flushStream() throws IOException {

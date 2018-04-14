@@ -4,12 +4,20 @@ import net.minecraft.server.v1_7_R4.*
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
+import org.bukkit.configuration.MemorySection
+import org.bukkit.configuration.file.FileConfiguration
+import org.bukkit.configuration.file.YamlConfiguration
+import org.bukkit.configuration.file.YamlConstructor
+import org.bukkit.configuration.file.YamlRepresenter
 import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer
 import org.bukkit.entity.Player
 import org.soraworld.violet.constant.Violets
 import org.soraworld.violet.util.FileUtil
-import org.soraworld.violet.yaml.IYamlConfiguration
-import java.io.File
+import org.yaml.snakeyaml.DumperOptions
+import org.yaml.snakeyaml.Yaml
+import java.io.*
+import java.lang.reflect.Field
+import java.lang.reflect.Method
 import java.util.*
 import java.util.regex.Pattern
 
@@ -18,7 +26,7 @@ abstract class IIConfig(path: File) {
     /*
     * IIConfig Properties
     * */
-    private val cfgYaml: IYamlConfiguration = IYamlConfiguration()
+    private val cfgYaml: YamlConfiguration = YamlConfiguration()
     private val cfgFile: File = File(path, "config.yml")
     abstract val adminPerm: String
     var debug: Boolean = false
@@ -33,7 +41,7 @@ abstract class IIConfig(path: File) {
     * */
     private val langPath: File = File(path, "lang")
     private val langFiles: HashMap<String, File> = HashMap()
-    private val langYamls: HashMap<String, IYamlConfiguration> = HashMap()
+    private val langYamls: HashMap<String, YamlConfiguration> = HashMap()
 
     /*
     * IIChat Properties
@@ -56,7 +64,7 @@ abstract class IIConfig(path: File) {
             return true
         }
         try {
-            cfgYaml.load(cfgFile)
+            cfgYaml.loadFile(cfgFile)
             debug = cfgYaml.getBoolean("debug")
             lang = cfgYaml.getString("lang")
             loadOptions()
@@ -74,7 +82,7 @@ abstract class IIConfig(path: File) {
             cfgYaml.set("lang", lang)
             cfgYaml.set("debug", debug)
             saveOptions()
-            cfgYaml.save(cfgFile)
+            cfgYaml.saveFile(cfgFile)
         } catch (e: Throwable) {
             if (debug) e.printStackTrace()
             consoleK("&cConfig file save exception !!!")
@@ -116,10 +124,10 @@ abstract class IIConfig(path: File) {
         return file
     }
 
-    private fun langYaml(lang: String): IYamlConfiguration {
-        var yaml: IYamlConfiguration? = langYamls[lang]
+    private fun langYaml(lang: String): YamlConfiguration {
+        var yaml: YamlConfiguration? = langYamls[lang]
         if (yaml == null) {
-            yaml = IYamlConfiguration()
+            yaml = YamlConfiguration()
             langYamls[lang] = yaml
             loadLang(lang)
         }
@@ -222,6 +230,60 @@ abstract class IIConfig(path: File) {
 
     companion object {
 
+        private val fieldMap: Field?
+        private val methodHead: Method?
+        private val dumperOptions: DumperOptions
+        private val yaml: Yaml
+        private const val BLANK_CONFIG = "{}\n"
+
+        init {
+            var map: Field? = null
+            var head: Method? = null
+            try {
+                map = MemorySection::class.java.getDeclaredField("map")
+                head = FileConfiguration::class.java.getDeclaredMethod("buildHeader")
+                map?.isAccessible = true
+                head?.isAccessible = true
+                println("reflect succeed")
+            } catch (e: Throwable) {
+                println("reflect failed")
+            }
+            fieldMap = map
+            methodHead = head
+            dumperOptions = DumperOptions()
+            dumperOptions.defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
+            dumperOptions.isAllowUnicode = true
+            val yamlRepresent = YamlRepresenter()
+            yamlRepresent.defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
+            yaml = org.yaml.snakeyaml.Yaml(YamlConstructor(), yamlRepresent, dumperOptions)
+        }
+
+        private fun YamlConfiguration.saveToUTF8(): String {
+            dumperOptions.indent = options().indent()
+            val header = methodHead?.invoke(this) ?: ""
+            var dump = yaml.dump(getValues(false))
+            if (dump == BLANK_CONFIG) dump = ""
+            return if (header is String) header + dump else dump
+        }
+
+        fun YamlConfiguration.loadFile(file: File) {
+            load(InputStreamReader(FileInputStream(file), Charsets.UTF_8))
+        }
+
+        fun YamlConfiguration.saveFile(file: File) {
+            file.canonicalFile.parentFile.mkdirs()
+            OutputStreamWriter(FileOutputStream(file), Charsets.UTF_8).use { writer ->
+                writer.write(saveToUTF8())
+            }
+        }
+
+        fun YamlConfiguration.clear() {
+            fieldMap?.set(this, LinkedHashMap<String, Any>())
+        }
+
+        /*
+        * =======================
+        * */
         private var vcfg: IIConfig? = null
         private val FORMAT: Pattern = Pattern.compile("((?<!&)&[0-9a-fk-or])+")
 
