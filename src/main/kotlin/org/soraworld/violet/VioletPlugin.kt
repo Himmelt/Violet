@@ -2,6 +2,7 @@ package org.soraworld.violet
 
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
+import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 import org.soraworld.violet.command.IICommand
 import org.soraworld.violet.config.IIConfig
@@ -9,14 +10,14 @@ import java.io.File
 
 abstract class VioletPlugin : JavaPlugin() {
 
-    protected lateinit var config: IIConfig
+    protected lateinit var iconfig: IIConfig
 
     private var command: IICommand? = null
 
     override fun onEnable() {
-        config = registerConfig(dataFolder)
-        config.load()
-        config.afterLoad()
+        iconfig = registerConfig(dataFolder)
+        iconfig.load()
+        iconfig.afterLoad()
         command = registerCommand()
         registerEvents()
         afterEnable()
@@ -24,7 +25,7 @@ abstract class VioletPlugin : JavaPlugin() {
 
     override fun onDisable() {
         beforeDisable()
-        config.save()
+        iconfig.save()
     }
 
     override fun onCommand(sender: CommandSender?, command: Command?, label: String?, args: Array<out String>?): Boolean {
@@ -32,7 +33,11 @@ abstract class VioletPlugin : JavaPlugin() {
     }
 
     override fun onTabComplete(sender: CommandSender?, command: Command?, alias: String?, args: Array<out String>?): MutableList<String> {
-        return this.command?.getTabCompletions(args?.toMutableList()) ?: ArrayList()
+        return this.command?.tabCompletions(args?.toMutableList() ?: ArrayList()) ?: ArrayList()
+    }
+
+    protected fun registerEvent(listener: Listener) {
+        server.pluginManager.registerEvents(listener, this)
     }
 
     protected abstract fun registerConfig(path: File): IIConfig
@@ -44,6 +49,5 @@ abstract class VioletPlugin : JavaPlugin() {
     protected abstract fun afterEnable()
 
     protected abstract fun beforeDisable()
-
 
 }

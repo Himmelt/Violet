@@ -15,11 +15,11 @@ class VioletConfig(path: File) : IIConfig(path) {
     override fun loadOptions() {}
 
     override fun saveOptions() {
-        set("version", Violets.PLUGIN_VERSION)
+        cfgYaml["version"] = Violets.PLUGIN_VERSION
     }
 
     override fun afterLoad() {
-        consoleV(Violets.KEY_GET_VERSION, get("version", Violets.PLUGIN_VERSION))
+        consoleV(Violets.KEY_GET_VERSION, cfgYaml["version", Violets.PLUGIN_VERSION])
     }
 
 }

@@ -4,7 +4,7 @@ import org.bukkit.command.CommandSender
 import org.soraworld.violet.config.IIConfig
 import org.soraworld.violet.constant.Violets
 
-class CommandViolet(name: String, perm: String?, config: IIConfig) : IICommand(name, perm, config) {
+open class CommandViolet(name: String, perm: String?, config: IIConfig) : IICommand(name, perm, config) {
 
     init {
         addSub(object : IICommand("lang", config.adminPerm, config) {

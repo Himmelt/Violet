@@ -16,7 +16,7 @@ class Violet : VioletPlugin() {
     override fun registerEvents() {}
 
     override fun registerCommand(): IICommand? {
-        return CommandViolet(Violets.PLUGIN_ID, config.adminPerm, config)
+        return CommandViolet(Violets.PLUGIN_ID, iconfig.adminPerm, iconfig)
     }
 
     override fun afterEnable() {}

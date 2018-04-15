@@ -33,21 +33,21 @@ abstract class IICommand(private val name: String, private val perm: String?, pr
         return execute(player as CommandSender, args)
     }
 
+    open fun tabCompletions(args: MutableList<String>): MutableList<String> {
+        return args.let {
+            when {
+                it.size == 1 -> getMatchList(it[0], subs.keys)
+                else -> subs[it.removeAt(0)]?.tabCompletions(it)
+            }
+        } ?: ArrayList()
+    }
+
     protected fun addSub(sub: IICommand) {
         this.subs[sub.name] = sub
         for (alias in sub.aliases) {
             val command = this.subs[alias]
             if (command == null || command.name != alias) this.subs[alias] = sub
         }
-    }
-
-    fun getTabCompletions(args: MutableList<String>?): MutableList<String> {
-        return args?.let {
-            when {
-                it.size == 1 -> getMatchList(it[0], subs.keys)
-                else -> subs[it.removeAt(0)]?.getTabCompletions(it)
-            }
-        } ?: ArrayList()
     }
 
     private fun canRun(sender: CommandSender): Boolean {

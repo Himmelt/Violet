@@ -10,6 +10,7 @@ import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.configuration.file.YamlRepresenter
 import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer
 import org.bukkit.entity.Player
+import org.soraworld.violet.config.IIConfig.Companion.saveToUTF8
 import org.soraworld.violet.constant.Violets
 import org.soraworld.violet.util.FileUtil
 import org.soraworld.violet.yaml.IEmitter
@@ -28,7 +29,7 @@ abstract class IIConfig(path: File) {
     /*
     * IIConfig Properties
     * */
-    private val cfgYaml: YamlConfiguration = YamlConfiguration()
+    protected val cfgYaml: YamlConfiguration = YamlConfiguration()
     private val cfgFile: File = File(path, "config.yml")
     abstract val adminPerm: String
     var debug: Boolean = false
@@ -97,14 +98,6 @@ abstract class IIConfig(path: File) {
     /*
     * IIConfig Abstract Methods
     * */
-
-    fun get(path: String, def: Any): Any {
-        return cfgYaml[path, def]
-    }
-
-    fun set(path: String, value: Any) {
-        cfgYaml[path] = value
-    }
 
     protected abstract fun loadOptions()
 
@@ -232,7 +225,7 @@ abstract class IIConfig(path: File) {
 
     companion object {
 
-        private val fieldMap: Field?
+        internal val fieldMap: Field?
         private val methodHead: Method?
         private val resolver: Resolver = Resolver()
         private val dumperOptions: DumperOptions = DumperOptions()
@@ -257,27 +250,12 @@ abstract class IIConfig(path: File) {
             yamlRepresent.defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
         }
 
-        private fun YamlConfiguration.saveToUTF8(): String {
+        internal fun YamlConfiguration.saveToUTF8(): String {
             dumperOptions.indent = options().indent()
             val header = methodHead?.invoke(this) ?: ""
             var dump: String = dumps(getValues(false))
             if (dump == BLANK_CONFIG) dump = ""
             return if (header is String) header + dump else dump
-        }
-
-        fun YamlConfiguration.loadFile(file: File) {
-            load(InputStreamReader(FileInputStream(file), Charsets.UTF_8))
-        }
-
-        fun YamlConfiguration.saveFile(file: File) {
-            file.canonicalFile.parentFile.mkdirs()
-            OutputStreamWriter(FileOutputStream(file), Charsets.UTF_8).use { writer ->
-                writer.write(saveToUTF8())
-            }
-        }
-
-        fun YamlConfiguration.clear() {
-            fieldMap?.set(this, LinkedHashMap<String, Any>())
         }
 
         private fun dumps(data: Any): String {
@@ -306,9 +284,9 @@ abstract class IIConfig(path: File) {
         * =======================
         * */
         private var vcfg: IIConfig? = null
-        private val FORMAT: Pattern = Pattern.compile("((?<!&)&[0-9a-fk-or])+")
+        internal val FORMAT: Pattern = Pattern.compile("((?<!&)&[0-9a-fk-or])+")
 
-        private fun parseStyle(text: String): ChatModifier {
+        internal fun parseStyle(text: String): ChatModifier {
             var style = ChatModifier()
             var i = 1
             while (i < text.length) {
@@ -341,27 +319,6 @@ abstract class IIConfig(path: File) {
             return style
         }
 
-        @JvmOverloads
-        fun formatStyle(text: String, ca: EnumClickAction? = null, cv: String? = null, ha: EnumHoverAction? = null, hv: String? = null): IChatBaseComponent {
-            val matcher = FORMAT.matcher(text)
-            val component = ChatComponentText("")
-            var head = 0
-            var style = ChatModifier()
-            while (matcher.find()) {
-                component.addSibling(ChatComponentText(text.substring(head, matcher.start()).replace("&&".toRegex(), "&")).setChatModifier(style))
-                style = parseStyle(matcher.group())
-                head = matcher.end()
-            }
-            component.addSibling(ChatComponentText(text.substring(head).replace("&&".toRegex(), "&")).setChatModifier(style))
-            if (ca != null && cv != null) {
-                component.chatModifier.setChatClickable(ChatClickable(ca, cv))
-            }
-            if (ha != null && hv != null) {
-                component.chatModifier.a(ChatHoverable(ha, formatStyle(hv)))
-            }
-            return component
-        }
-
         private fun colorize(message: String): String {
             return message.replace('&', ChatColor.COLOR_CHAR)
         }
@@ -372,4 +329,37 @@ abstract class IIConfig(path: File) {
 
     }
 
+}
+
+fun YamlConfiguration.clear() {
+    IIConfig.Companion.fieldMap?.set(this, LinkedHashMap<String, Any>())
+}
+
+fun YamlConfiguration.loadFile(file: File) {
+    load(InputStreamReader(FileInputStream(file), Charsets.UTF_8))
+}
+
+fun YamlConfiguration.saveFile(file: File) {
+    file.canonicalFile.parentFile.mkdirs()
+    OutputStreamWriter(FileOutputStream(file), Charsets.UTF_8).use { writer ->
+        writer.write(saveToUTF8())
+    }
+}
+
+fun formatStyle(text: String): IChatBaseComponent = formatStyle(text, null, null, null, null)
+
+fun formatStyle(text: String, ca: EnumClickAction? = null, cv: String? = null, ha: EnumHoverAction? = null, hv: String? = null): IChatBaseComponent {
+    val matcher = IIConfig.FORMAT.matcher(text)
+    val component = ChatComponentText("")
+    var head = 0
+    var style = ChatModifier()
+    while (matcher.find()) {
+        component.addSibling(ChatComponentText(text.substring(head, matcher.start()).replace("&&".toRegex(), "&")).setChatModifier(style))
+        style = IIConfig.parseStyle(matcher.group())
+        head = matcher.end()
+    }
+    component.addSibling(ChatComponentText(text.substring(head).replace("&&".toRegex(), "&")).setChatModifier(style))
+    if (ca != null && cv != null) component.chatModifier.setChatClickable(ChatClickable(ca, cv))
+    if (ha != null && hv != null) component.chatModifier.a(ChatHoverable(ha, formatStyle(hv)))
+    return component
 }
