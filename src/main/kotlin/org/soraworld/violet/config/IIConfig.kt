@@ -15,7 +15,6 @@ import org.soraworld.violet.util.FileUtil
 import org.soraworld.violet.yaml.IEmitter
 import org.yaml.snakeyaml.DumperOptions
 import org.yaml.snakeyaml.error.YAMLException
-import org.yaml.snakeyaml.nodes.Tag
 import org.yaml.snakeyaml.resolver.Resolver
 import org.yaml.snakeyaml.serializer.Serializer
 import java.io.*
@@ -285,12 +284,12 @@ abstract class IIConfig(path: File) {
             val list = ArrayList<Any>(1)
             list.add(data)
             val buffer = StringWriter()
-            dumpAll(list.iterator(), buffer, dumperOptions.explicitRoot)
+            dumpAll(list.iterator(), buffer)
             return buffer.toString()
         }
 
-        private fun dumpAll(data: Iterator<Any>, output: Writer, rootTag: Tag?) {
-            val serializer = Serializer(IEmitter(output, dumperOptions), resolver, dumperOptions, rootTag)
+        private fun dumpAll(data: Iterator<Any>, output: Writer) {
+            val serializer = Serializer(IEmitter(output, dumperOptions), resolver, dumperOptions, null)
             try {
                 serializer.open()
                 while (data.hasNext()) {
