@@ -7,14 +7,17 @@ import org.bukkit.command.CommandSender
 import org.bukkit.configuration.MemorySection
 import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
-import org.bukkit.configuration.file.YamlConstructor
 import org.bukkit.configuration.file.YamlRepresenter
 import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer
 import org.bukkit.entity.Player
 import org.soraworld.violet.constant.Violets
 import org.soraworld.violet.util.FileUtil
+import org.soraworld.violet.yaml.IEmitter
 import org.yaml.snakeyaml.DumperOptions
-import org.yaml.snakeyaml.Yaml
+import org.yaml.snakeyaml.error.YAMLException
+import org.yaml.snakeyaml.nodes.Tag
+import org.yaml.snakeyaml.resolver.Resolver
+import org.yaml.snakeyaml.serializer.Serializer
 import java.io.*
 import java.lang.reflect.Field
 import java.lang.reflect.Method
@@ -59,14 +62,14 @@ abstract class IIConfig(path: File) {
     fun load(): Boolean {
         vcfg = this
         if (!cfgFile.exists()) {
-            lang = cfgYaml.getString("lang")
+            lang = cfgYaml.getString("lang", "en_us")
             save()
             return true
         }
         try {
             cfgYaml.loadFile(cfgFile)
-            debug = cfgYaml.getBoolean("debug")
-            lang = cfgYaml.getString("lang")
+            debug = cfgYaml.getBoolean("debug", false)
+            lang = cfgYaml.getString("lang", "en_us")
             loadOptions()
         } catch (e: Throwable) {
             if (debug) e.printStackTrace()
@@ -232,8 +235,9 @@ abstract class IIConfig(path: File) {
 
         private val fieldMap: Field?
         private val methodHead: Method?
-        private val dumperOptions: DumperOptions
-        private val yaml: Yaml
+        private val resolver: Resolver = Resolver()
+        private val dumperOptions: DumperOptions = DumperOptions()
+        private val yamlRepresent: YamlRepresenter = YamlRepresenter()
         private const val BLANK_CONFIG = "{}\n"
 
         init {
@@ -244,24 +248,20 @@ abstract class IIConfig(path: File) {
                 head = FileConfiguration::class.java.getDeclaredMethod("buildHeader")
                 map?.isAccessible = true
                 head?.isAccessible = true
-                println("reflect succeed")
             } catch (e: Throwable) {
-                println("reflect failed")
+                println("reflect failed !!!!!")
             }
             fieldMap = map
             methodHead = head
-            dumperOptions = DumperOptions()
-            dumperOptions.defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
             dumperOptions.isAllowUnicode = true
-            val yamlRepresent = YamlRepresenter()
+            dumperOptions.defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
             yamlRepresent.defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
-            yaml = org.yaml.snakeyaml.Yaml(YamlConstructor(), yamlRepresent, dumperOptions)
         }
 
         private fun YamlConfiguration.saveToUTF8(): String {
             dumperOptions.indent = options().indent()
             val header = methodHead?.invoke(this) ?: ""
-            var dump = yaml.dump(getValues(false))
+            var dump: String = dumps(getValues(false))
             if (dump == BLANK_CONFIG) dump = ""
             return if (header is String) header + dump else dump
         }
@@ -279,6 +279,28 @@ abstract class IIConfig(path: File) {
 
         fun YamlConfiguration.clear() {
             fieldMap?.set(this, LinkedHashMap<String, Any>())
+        }
+
+        private fun dumps(data: Any): String {
+            val list = ArrayList<Any>(1)
+            list.add(data)
+            val buffer = StringWriter()
+            dumpAll(list.iterator(), buffer, dumperOptions.explicitRoot)
+            return buffer.toString()
+        }
+
+        private fun dumpAll(data: Iterator<Any>, output: Writer, rootTag: Tag?) {
+            val serializer = Serializer(IEmitter(output, dumperOptions), resolver, dumperOptions, rootTag)
+            try {
+                serializer.open()
+                while (data.hasNext()) {
+                    val node = yamlRepresent.represent(data.next())
+                    serializer.serialize(node)
+                }
+                serializer.close()
+            } catch (e: Throwable) {
+                throw YAMLException(e)
+            }
         }
 
         /*
