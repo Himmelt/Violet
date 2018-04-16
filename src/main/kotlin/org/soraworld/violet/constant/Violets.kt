@@ -4,7 +4,7 @@ object Violets {
 
     const val PLUGIN_ID: String = "violet"
     const val PLUGIN_NAME: String = "Violet"
-    const val PLUGIN_VERSION: String = "1.2.0"
+    const val PLUGIN_VERSION: String = "1.2.1"
 
     const val KEY_CHAT_HEAD: String = "chatHead"
     const val KEY_GET_VERSION: String = "getVersion"

@@ -4,23 +4,12 @@ import net.minecraft.server.v1_7_R4.*
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
-import org.bukkit.configuration.MemorySection
-import org.bukkit.configuration.file.FileConfiguration
-import org.bukkit.configuration.file.YamlConfiguration
-import org.bukkit.configuration.file.YamlRepresenter
 import org.bukkit.craftbukkit.v1_7_R4.entity.CraftPlayer
 import org.bukkit.entity.Player
-import org.soraworld.violet.config.IIConfig.Companion.saveToUTF8
 import org.soraworld.violet.constant.Violets
 import org.soraworld.violet.util.FileUtil
-import org.soraworld.violet.yaml.IEmitter
-import org.yaml.snakeyaml.DumperOptions
-import org.yaml.snakeyaml.error.YAMLException
-import org.yaml.snakeyaml.resolver.Resolver
-import org.yaml.snakeyaml.serializer.Serializer
-import java.io.*
-import java.lang.reflect.Field
-import java.lang.reflect.Method
+import org.soraworld.violet.yaml.IYamlConfiguration
+import java.io.File
 import java.util.*
 import java.util.regex.Pattern
 
@@ -29,14 +18,14 @@ abstract class IIConfig(path: File) {
     /*
     * IIConfig Properties
     * */
-    protected val cfgYaml: YamlConfiguration = YamlConfiguration()
+    protected val cfgYaml: IYamlConfiguration = IYamlConfiguration()
     private val cfgFile: File = File(path, "config.yml")
     abstract val adminPerm: String
     var debug: Boolean = false
     var lang: String = "en_us"
         set(lang) {
             field = lang
-            setHead(formatKey(Violets.KEY_CHAT_HEAD))
+            if (hasKey(Violets.KEY_CHAT_HEAD)) setHead(formatKey(Violets.KEY_CHAT_HEAD))
         }
 
     /*
@@ -44,7 +33,7 @@ abstract class IIConfig(path: File) {
     * */
     private val langPath: File = File(path, "lang")
     private val langFiles: HashMap<String, File> = HashMap()
-    private val langYamls: HashMap<String, YamlConfiguration> = HashMap()
+    private val langYamls: HashMap<String, IYamlConfiguration> = HashMap()
 
     /*
     * IIChat Properties
@@ -62,12 +51,12 @@ abstract class IIConfig(path: File) {
     fun load(): Boolean {
         vcfg = this
         if (!cfgFile.exists()) {
-            lang = cfgYaml.getString("lang", "en_us")
+            lang = if (Locale.getDefault() == Locale.CHINA) "zh_cn" else "en_us"
             save()
             return true
         }
         try {
-            cfgYaml.loadFile(cfgFile)
+            cfgYaml.load(cfgFile)
             debug = cfgYaml.getBoolean("debug", false)
             lang = cfgYaml.getString("lang", "en_us")
             loadOptions()
@@ -85,7 +74,7 @@ abstract class IIConfig(path: File) {
             cfgYaml.set("lang", lang)
             cfgYaml.set("debug", debug)
             saveOptions()
-            cfgYaml.saveFile(cfgFile)
+            cfgYaml.save(cfgFile)
         } catch (e: Throwable) {
             if (debug) e.printStackTrace()
             consoleK("&cConfig file save exception !!!")
@@ -119,10 +108,10 @@ abstract class IIConfig(path: File) {
         return file
     }
 
-    private fun langYaml(lang: String): YamlConfiguration {
-        var yaml: YamlConfiguration? = langYamls[lang]
+    private fun langYaml(lang: String): IYamlConfiguration {
+        var yaml: IYamlConfiguration? = langYamls[lang]
         if (yaml == null) {
-            yaml = YamlConfiguration()
+            yaml = IYamlConfiguration()
             langYamls[lang] = yaml
             loadLang(lang)
         }
@@ -138,25 +127,21 @@ abstract class IIConfig(path: File) {
                 FileUtil.copyInputStreamToFile(input, file)
             } catch (e: Throwable) {
                 if (debug) e.printStackTrace()
-                println("&cLang file $lang extract exception !!!")
+                console("&cLang file $lang extract exception !!!")
             }
         }
         try {
             langYaml(lang).load(file)
         } catch (e: Throwable) {
             if (debug) e.printStackTrace()
-            println("&cLang file $lang loadLang exception !!!")
+            console("&cLang file $lang loadLang exception !!!")
         }
     }
 
     @JvmOverloads
-    fun hasKey(key: String, lang: String = this.lang): Boolean {
-        return langYaml(lang).getKeys(false).contains(key)
-    }
+    fun hasKey(key: String, lang: String = this.lang) = langYaml(lang).getKeys(false).contains(key)
 
-    fun formatKey(key: String, vararg args: Any): String {
-        return formatLangKey(lang, key, *args)
-    }
+    fun formatKey(key: String, vararg args: Any) = formatLangKey(lang, key, *args)
 
     fun formatLangKey(lang: String, key: String, vararg args: Any): String {
         val value = langYaml(lang).getString(key)
@@ -178,9 +163,7 @@ abstract class IIConfig(path: File) {
         }
     }
 
-    fun send(sender: CommandSender, key: String, vararg args: Any) {
-        sender.sendMessage(colorHead + colorize(formatKey(key, *args)))
-    }
+    fun send(sender: CommandSender, key: String, vararg args: Any) = sender.sendMessage(colorHead + colorize(formatKey(key, *args)))
 
     fun sendMessage(player: Player, vararg siblings: IChatBaseComponent) {
         if (player is CraftPlayer) {
@@ -190,32 +173,38 @@ abstract class IIConfig(path: File) {
         }
     }
 
-    fun broadcast(key: String, vararg args: Any) {
-        Bukkit.broadcastMessage(colorHead + colorize(formatKey(key, *args)))
-    }
+    fun broadcast(key: String, vararg args: Any) = Bukkit.broadcastMessage(colorHead + colorize(formatKey(key, *args)))
 
-    fun console(message: String) {
-        Bukkit.getConsoleSender().sendMessage(colorHead + colorize(message))
-    }
+    fun console(message: String) = Bukkit.getConsoleSender().sendMessage(colorHead + colorize(message))
 
-    fun consoleK(key: String, vararg args: Any) {
-        console(formatKey(key, *args))
-    }
+    fun consoleK(key: String, vararg args: Any) = console(formatKey(key, *args))
 
-    fun println(message: String) {
-        System.out.println(plainHead + message)
-    }
+    fun println(message: String) = System.out.println(plainHead + message)
 
-    fun sendV(sender: CommandSender, key: String, vararg args: Any) {
-        sender.sendMessage(colorHead + colorize(translate(lang, key, *args)))
-    }
+    fun sendV(sender: CommandSender, key: String, vararg args: Any) = sender.sendMessage(colorHead + colorize(translate(lang, key, *args)))
 
     fun broadcastV(key: String, vararg args: Any) {
         Bukkit.broadcastMessage(colorHead + colorize(translate(lang, key, *args)))
     }
 
-    fun consoleV(key: String, vararg args: Any) {
-        console(translate(lang, key, *args))
+    fun consoleV(key: String, vararg args: Any) = console(translate(lang, key, *args))
+
+    fun formatStyle(text: String): IChatBaseComponent = formatStyle(text, null, null, null, null)
+
+    fun formatStyle(text: String, ca: EnumClickAction? = null, cv: String? = null, ha: EnumHoverAction? = null, hv: String? = null): IChatBaseComponent {
+        val matcher = FORMAT.matcher(text)
+        val component = ChatComponentText("")
+        var head = 0
+        var style = ChatModifier()
+        while (matcher.find()) {
+            component.addSibling(ChatComponentText(text.substring(head, matcher.start()).replace("&&".toRegex(), "&")).setChatModifier(style))
+            style = parseStyle(matcher.group())
+            head = matcher.end()
+        }
+        component.addSibling(ChatComponentText(text.substring(head).replace("&&".toRegex(), "&")).setChatModifier(style))
+        if (ca != null && cv != null) component.chatModifier.setChatClickable(ChatClickable(ca, cv))
+        if (ha != null && hv != null) component.chatModifier.a(ChatHoverable(ha, formatStyle(hv)))
+        return component
     }
 
 
@@ -224,69 +213,10 @@ abstract class IIConfig(path: File) {
     * */
 
     companion object {
-
-        internal val fieldMap: Field?
-        private val methodHead: Method?
-        private val resolver: Resolver = Resolver()
-        private val dumperOptions: DumperOptions = DumperOptions()
-        private val yamlRepresent: YamlRepresenter = YamlRepresenter()
-        private const val BLANK_CONFIG = "{}\n"
-
-        init {
-            var map: Field? = null
-            var head: Method? = null
-            try {
-                map = MemorySection::class.java.getDeclaredField("map")
-                head = FileConfiguration::class.java.getDeclaredMethod("buildHeader")
-                map?.isAccessible = true
-                head?.isAccessible = true
-            } catch (e: Throwable) {
-                println("reflect failed !!!!!")
-            }
-            fieldMap = map
-            methodHead = head
-            dumperOptions.isAllowUnicode = true
-            dumperOptions.defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
-            yamlRepresent.defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
-        }
-
-        internal fun YamlConfiguration.saveToUTF8(): String {
-            dumperOptions.indent = options().indent()
-            val header = methodHead?.invoke(this) ?: ""
-            var dump: String = dumps(getValues(false))
-            if (dump == BLANK_CONFIG) dump = ""
-            return if (header is String) header + dump else dump
-        }
-
-        private fun dumps(data: Any): String {
-            val list = ArrayList<Any>(1)
-            list.add(data)
-            val buffer = StringWriter()
-            dumpAll(list.iterator(), buffer)
-            return buffer.toString()
-        }
-
-        private fun dumpAll(data: Iterator<Any>, output: Writer) {
-            val serializer = Serializer(IEmitter(output, dumperOptions), resolver, dumperOptions, null)
-            try {
-                serializer.open()
-                while (data.hasNext()) {
-                    val node = yamlRepresent.represent(data.next())
-                    serializer.serialize(node)
-                }
-                serializer.close()
-            } catch (e: Throwable) {
-                throw YAMLException(e)
-            }
-        }
-
-        /*
-        * =======================
-        * */
         private var vcfg: IIConfig? = null
-        internal val FORMAT: Pattern = Pattern.compile("((?<!&)&[0-9a-fk-or])+")
+        private val FORMAT: Pattern = Pattern.compile("((?<!&)&[0-9a-fk-or])+")
 
-        internal fun parseStyle(text: String): ChatModifier {
+        private fun parseStyle(text: String): ChatModifier {
             var style = ChatModifier()
             var i = 1
             while (i < text.length) {
@@ -323,43 +253,6 @@ abstract class IIConfig(path: File) {
             return message.replace('&', ChatColor.COLOR_CHAR)
         }
 
-        fun translate(lang: String, key: String, vararg args: Any): String {
-            return vcfg?.formatLangKey(lang, key, *args) ?: key
-        }
-
+        fun translate(lang: String, key: String, vararg args: Any) = vcfg?.formatLangKey(lang, key, *args) ?: key
     }
-
-}
-
-fun YamlConfiguration.clear() {
-    IIConfig.Companion.fieldMap?.set(this, LinkedHashMap<String, Any>())
-}
-
-fun YamlConfiguration.loadFile(file: File) {
-    load(InputStreamReader(FileInputStream(file), Charsets.UTF_8))
-}
-
-fun YamlConfiguration.saveFile(file: File) {
-    file.canonicalFile.parentFile.mkdirs()
-    OutputStreamWriter(FileOutputStream(file), Charsets.UTF_8).use { writer ->
-        writer.write(saveToUTF8())
-    }
-}
-
-fun formatStyle(text: String): IChatBaseComponent = formatStyle(text, null, null, null, null)
-
-fun formatStyle(text: String, ca: EnumClickAction? = null, cv: String? = null, ha: EnumHoverAction? = null, hv: String? = null): IChatBaseComponent {
-    val matcher = IIConfig.FORMAT.matcher(text)
-    val component = ChatComponentText("")
-    var head = 0
-    var style = ChatModifier()
-    while (matcher.find()) {
-        component.addSibling(ChatComponentText(text.substring(head, matcher.start()).replace("&&".toRegex(), "&")).setChatModifier(style))
-        style = IIConfig.parseStyle(matcher.group())
-        head = matcher.end()
-    }
-    component.addSibling(ChatComponentText(text.substring(head).replace("&&".toRegex(), "&")).setChatModifier(style))
-    if (ca != null && cv != null) component.chatModifier.setChatClickable(ChatClickable(ca, cv))
-    if (ha != null && hv != null) component.chatModifier.a(ChatHoverable(ha, formatStyle(hv)))
-    return component
 }
