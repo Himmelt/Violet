@@ -26,6 +26,7 @@ abstract class IIConfig(path: File) {
         set(lang) {
             field = lang
             if (hasKey(Violets.KEY_CHAT_HEAD)) setHead(formatKey(Violets.KEY_CHAT_HEAD))
+            else setHead(plainHead)
         }
 
     /*
@@ -49,7 +50,6 @@ abstract class IIConfig(path: File) {
     * */
 
     fun load(): Boolean {
-        vcfg = this
         if (!cfgFile.exists()) {
             lang = if (Locale.getDefault() == Locale.CHINA) "zh_cn" else "en_us"
             save()
@@ -134,7 +134,7 @@ abstract class IIConfig(path: File) {
             langYaml(lang).load(file)
         } catch (e: Throwable) {
             if (debug) e.printStackTrace()
-            console("&cLang file $lang loadLang exception !!!")
+            console("&cLang file $lang load exception !!!")
         }
     }
 
@@ -213,7 +213,7 @@ abstract class IIConfig(path: File) {
     * */
 
     companion object {
-        private var vcfg: IIConfig? = null
+        internal var vcfg: IIConfig? = null
         private val FORMAT: Pattern = Pattern.compile("((?<!&)&[0-9a-fk-or])+")
 
         private fun parseStyle(text: String): ChatModifier {

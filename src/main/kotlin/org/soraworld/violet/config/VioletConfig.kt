@@ -6,6 +6,10 @@ import java.io.File
 
 class VioletConfig(path: File) : IIConfig(path) {
 
+    init {
+        vcfg = this
+    }
+
     override val adminPerm: String = Violets.PERM_ADMIN
 
     override var plainHead: String = "[" + Violets.PLUGIN_NAME + "] "
