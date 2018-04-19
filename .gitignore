@@ -3,4 +3,5 @@
 /build
 /lib
 /out
+/gradle.properties
 *.iml

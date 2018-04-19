@@ -1,32 +1,26 @@
-buildscript {
-    ext.kotlin_version = '1.2.30'
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
-
 plugins {
     id "com.jfrog.bintray" version "1.8.0"
+    id "org.jetbrains.kotlin.jvm" version "1.2.30"
 }
 
 apply plugin: 'java'
 apply plugin: 'kotlin'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
 group = 'org.soraworld.violet'
 version = '1.7.10-1.2.1'
 archivesBaseName = "Violet"
 
-bintray {
-    user = 'bintray_user'
-    key = 'bintray_api_key'
-}
-
 sourceCompatibility = targetCompatibility = '1.8'
 compileJava {
     sourceCompatibility = targetCompatibility = '1.8'
+}
+compileKotlin {
+    sourceCompatibility = targetCompatibility = '1.8'
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
 
 repositories {
@@ -45,7 +39,7 @@ configurations {
 dependencies {
     compile 'org.spigotmc:spigot-api:1.8-R0.1-SNAPSHOT'
     compile files('lib/spigot-1.7.10.jar')
-    shade "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    shade "org.jetbrains.kotlin:kotlin-stdlib:1.2.30"
 }
 
 jar {
@@ -54,4 +48,33 @@ jar {
     }
     includeEmptyDirs = false
     exclude 'org/yaml/snakeyaml'
+}
+
+publishing {
+    publications {
+        VioletMaven(MavenPublication) {
+            from components.java
+            groupId = 'org.soraworld'
+            artifactId = 'violet'
+            version = project.version
+        }
+    }
+}
+
+bintray {
+    key = BINTRAY_KEY
+    user = BINTRAY_USER
+    publications = ['VioletMaven']
+    pkg {
+        repo = 'Minecraft'
+        name = 'Violet'
+        licenses = ['MIT']
+        vcsUrl = 'https://github.com/Himmelt/Violet.git'
+        publicDownloadNumbers = true
+        version {
+            name = project.version
+            desc = 'Spigot/Bukkit Violet Plugin Library.'
+            released = new Date()
+        }
+    }
 }
