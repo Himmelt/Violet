@@ -43,7 +43,7 @@ public class VioletSponge implements CommandCallable {
     @Listener
     public void onEnable(GameInitializationEvent event) {
         plugin.loadConfig(path);
-        Sponge.getCommandManager().register(this, this);
+        Sponge.getCommandManager().register(this, this, Violets.PLUGIN_ID);
         Sponge.getEventManager().registerListeners(this, new EventListener());
     }
 

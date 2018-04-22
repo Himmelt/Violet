@@ -22,16 +22,15 @@ public final class VioletAPI {
     private static final HashMap<Object, ICommandSender> senders = new HashMap<>();
 
     static {
-        try {
-            Sponge.class.getName();
-            serverType = ServerType.SPONGE;
-            System.out.println("Running Sponge Server.");
-        } catch (Throwable e) {
+        if (Bukkit.getServer() != null) {
+            serverType = ServerType.BUKKIT;
+            System.out.println("Running Bukkit Server.");
+        } else {
             try {
-                Bukkit.class.getName();
-                serverType = ServerType.BUKKIT;
-                System.out.println("Running Bukkit Server.");
-            } catch (Throwable t) {
+                Sponge.getServer();
+                serverType = ServerType.SPONGE;
+                System.out.println("Running Sponge Server.");
+            } catch (Throwable e) {
                 serverType = ServerType.UNKNOWN;
                 System.out.println("Running Unknown Server.");
             }

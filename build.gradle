@@ -26,20 +26,31 @@ repositories {
 
 configurations {
     shade
+    shaded
     compile.extendsFrom(shade)
+    compile.extendsFrom(shaded)
 }
 
 dependencies {
     compile 'com.typesafe:config:1.3.1'
-    compile 'org.spigotmc:spigot-api:1.8-R0.1-SNAPSHOT'
-    compile 'org.spongepowered:spongeapi:7.1.0-SNAPSHOT'
-    shade files('lib/HoconConfigurate-1.0.0.jar')
+    shade 'org.spigotmc:spigot-api:1.8-R0.1-SNAPSHOT'
+    shade 'org.spongepowered:spongeapi:7.1.0-SNAPSHOT'
+    shaded files('lib/HoconConfigurate-1.0.0.jar')
+}
+
+jar {
+    configurations.shade.copyRecursive().setTransitive(false).each {
+        artifact -> from(zipTree(artifact))
+    }
 }
 
 task shaded(type: Jar) {
     from(sourceSets.main.output) {
     }
     configurations.shade.copyRecursive().setTransitive(false).each {
+        artifact -> from(zipTree(artifact))
+    }
+    configurations.shaded.copyRecursive().setTransitive(false).each {
         artifact -> from(zipTree(artifact))
     }
     classifier = 'shaded'
