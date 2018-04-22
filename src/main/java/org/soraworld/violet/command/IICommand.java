@@ -1,7 +1,7 @@
 package org.soraworld.violet.command;
 
-import org.soraworld.violet.api.IPlayer;
-import org.soraworld.violet.api.VioletSender;
+import org.soraworld.violet.api.command.ICommandSender;
+import org.soraworld.violet.api.entity.IPlayer;
 import org.soraworld.violet.config.VioletManager;
 import org.soraworld.violet.constant.Violets;
 
@@ -11,7 +11,7 @@ public abstract class IICommand {
 
     private final String perm;
     private final boolean onlyPlayer;
-    private final VioletManager manager;
+    protected final VioletManager manager;
 
     private final List<String> aliases = new ArrayList<>();
     private final TreeMap<String, IICommand> subs = new TreeMap<>();
@@ -23,7 +23,7 @@ public abstract class IICommand {
         this.aliases.addAll(Arrays.asList(aliases));
     }
 
-    public boolean execute(VioletSender sender, ArrayList<String> args) {
+    public boolean execute(ICommandSender sender, ArrayList<String> args) {
         if (args.isEmpty()) return false;
         IICommand sub = subs.get(args.remove(0));
         if (sub == null) return false;
@@ -40,7 +40,7 @@ public abstract class IICommand {
     }
 
     public boolean execute(IPlayer player, ArrayList<String> args) {
-        return execute((VioletSender) player, args);
+        return execute((ICommandSender) player, args);
     }
 
     protected void addSub(IICommand sub) {
@@ -49,7 +49,7 @@ public abstract class IICommand {
         }
     }
 
-    private boolean canRun(VioletSender sender) {
+    private boolean canRun(ICommandSender sender) {
         return perm == null || sender.hasPermission(perm);
     }
 

@@ -1,30 +1,27 @@
 package org.soraworld.violet.command;
 
-import org.soraworld.violet.api.VioletSender;
+import org.soraworld.violet.api.command.ICommandSender;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
 
-public class SpongeSender implements VioletSender {
+public class SpongeSender<T extends CommandSource> implements ICommandSender {
 
-    private CommandSource sponge = null;
+    protected final T sponge;
 
-    public SpongeSender(Object source) {
-        try {
-            if (source instanceof CommandSource) sponge = (CommandSource) source;
-        } catch (Throwable ignored) {
-        }
+    public SpongeSender(T source) {
+        sponge = source;
     }
 
     public String getName() {
-        return sponge == null ? "null" : sponge.getName();
+        return sponge.getName();
     }
 
     public boolean hasPermission(String perm) {
-        return sponge != null && sponge.hasPermission(perm);
+        return sponge.hasPermission(perm);
     }
 
     public void sendMessage(String msg) {
-        if (sponge != null) sponge.sendMessage(Text.of(msg));
+        sponge.sendMessage(Text.of(msg));
     }
 
 }

@@ -4,8 +4,8 @@ import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import org.soraworld.violet.api.IPlayer;
-import org.soraworld.violet.api.VioletSender;
+import org.soraworld.violet.api.command.ICommandSender;
+import org.soraworld.violet.api.entity.IPlayer;
 
 import java.nio.file.Path;
 
@@ -18,12 +18,14 @@ public class VioletManager {
     public boolean debug;
     public String lang;
     public String adminPerm;
+    private Settings settings;
     private CommentedConfigurationNode rootNode = null;
 
-    public VioletManager(Path path) {
+    public VioletManager(Path path, Settings settings) {
         this.path = path;
         this.confile = path.resolve("config.conf");
         this.loader = HoconConfigurationLoader.builder().setPath(confile).build();
+        this.settings = settings;
     }
 
     public boolean load() {
@@ -34,7 +36,7 @@ public class VioletManager {
         return true;
     }
 
-    public void sendKey(VioletSender sender, String key, Object... args) {
+    public void sendKey(ICommandSender sender, String key, Object... args) {
         sender.sendMessage("text");
     }
 
@@ -57,7 +59,7 @@ public class VioletManager {
         System.out.println("plainHead " + msg);
     }
 
-    public void vSendKey(VioletSender sender, String key, Object... args) {
+    public void vSendKey(ICommandSender sender, String key, Object... args) {
 
     }
 

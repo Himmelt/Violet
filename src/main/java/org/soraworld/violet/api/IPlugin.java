@@ -1,4 +1,4 @@
 package org.soraworld.violet.api;
 
-interface IPlugin {
+public interface IPlugin {
 }

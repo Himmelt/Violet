@@ -1,29 +1,26 @@
 package org.soraworld.violet.command;
 
 import org.bukkit.command.CommandSender;
-import org.soraworld.violet.api.VioletSender;
+import org.soraworld.violet.api.command.ICommandSender;
 
-public class BukkitSender implements VioletSender {
+public class BukkitSender<T extends CommandSender> implements ICommandSender {
 
-    private CommandSender bukkit = null;
+    protected final T bukkit;
 
-    public BukkitSender(Object source) {
-        try {
-            if (source instanceof CommandSender) bukkit = (CommandSender) source;
-        } catch (Throwable ignored) {
-        }
+    public BukkitSender(T source) {
+        bukkit = source;
     }
 
     public String getName() {
-        return bukkit == null ? "null" : bukkit.getName();
+        return bukkit.getName();
     }
 
     public boolean hasPermission(String perm) {
-        return bukkit != null && bukkit.hasPermission(perm);
+        return bukkit.hasPermission(perm);
     }
 
     public void sendMessage(String msg) {
-        if (bukkit != null) bukkit.sendMessage(msg);
+        bukkit.sendMessage(msg);
     }
 
 }

@@ -1,6 +1,6 @@
-package org.soraworld.violet.api;
+package org.soraworld.violet.api.command;
 
-public interface VioletSender {
+public interface ICommandSender {
 
     String getName();
 
