@@ -1,27 +1,19 @@
 plugins {
     id "com.jfrog.bintray" version "1.8.0"
     id 'org.spongepowered.plugin' version '0.8.1'
-    id "org.jetbrains.kotlin.jvm" version "1.2.30"
 }
 
 apply plugin: 'java'
-apply plugin: 'kotlin'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 
 group = 'org.soraworld.violet'
-version = '1.7.10-1.2.1'
+version = '2.0.0'
 archivesBaseName = "Violet"
 
 sourceCompatibility = targetCompatibility = '1.8'
 compileJava {
     sourceCompatibility = targetCompatibility = '1.8'
-}
-compileKotlin {
-    sourceCompatibility = targetCompatibility = '1.8'
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
 }
 
 repositories {
@@ -38,18 +30,9 @@ configurations {
 }
 
 dependencies {
+    compile 'com.typesafe:config:1.3.1'
     compile 'org.spigotmc:spigot-api:1.8-R0.1-SNAPSHOT'
     compile 'org.spongepowered:spongeapi:7.1.0-SNAPSHOT'
-    compile files('lib/spigot-1.7.10.jar')
-    shade "org.jetbrains.kotlin:kotlin-stdlib:1.2.30"
-}
-
-jar {
-    configurations.shade.copyRecursive().setTransitive(false).each {
-        artifact -> from(zipTree(artifact))
-    }
-    includeEmptyDirs = false
-    exclude 'org/yaml/snakeyaml'
 }
 
 publishing {
@@ -75,7 +58,7 @@ bintray {
         publicDownloadNumbers = true
         version {
             name = project.version
-            desc = 'Spigot/Bukkit Violet Plugin Library.'
+            desc = 'Spigot/Bukkit/Sponge Violet Plugin Library.'
             released = new Date()
         }
     }
