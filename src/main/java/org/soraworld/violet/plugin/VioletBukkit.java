@@ -11,11 +11,11 @@ public class VioletBukkit extends JavaPlugin {
         plugin.onLoad();
     }
 
-    public void onDisable() {
+    public void onEnable() {
         plugin.onEnable(getDataFolder().toPath());
     }
 
-    public void onEnable() {
+    public void onDisable() {
         plugin.onDisable();
     }
 

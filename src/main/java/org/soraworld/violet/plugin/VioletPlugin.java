@@ -15,11 +15,11 @@ public abstract class VioletPlugin {
     }
 
     public void onEnable(Path path) {
-
+        System.out.println("plugin onEnable!!");
     }
 
     public void onDisable() {
-
+        System.out.println("plugin onDisable!!");
     }
 
     public boolean execute(VioletSender sender, ArrayList<String> args) {

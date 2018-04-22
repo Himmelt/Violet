@@ -23,8 +23,10 @@ public final class VioletAPI {
             try {
                 Bukkit.class.getName();
                 serverType = ServerType.BUKKIT;
+                System.out.println("Running Bukkit Server.");
             } catch (Throwable t) {
                 serverType = ServerType.UNKNOWN;
+                System.out.println("Running Sponge Server.");
             }
         }
     }
