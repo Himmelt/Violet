@@ -1,6 +1,6 @@
 package org.soraworld.violet.command;
 
-import org.soraworld.violet.api.command.ICommandSender;
+import org.soraworld.rikka.command.CommandSource;
 import org.soraworld.violet.config.VioletManager;
 import org.soraworld.violet.constant.Violets;
 
@@ -11,7 +11,7 @@ public class CommandViolet extends IICommand {
     public CommandViolet(String perm, boolean onlyPlayer, VioletManager manager, String... aliases) {
         super(perm, onlyPlayer, manager, aliases);
         addSub(new IICommand(manager.adminPerm, false, manager, "lang") {
-            public boolean execute(ICommandSender sender, ArrayList<String> args) {
+            public boolean execute(CommandSource sender, ArrayList<String> args) {
                 if (args.isEmpty()) {
                     manager.vSendKey(sender, Violets.KEY_GET_LANG, manager.lang);
                 } else {
@@ -23,7 +23,7 @@ public class CommandViolet extends IICommand {
             }
         });
         addSub(new IICommand(manager.adminPerm, false, manager, "save") {
-            public boolean execute(ICommandSender sender, ArrayList<String> args) {
+            public boolean execute(CommandSource sender, ArrayList<String> args) {
                 if (manager.save()) {
                     manager.vSendKey(sender, Violets.KEY_CFG_SAVE);
                 } else {
@@ -33,7 +33,7 @@ public class CommandViolet extends IICommand {
             }
         });
         addSub(new IICommand(manager.adminPerm, false, manager, "debug") {
-            public boolean execute(ICommandSender sender, ArrayList<String> args) {
+            public boolean execute(CommandSource sender, ArrayList<String> args) {
                 if (manager.debug) {
                     manager.debug = false;
                     manager.vSendKey(sender, Violets.KEY_DEBUG_OFF);
@@ -45,7 +45,7 @@ public class CommandViolet extends IICommand {
             }
         });
         addSub(new IICommand(manager.adminPerm, false, manager, "reload") {
-            public boolean execute(ICommandSender sender, ArrayList<String> args) {
+            public boolean execute(CommandSource sender, ArrayList<String> args) {
                 if (manager.load()) {
                     manager.vSendKey(sender, Violets.KEY_CFG_LOAD);
                 } else {

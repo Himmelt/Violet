@@ -2,14 +2,11 @@ package org.soraworld.violet.api;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.soraworld.violet.api.command.ICommandSender;
-import org.soraworld.violet.command.BukkitSender;
+import org.soraworld.rikka.command.CommandSource;
 import org.soraworld.violet.command.InvalidSender;
-import org.soraworld.violet.command.SpongeSender;
-import org.soraworld.violet.entity.BukkitPlayer;
-import org.soraworld.violet.entity.SpongePlayer;
+import org.soraworld.violet.rikka.bukkit.entity.BukkitPlayer;
+import org.soraworld.violet.rikka.sponge.entity.SpongePlayer;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 
 import java.util.HashMap;
@@ -18,8 +15,8 @@ public final class VioletAPI {
 
     private static ServerType serverType;
 
-    private static ICommandSender invalid = new InvalidSender();
-    private static final HashMap<Object, ICommandSender> senders = new HashMap<>();
+    private static CommandSource invalid = new InvalidSender();
+    private static final HashMap<Object, CommandSource> senders = new HashMap<>();
 
     static {
         if (Bukkit.getServer() != null) {
@@ -37,20 +34,21 @@ public final class VioletAPI {
         }
     }
 
-    public static ICommandSender getSender(Object source) {
+    public static CommandSource getSender(Object source) {
         if (source == null) return invalid;
-        ICommandSender sender = senders.get(source);
+        CommandSource sender = senders.get(source);
         if (sender != null) return sender;
         if (serverType == ServerType.SPONGE) {
-            if (source instanceof Player) sender = new SpongePlayer<>((Player) source);
-            else if (source instanceof CommandSource) sender = new SpongeSender<>((CommandSource) source);
+            if (source instanceof Player)
+                sender = new SpongePlayer<>((org.spongepowered.api.entity.living.player.Player) source);
+            else if (source instanceof CommandSource) sender = new InvalidSender();
             senders.put(source, sender);
             return sender;
         }
         if (serverType == ServerType.BUKKIT) {
             if (source instanceof org.bukkit.entity.Player)
                 sender = new BukkitPlayer<>((org.bukkit.entity.Player) source);
-            else if (source instanceof CommandSender) sender = new BukkitSender<>((CommandSender) source);
+            else if (source instanceof CommandSender) sender = new InvalidSender();
             senders.put(source, sender);
             return sender;
         }
