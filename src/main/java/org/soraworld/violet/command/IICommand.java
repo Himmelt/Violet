@@ -1,7 +1,7 @@
 package org.soraworld.violet.command;
 
-import org.soraworld.rikka.command.CommandSource;
-import org.soraworld.rikka.entity.living.player.Player;
+import org.soraworld.rikka.command.ICommandSender;
+import org.soraworld.rikka.entity.living.player.IPlayer;
 import org.soraworld.violet.config.VioletManager;
 import org.soraworld.violet.constant.Violets;
 
@@ -23,13 +23,13 @@ public abstract class IICommand {
         this.aliases.addAll(Arrays.asList(aliases));
     }
 
-    public boolean execute(CommandSource sender, ArrayList<String> args) {
+    public boolean execute(ICommandSender sender, ArrayList<String> args) {
         if (args.isEmpty()) return false;
         IICommand sub = subs.get(args.remove(0));
         if (sub == null) return false;
         if (sub.canRun(sender)) {
-            if (sender instanceof Player) {
-                sub.execute((Player) sender, args);
+            if (sender instanceof IPlayer) {
+                sub.execute((IPlayer) sender, args);
             } else if (onlyPlayer) {
                 manager.vSendKey(sender, Violets.KEY_ONLY_PLAYER);
             } else {
@@ -39,8 +39,8 @@ public abstract class IICommand {
         return true;
     }
 
-    public boolean execute(Player player, ArrayList<String> args) {
-        return execute((CommandSource) player, args);
+    public boolean execute(IPlayer player, ArrayList<String> args) {
+        return execute((ICommandSender) player, args);
     }
 
     protected void addSub(IICommand sub) {
@@ -49,7 +49,7 @@ public abstract class IICommand {
         }
     }
 
-    private boolean canRun(CommandSource sender) {
+    private boolean canRun(ICommandSender sender) {
         return perm == null || sender.hasPermission(perm);
     }
 

@@ -4,8 +4,8 @@ import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import org.soraworld.rikka.command.CommandSource;
-import org.soraworld.rikka.entity.living.player.Player;
+import org.soraworld.rikka.command.ICommandSender;
+import org.soraworld.rikka.entity.living.player.IPlayer;
 
 import java.nio.file.Path;
 
@@ -36,11 +36,11 @@ public class VioletManager {
         return true;
     }
 
-    public void sendKey(CommandSource sender, String key, Object... args) {
+    public void sendKey(ICommandSender sender, String key, Object... args) {
         sender.sendMessage("text");
     }
 
-    public void sendMessage(Player player, String msg) {
+    public void sendMessage(IPlayer player, String msg) {
 
     }
 
@@ -59,7 +59,7 @@ public class VioletManager {
         System.out.println("plainHead " + msg);
     }
 
-    public void vSendKey(CommandSource sender, String key, Object... args) {
+    public void vSendKey(ICommandSender sender, String key, Object... args) {
 
     }
 

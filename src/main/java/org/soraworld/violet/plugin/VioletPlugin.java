@@ -1,6 +1,6 @@
 package org.soraworld.violet.plugin;
 
-import org.soraworld.rikka.command.CommandSource;
+import org.soraworld.rikka.command.ICommandSender;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.command.IICommand;
 import org.soraworld.violet.config.Settings;
@@ -24,7 +24,7 @@ public abstract class VioletPlugin implements IPlugin {
         System.out.println("plugin onDisable!!");
     }
 
-    public boolean execute(CommandSource sender, ArrayList<String> args) {
+    public boolean execute(ICommandSender sender, ArrayList<String> args) {
         System.out.println("execute");
         return command != null && command.execute(sender, args);
     }

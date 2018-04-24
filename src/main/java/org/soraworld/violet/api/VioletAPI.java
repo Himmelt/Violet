@@ -2,12 +2,14 @@ package org.soraworld.violet.api;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.soraworld.rikka.command.CommandSource;
+import org.soraworld.rikka.command.ICommandSender;
 import org.soraworld.violet.command.InvalidSender;
-import org.soraworld.violet.rikka.bukkit.entity.BukkitPlayer;
-import org.soraworld.violet.rikka.sponge.entity.SpongePlayer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
+import rikka.bukkit.BukkitRikka;
+import rikka.bukkit.entity.BukkitPlayer;
+import rikka.sponge.SpongeRikka;
+import rikka.sponge.entity.SpongePlayer;
 
 import java.util.HashMap;
 
@@ -15,8 +17,8 @@ public final class VioletAPI {
 
     private static ServerType serverType;
 
-    private static CommandSource invalid = new InvalidSender();
-    private static final HashMap<Object, CommandSource> senders = new HashMap<>();
+    public static final ICommandSender invalid = new InvalidSender();
+    private static final HashMap<Object, ICommandSender> senders = new HashMap<>();
 
     static {
         if (Bukkit.getServer() != null) {
@@ -34,14 +36,24 @@ public final class VioletAPI {
         }
     }
 
-    public static CommandSource getSender(Object source) {
+    public static ICommandSender getCommandSource(org.bukkit.command.CommandSender sender) {
+        if (serverType == ServerType.BUKKIT) return BukkitRikka.getCommandSource(sender);
+        return invalid;
+    }
+
+    public static ICommandSender getCommandSource(org.spongepowered.api.command.CommandSource sender) {
+        if (serverType == ServerType.SPONGE) return SpongeRikka.getCommandSource(sender);
+        return invalid;
+    }
+
+    public static ICommandSender getSender(Object source) {
         if (source == null) return invalid;
-        CommandSource sender = senders.get(source);
+        ICommandSender sender = senders.get(source);
         if (sender != null) return sender;
         if (serverType == ServerType.SPONGE) {
             if (source instanceof Player)
                 sender = new SpongePlayer<>((org.spongepowered.api.entity.living.player.Player) source);
-            else if (source instanceof CommandSource) sender = new InvalidSender();
+            else if (source instanceof ICommandSender) sender = new InvalidSender();
             senders.put(source, sender);
             return sender;
         }

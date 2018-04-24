@@ -1,10 +1,10 @@
 package org.soraworld.violet.command;
 
-import org.soraworld.rikka.command.CommandSource;
+import org.soraworld.rikka.command.ICommandSender;
 import org.soraworld.rikka.text.Text;
 import org.soraworld.rikka.text.channel.MessageChannel;
 
-public final class InvalidSender implements CommandSource {
+public final class InvalidSender implements ICommandSender {
 
     public String getName() {
         return "invalid";
