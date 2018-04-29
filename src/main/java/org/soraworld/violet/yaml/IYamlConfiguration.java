@@ -8,6 +8,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.file.YamlConstructor;
 import org.bukkit.configuration.file.YamlRepresenter;
 import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.*;
@@ -16,7 +17,7 @@ public class IYamlConfiguration extends YamlConfiguration {
 
     private final DumperOptions dumperOptions = new DumperOptions();
     private final Representer yamlRepresent = new YamlRepresenter();
-    private final IYaml yaml = new IYaml(new YamlConstructor(), yamlRepresent, dumperOptions);
+    private final Yaml yaml = new Yaml(new YamlConstructor(), yamlRepresent, dumperOptions);
 
     @Override
     public String saveToString() {
