@@ -1,8 +1,8 @@
 package org.soraworld.violet.command;
 
-import org.soraworld.rikka.command.ICommandSender;
 import org.soraworld.violet.config.VioletManager;
 import org.soraworld.violet.constant.Violets;
+import rikka.api.command.ICommandSender;
 
 import java.util.ArrayList;
 

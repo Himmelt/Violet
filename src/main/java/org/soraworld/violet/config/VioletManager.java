@@ -4,8 +4,9 @@ import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import org.soraworld.rikka.command.ICommandSender;
-import org.soraworld.rikka.entity.living.player.IPlayer;
+import org.spongepowered.api.text.Text;
+import rikka.api.command.ICommandSender;
+import rikka.api.entity.living.IPlayer;
 
 import java.nio.file.Path;
 
@@ -37,7 +38,7 @@ public class VioletManager {
     }
 
     public void sendKey(ICommandSender sender, String key, Object... args) {
-        sender.sendMessage("text");
+        sender.sendMessage(Text.of("text"));
     }
 
     public void sendMessage(IPlayer player, String msg) {

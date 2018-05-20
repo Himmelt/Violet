@@ -35,6 +35,7 @@ dependencies {
     compile 'com.typesafe:config:1.3.1'
     shade 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
     shade 'org.spongepowered:spongeapi:7.1.0-SNAPSHOT'
+    shade files('lib/Rikka-0.0.1.jar')
     shaded files('lib/HoconConfigurate-1.0.0.jar')
 }
 
