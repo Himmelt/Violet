@@ -1,10 +1,10 @@
 package org.soraworld.violet.plugin;
 
 import org.soraworld.violet.api.IPlugin;
-import org.soraworld.violet.command.IICommand;
 import org.soraworld.violet.config.Settings;
 import org.soraworld.violet.config.VioletManager;
 import rikka.api.command.ICommandSender;
+import rikka.api.command.IICommand;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
