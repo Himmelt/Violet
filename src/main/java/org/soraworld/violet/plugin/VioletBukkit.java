@@ -6,11 +6,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.listener.EventListener;
+import rikka.RikkaAPI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import static rikka.RikkaAPI.getCommandSender;
 
 public class VioletBukkit extends JavaPlugin {
 
@@ -27,7 +26,7 @@ public class VioletBukkit extends JavaPlugin {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        return plugin.execute(getCommandSender(sender), new ArrayList<>(Arrays.asList(args)));
+        return plugin.execute(RikkaAPI.getCommandSender(sender), new ArrayList<>(Arrays.asList(args)));
     }
 
 }

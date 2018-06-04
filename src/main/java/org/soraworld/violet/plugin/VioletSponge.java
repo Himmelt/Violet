@@ -15,6 +15,7 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import rikka.RikkaAPI;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,8 +25,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
-import static rikka.RikkaAPI.getCommandSender;
 
 @Plugin(
         id = Violets.PLUGIN_ID,
@@ -55,7 +54,7 @@ public class VioletSponge implements CommandCallable {
 
     @Nonnull
     public CommandResult process(@Nonnull CommandSource source, @Nonnull String arguments) {
-        boolean result = plugin.execute(getCommandSender(source), new ArrayList<>(Arrays.asList(arguments.split(" "))));
+        boolean result = plugin.execute(RikkaAPI.getCommandSender(source), new ArrayList<>(Arrays.asList(arguments.split(" "))));
         return result ? CommandResult.success() : CommandResult.empty();
     }
 
