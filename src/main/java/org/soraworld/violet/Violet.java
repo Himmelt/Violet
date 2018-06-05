@@ -1,6 +1,6 @@
 package org.soraworld.violet;
 
-import org.soraworld.violet.command.CommandViolet;
+import org.soraworld.violet.command.VioletCommand;
 import org.soraworld.violet.config.Settings;
 import org.soraworld.violet.config.VioletSettings;
 import org.soraworld.violet.constant.Violets;
@@ -14,7 +14,7 @@ public class Violet extends VioletPlugin {
     }
 
     protected IICommand regCommand() {
-        return new CommandViolet(Violets.PERM_ADMIN, false, manager, Violets.PLUGIN_ID);
+        return new VioletCommand(Violets.PERM_ADMIN, false, manager, Violets.PLUGIN_ID);
     }
 
     protected void afterEnable() {
