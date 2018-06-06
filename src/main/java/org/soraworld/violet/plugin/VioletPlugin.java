@@ -2,11 +2,11 @@ package org.soraworld.violet.plugin;
 
 import org.soraworld.violet.config.Settings;
 import org.soraworld.violet.config.VioletManager;
+import rikka.api.command.CommandArgs;
 import rikka.api.command.ICommandSender;
 import rikka.api.command.IICommand;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 
 public abstract class VioletPlugin {
 
@@ -23,9 +23,8 @@ public abstract class VioletPlugin {
         System.out.println("plugin onDisable!!");
     }
 
-    public boolean execute(ICommandSender sender, ArrayList<String> args) {
-        System.out.println("execute");
-        return command != null && command.execute(sender, args);
+    public boolean execute(ICommandSender sender, String[] args) {
+        return command != null && command.execute(sender, new CommandArgs(args));
     }
 
     protected abstract Settings regSettings();
