@@ -5,6 +5,8 @@ import org.soraworld.violet.config.Settings;
 import org.soraworld.violet.config.VioletSettings;
 import org.soraworld.violet.constant.Violets;
 import org.soraworld.violet.plugin.VioletPlugin;
+import rikka.api.command.CommandArgs;
+import rikka.api.command.ICommandSender;
 import rikka.api.command.IICommand;
 
 public class Violet extends VioletPlugin {
@@ -19,6 +21,10 @@ public class Violet extends VioletPlugin {
 
     protected void afterEnable() {
 
+    }
+
+    public boolean execute(ICommandSender sender, CommandArgs args) {
+        return false;
     }
 
 }
