@@ -4,13 +4,14 @@ import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import org.soraworld.violet.api.OperationManager;
 import org.spongepowered.api.text.Text;
 import rikka.api.command.ICommandSender;
 import rikka.api.entity.living.IPlayer;
 
 import java.nio.file.Path;
 
-public class VioletManager {
+public class VioletManager implements OperationManager {
 
     private final Path path;
     private final Path confile;

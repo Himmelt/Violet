@@ -1,6 +1,9 @@
-package org.soraworld.violet.plugin;
+package org.soraworld.violet;
 
-import org.soraworld.violet.Violet;
+import org.soraworld.violet.command.VioletCommand;
+import org.soraworld.violet.config.Settings;
+import org.soraworld.violet.config.VioletManager;
+import org.soraworld.violet.config.VioletSettings;
 import org.soraworld.violet.constant.Violets;
 import org.soraworld.violet.listener.EventListener;
 import org.spongepowered.api.Sponge;
@@ -16,13 +19,14 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import rikka.RikkaAPI;
+import rikka.api.command.CommandArgs;
+import rikka.api.command.IICommand;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,24 +42,41 @@ public class VioletSponge implements CommandCallable {
 
     @ConfigDir(sharedRoot = false)
     private Path path = new File(Violets.PLUGIN_NAME).toPath();
-    private VioletPlugin plugin = new Violet();
+
+    protected VioletManager manager;
+    protected VioletCommand command;
 
     @Listener
     public void onEnable(GameInitializationEvent event) {
-        plugin.loadConfig(path);
+        loadConfig(path);
         Sponge.getCommandManager().register(this, this, Violets.PLUGIN_ID);
         Sponge.getEventManager().registerListeners(this, new EventListener());
     }
 
     @Listener
     public void onDisable(GameStoppingServerEvent event) {
-        plugin.onDisable();
     }
 
     @Nonnull
     public CommandResult process(@Nonnull CommandSource source, @Nonnull String arguments) {
-        boolean result = plugin.execute(RikkaAPI.getCommandSender(source), new ArrayList<>(Arrays.asList(arguments.split(" "))));
-        return result ? CommandResult.success() : CommandResult.empty();
+        rikka.api.command.CommandResult result = command.execute(RikkaAPI.getCommandSender(source), new CommandArgs(arguments.split(" ")));
+        return result == rikka.api.command.CommandResult.SUCCESS ? CommandResult.success() : CommandResult.empty();
+    }
+
+    public void loadConfig(Path path) {
+        manager = new VioletManager(path, regSettings());
+        manager.load();
+    }
+
+    protected Settings regSettings() {
+        return new VioletSettings();
+    }
+
+    protected void afterEnable() {
+    }
+
+    protected IICommand regCommand() {
+        return new VioletCommand(Violets.PERM_ADMIN, false, manager, Violets.PLUGIN_ID);
     }
 
     @Nonnull
