@@ -26,7 +26,7 @@ public class EventListener implements BukkitListener {
     }
 
     private void on(IPlayer player) {
-        player.sendMessage(Text.of("Hello " + player.getName()));
+        if (player != null) player.sendMessage(Text.of("Hello " + player.getName()));
     }
 
 }

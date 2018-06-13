@@ -4,7 +4,7 @@ public final class Violets {
 
     public static final String PLUGIN_ID = "violet";
     public static final String PLUGIN_NAME = "Violet";
-    public static final String PLUGIN_VERSION = "1.2.1";
+    public static final String PLUGIN_VERSION = "2.0.0";
 
     public static final String KEY_CHAT_HEAD = "chatHead";
     public static final String KEY_GET_VERSION = "getVersion";
@@ -24,6 +24,6 @@ public final class Violets {
     public static final String KEY_INVALID_FLOAT = "invalidFloat";
     public static final String KEY_ONLY_PLAYER_OR_INVALID_ARG = "onlyPlayerOrInvalidArg";
 
-    public static final String PERM_ADMIN = "$PLUGIN_ID.admin";
+    public static final String PERM_ADMIN = PLUGIN_ID + ".admin";
 
 }

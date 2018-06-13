@@ -5,7 +5,7 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.soraworld.violet.constant.Violets;
 
 @ConfigSerializable
-public abstract class Settings {
+public class VioletSetting {
 
     @Setting(comment = "Language id")
     String lang = "zh_cn";

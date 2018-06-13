@@ -20,14 +20,14 @@ public class VioletManager implements OperationManager {
     public boolean debug;
     public String lang;
     public String adminPerm;
-    private Settings settings;
+    private VioletSetting setting;
     private CommentedConfigurationNode rootNode = null;
 
-    public VioletManager(Path path, Settings settings) {
+    public VioletManager(Path path, VioletSetting setting) {
         this.path = path;
         this.confile = path.resolve("config.conf");
         this.loader = HoconConfigurationLoader.builder().setPath(confile).build();
-        this.settings = settings;
+        this.setting = setting;
     }
 
     public boolean load() {
@@ -38,8 +38,16 @@ public class VioletManager implements OperationManager {
         return true;
     }
 
+    public void sendMsg(ICommandSender sender, String msg) {
+
+    }
+
     public void sendKey(ICommandSender sender, String key, Object... args) {
         sender.sendMessage(Text.of("text"));
+    }
+
+    public void sendVKey(ICommandSender sender, String key, Object... args) {
+
     }
 
     public void sendMessage(IPlayer player, String msg) {

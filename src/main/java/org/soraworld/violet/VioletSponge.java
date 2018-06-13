@@ -1,9 +1,8 @@
 package org.soraworld.violet;
 
 import org.soraworld.violet.command.VioletCommand;
-import org.soraworld.violet.config.Settings;
 import org.soraworld.violet.config.VioletManager;
-import org.soraworld.violet.config.VioletSettings;
+import org.soraworld.violet.config.VioletSetting;
 import org.soraworld.violet.constant.Violets;
 import org.soraworld.violet.listener.EventListener;
 import org.spongepowered.api.Sponge;
@@ -20,6 +19,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import rikka.RikkaAPI;
 import rikka.api.command.CommandArgs;
+import rikka.api.command.ExecuteResult;
 import rikka.api.command.IICommand;
 
 import javax.annotation.Nonnull;
@@ -59,17 +59,17 @@ public class VioletSponge implements CommandCallable {
 
     @Nonnull
     public CommandResult process(@Nonnull CommandSource source, @Nonnull String arguments) {
-        rikka.api.command.CommandResult result = command.execute(RikkaAPI.getCommandSender(source), new CommandArgs(arguments.split(" ")));
-        return result == rikka.api.command.CommandResult.SUCCESS ? CommandResult.success() : CommandResult.empty();
+        ExecuteResult result = command.execute(RikkaAPI.getCommandSender(source), new CommandArgs(arguments.split(" ")));
+        return result == ExecuteResult.SUCCESS ? CommandResult.success() : CommandResult.empty();
     }
 
     public void loadConfig(Path path) {
-        manager = new VioletManager(path, regSettings());
+        manager = new VioletManager(path, regSetting());
         manager.load();
     }
 
-    protected Settings regSettings() {
-        return new VioletSettings();
+    protected VioletSetting regSetting() {
+        return new VioletSetting();
     }
 
     protected void afterEnable() {
