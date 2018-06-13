@@ -12,7 +12,6 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
@@ -20,7 +19,6 @@ import org.spongepowered.api.world.World;
 import rikka.RikkaAPI;
 import rikka.api.command.CommandArgs;
 import rikka.api.command.ExecuteResult;
-import rikka.api.command.IICommand;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -48,13 +46,9 @@ public class VioletSponge implements CommandCallable {
 
     @Listener
     public void onEnable(GameInitializationEvent event) {
-        loadConfig(path);
+        initPlugin(path);
         Sponge.getCommandManager().register(this, this, Violets.PLUGIN_ID);
         Sponge.getEventManager().registerListeners(this, new EventListener());
-    }
-
-    @Listener
-    public void onDisable(GameStoppingServerEvent event) {
     }
 
     @Nonnull
@@ -63,20 +57,10 @@ public class VioletSponge implements CommandCallable {
         return result == ExecuteResult.SUCCESS ? CommandResult.success() : CommandResult.empty();
     }
 
-    public void loadConfig(Path path) {
-        manager = new VioletManager(path, regSetting());
+    protected void initPlugin(Path path) {
+        manager = new VioletManager(path, new VioletSetting());
         manager.load();
-    }
-
-    protected VioletSetting regSetting() {
-        return new VioletSetting();
-    }
-
-    protected void afterEnable() {
-    }
-
-    protected IICommand regCommand() {
-        return new VioletCommand(Violets.PERM_ADMIN, false, manager, Violets.PLUGIN_ID);
+        command = new VioletCommand(Violets.PERM_ADMIN, false, manager, Violets.PLUGIN_ID);
     }
 
     @Nonnull

@@ -5,7 +5,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.soraworld.violet.command.VioletCommand;
-import org.soraworld.violet.config.Settings;
 import org.soraworld.violet.config.VioletManager;
 import org.soraworld.violet.config.VioletSetting;
 import org.soraworld.violet.constant.Violets;
@@ -13,7 +12,6 @@ import org.soraworld.violet.listener.EventListener;
 import rikka.RikkaAPI;
 import rikka.api.command.CommandArgs;
 import rikka.api.command.ExecuteResult;
-import rikka.api.command.IICommand;
 
 import java.nio.file.Path;
 
@@ -23,11 +21,8 @@ public class VioletBukkit extends JavaPlugin {
     protected VioletCommand command;
 
     public void onEnable() {
-        loadConfig(getDataFolder().toPath());
+        initPlugin(getDataFolder().toPath());
         Bukkit.getPluginManager().registerEvents(new EventListener(), this);
-    }
-
-    public void onDisable() {
     }
 
     @Override
@@ -36,20 +31,10 @@ public class VioletBukkit extends JavaPlugin {
     }
 
 
-    public void loadConfig(Path path) {
-        manager = new VioletManager(path, regSettings());
+    protected void initPlugin(Path path) {
+        manager = new VioletManager(path, new VioletSetting());
         manager.load();
-    }
-
-    protected Settings regSettings() {
-        return new VioletSetting();
-    }
-
-    protected void afterEnable() {
-    }
-
-    protected IICommand regCommand() {
-        return new VioletCommand(Violets.PERM_ADMIN, false, manager, Violets.PLUGIN_ID);
+        command = new VioletCommand(Violets.PERM_ADMIN, false, manager, Violets.PLUGIN_ID);
     }
 
 }
