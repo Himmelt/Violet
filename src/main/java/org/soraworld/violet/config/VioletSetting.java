@@ -12,5 +12,4 @@ public class VioletSetting {
     public boolean debug = false;
     @Setting(comment = "Version")
     public String version = Violets.PLUGIN_VERSION;
-    public String adminPerm = "";
 }

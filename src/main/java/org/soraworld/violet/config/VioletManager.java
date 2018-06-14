@@ -6,6 +6,7 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.soraworld.violet.api.OperationManager;
+import org.soraworld.violet.constant.Violets;
 import org.spongepowered.api.text.Text;
 import rikka.api.command.ICommandSender;
 import rikka.api.entity.living.IPlayer;
@@ -25,7 +26,7 @@ public class VioletManager implements OperationManager {
 
     public VioletManager(Path path, VioletSetting setting) {
         this.path = path;
-        this.confile = path.resolve("config.conf");
+        this.confile = path.resolve("setting.conf");
         this.loader = HoconConfigurationLoader.builder().setPath(confile).build();
         this.setting = setting;
     }
@@ -92,6 +93,10 @@ public class VioletManager implements OperationManager {
 
     public VioletSetting getSetting() {
         return setting;
+    }
+
+    public String adminPerm() {
+        return Violets.PERM_ADMIN;
     }
 
 }
