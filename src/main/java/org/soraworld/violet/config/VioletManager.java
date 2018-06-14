@@ -1,5 +1,6 @@
 package org.soraworld.violet.config;
 
+import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.ConfigurationOptions;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -15,13 +16,12 @@ public class VioletManager implements OperationManager {
 
     private final Path path;
     private final Path confile;
-    private final ConfigurationLoader loader;
+    private final ConfigurationLoader<CommentedConfigurationNode> loader;
     private final ConfigurationOptions options = ConfigurationOptions.defaults().setShouldCopyDefaults(true);
-    public boolean debug;
-    public String lang;
-    public String adminPerm;
-    private VioletSetting setting;
-    private CommentedConfigurationNode rootNode = null;
+    protected VioletSetting setting;
+    protected CommentedConfigurationNode rootNode;
+
+    private TypeToken<VioletSetting> TOKEN = TypeToken.of(VioletSetting.class);
 
     public VioletManager(Path path, VioletSetting setting) {
         this.path = path;
@@ -31,11 +31,25 @@ public class VioletManager implements OperationManager {
     }
 
     public boolean load() {
-        return true;
+        try {
+            rootNode = loader.load(options);
+            setting = rootNode.getValue(TOKEN, setting);
+            return true;
+        } catch (Throwable e) {
+            if (setting.debug) e.printStackTrace();
+            return false;
+        }
     }
 
     public boolean save() {
-        return true;
+        try {
+            rootNode.setValue(TOKEN, setting);
+            loader.save(rootNode);
+            return true;
+        } catch (Throwable e) {
+            if (setting.debug) e.printStackTrace();
+            return false;
+        }
     }
 
     public void sendMsg(ICommandSender sender, String msg) {
@@ -74,6 +88,10 @@ public class VioletManager implements OperationManager {
     }
 
     public void vBroadcastKey(String key, Object... args) {
+    }
+
+    public VioletSetting getSetting() {
+        return setting;
     }
 
 }

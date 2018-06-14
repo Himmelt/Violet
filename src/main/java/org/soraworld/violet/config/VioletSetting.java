@@ -6,13 +6,11 @@ import org.soraworld.violet.constant.Violets;
 
 @ConfigSerializable
 public class VioletSetting {
-
     @Setting(comment = "Language id")
-    String lang = "zh_cn";
+    public String lang = "zh_cn";
     @Setting(comment = "Debug Mode")
-    boolean debug = false;
+    public boolean debug = false;
     @Setting(comment = "Version")
-    String version = Violets.PLUGIN_VERSION;
-    String adminPerm = "";
-
+    public String version = Violets.PLUGIN_VERSION;
+    public String adminPerm = "";
 }
