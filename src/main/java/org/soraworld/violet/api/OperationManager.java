@@ -8,6 +8,14 @@ public interface OperationManager {
 
     void sendKey(ICommandSender sender, String key, Object... args);
 
-    void sendVKey(ICommandSender sender, String key, Object... args);
+    void console(String msg);
+
+    void consoleKey(String key, Object... args);
+
+    void broadcast(String msg);
+
+    void broadcastKey(String key, Object... args);
+
+    void println(String msg);
 
 }

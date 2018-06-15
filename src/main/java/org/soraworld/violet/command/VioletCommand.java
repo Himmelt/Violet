@@ -20,27 +20,27 @@ public class VioletCommand extends IICommand {
                 if (args.notEmpty()) {
                     setting.lang = args.first();
                     manager.save();
-                    manager.sendVKey(sender, KEY_SET_LANG, setting.lang);
-                } else manager.sendVKey(sender, KEY_GET_LANG, setting.lang);
+                    manager.sendKey(sender, KEY_SET_LANG);
+                } else manager.sendKey(sender, KEY_GET_LANG);
                 return SUCCESS;
             }
         });
         addSub(new IICommand(manager.adminPerm(), false, "save") {
             public ExecuteResult execute(ICommandSender sender, CommandArgs args) {
-                manager.sendVKey(sender, manager.save() ? KEY_CFG_SAVE : KEY_CFG_SAVE_FAIL);
+                manager.sendKey(sender, manager.save() ? KEY_CFG_SAVE : KEY_CFG_SAVE_FAIL);
                 return SUCCESS;
             }
         });
         addSub(new IICommand(manager.adminPerm(), false, "debug") {
             public ExecuteResult execute(ICommandSender sender, CommandArgs args) {
                 setting.debug = !setting.debug;
-                manager.sendVKey(sender, setting.debug ? KEY_DEBUG_ON : KEY_DEBUG_OFF);
+                manager.sendKey(sender, setting.debug ? KEY_DEBUG_ON : KEY_DEBUG_OFF);
                 return SUCCESS;
             }
         });
         addSub(new IICommand(manager.adminPerm(), false, "reload") {
             public ExecuteResult execute(ICommandSender sender, CommandArgs args) {
-                manager.sendVKey(sender, manager.load() ? KEY_CFG_LOAD : KEY_CFG_LOAD_FAIL);
+                manager.sendKey(sender, manager.load() ? KEY_CFG_LOAD : KEY_CFG_LOAD_FAIL);
                 return SUCCESS;
             }
         });
