@@ -8,8 +8,12 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.commented.SimpleCommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import org.bukkit.Bukkit;
 import org.soraworld.violet.api.OperationManager;
 import org.soraworld.violet.constant.Violets;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.text.Text;
+import rikka.RikkaAPI;
 import rikka.api.command.ICommandSender;
 
 import java.nio.file.Files;
@@ -46,6 +50,7 @@ public class VioletManager implements OperationManager {
         try {
             rootNode = loader.load(options);
             setting = rootNode.getValue(TOKEN, setting);
+            setLang(setting.lang);
             return true;
         } catch (Throwable e) {
             console("&cConfig file load exception !!!");
@@ -72,7 +77,7 @@ public class VioletManager implements OperationManager {
         ConfigurationLoader loader = HoconConfigurationLoader.builder().setPath(file).build();
         boolean extract = false;
         try {
-            if (Files.notExists(file)) Files.copy(this.getClass().getResourceAsStream(""), file);
+            if (Files.notExists(file)) Files.copy(this.getClass().getResourceAsStream("/lang/" + lang + ".lang"), file);
             extract = true;
             langNode = loader.load();
         } catch (Throwable e) {
@@ -88,30 +93,49 @@ public class VioletManager implements OperationManager {
         return langNode.getNode(key).getString();
     }
 
+    public String trans(String key, Object... args) {
+        String text = langNode.getNode(key).getString();
+        return text == null || text.isEmpty() ? key : String.format(text, args);
+    }
+
+    public static String colorize(String text) {
+        return text == null ? null : text.replace('&', Violets.COLOR_CHAR);
+    }
+
     public void sendMsg(ICommandSender sender, String msg) {
         sender.sendMsg(msg);
     }
 
     public void sendKey(ICommandSender sender, String key, Object... args) {
-        sender.sendMsg(key);
+        sender.sendMsg(colorize(trans(key, args)));
     }
 
     public void broadcast(String msg) {
-
+        if (RikkaAPI.BUKKIT) {
+            Bukkit.broadcastMessage(msg);
+        } else if (RikkaAPI.SPONGE) {
+            Sponge.getServer().getBroadcastChannel().send(Text.of(msg));
+        }
     }
 
     public void broadcastKey(String key, Object... args) {
-
+        broadcast(trans(key, args));
     }
 
     public void console(String msg) {
+        if (RikkaAPI.BUKKIT) {
+            Bukkit.getConsoleSender().sendMessage(msg);
+        } else if (RikkaAPI.SPONGE) {
+            Sponge.getServer().getConsole().sendMessage(Text.of(msg));
+        }
     }
 
     public void consoleKey(String key, Object... args) {
-        System.out.println(String.format(key, args));
+        console(trans(key, args));
     }
 
     public void println(String msg) {
+        // TODO plainHead
         System.out.println("plainHead " + msg);
     }
 

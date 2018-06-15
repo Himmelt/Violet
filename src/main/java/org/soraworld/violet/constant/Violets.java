@@ -26,4 +26,6 @@ public final class Violets {
 
     public static final String PERM_ADMIN = PLUGIN_ID + ".admin";
 
+    public static final char COLOR_CHAR = '\u00A7';
+
 }

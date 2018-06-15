@@ -18,10 +18,10 @@ public class VioletCommand extends IICommand {
         addSub(new IICommand(manager.adminPerm(), false, "lang") {
             public ExecuteResult execute(ICommandSender sender, CommandArgs args) {
                 if (args.notEmpty()) {
-                    setting.lang = args.first();
+                    manager.setLang(args.first());
                     manager.save();
-                    manager.sendKey(sender, KEY_SET_LANG);
-                } else manager.sendKey(sender, KEY_GET_LANG);
+                    manager.sendKey(sender, KEY_SET_LANG, setting.lang);
+                } else manager.sendKey(sender, KEY_GET_LANG, setting.lang);
                 return SUCCESS;
             }
         });
