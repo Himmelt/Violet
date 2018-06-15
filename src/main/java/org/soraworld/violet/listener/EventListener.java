@@ -5,7 +5,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.InteractBlockEvent;
-import org.spongepowered.api.text.Text;
 import rikka.api.entity.living.IPlayer;
 
 import static rikka.RikkaAPI.getPlayer;
@@ -26,7 +25,7 @@ public class EventListener implements BukkitListener {
     }
 
     private void on(IPlayer player) {
-        if (player != null) player.sendMessage(Text.of("Hello " + player.getName()));
+        if (player != null) player.sendMsg("Hello " + player.getName());
     }
 
 }

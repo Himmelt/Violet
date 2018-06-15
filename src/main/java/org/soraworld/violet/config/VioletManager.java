@@ -7,9 +7,7 @@ import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
 import org.soraworld.violet.api.OperationManager;
 import org.soraworld.violet.constant.Violets;
-import org.spongepowered.api.text.Text;
 import rikka.api.command.ICommandSender;
-import rikka.api.entity.living.IPlayer;
 
 import java.nio.file.Path;
 
@@ -26,7 +24,7 @@ public class VioletManager implements OperationManager {
 
     public VioletManager(Path path, VioletSetting setting) {
         this.path = path;
-        this.confile = path.resolve("setting.conf");
+        this.confile = path.resolve("config.conf");
         this.loader = HoconConfigurationLoader.builder().setPath(confile).build();
         this.setting = setting;
     }
@@ -54,19 +52,15 @@ public class VioletManager implements OperationManager {
     }
 
     public void sendMsg(ICommandSender sender, String msg) {
-
+        sender.sendMsg(msg);
     }
 
     public void sendKey(ICommandSender sender, String key, Object... args) {
-        sender.sendMessage(Text.of("text"));
+        sender.sendMsg(key);
     }
 
     public void sendVKey(ICommandSender sender, String key, Object... args) {
-
-    }
-
-    public void sendMessage(IPlayer player, String msg) {
-
+        sender.sendMsg(key);
     }
 
     public void broadcastKey(String key, Object... args) {
@@ -77,7 +71,7 @@ public class VioletManager implements OperationManager {
     }
 
     public void consoleKey(String key, Object... args) {
-
+        System.out.println(String.format(key, args));
     }
 
     public void println(String msg) {
