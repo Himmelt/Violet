@@ -23,6 +23,7 @@ import rikka.api.command.ExecuteResult;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,13 +40,20 @@ import java.util.Optional;
 public class VioletSponge implements CommandCallable {
 
     @ConfigDir(sharedRoot = false)
-    private Path path = new File(Violets.PLUGIN_NAME).toPath();
+    private Path path;
 
     protected VioletManager manager;
     protected VioletCommand command;
 
     @Listener
     public void onEnable(GameInitializationEvent event) {
+        if (path == null) path = new File("config").toPath().resolve(Violets.PLUGIN_ID);
+        if (Files.notExists(path)) {
+            try {
+                Files.createDirectories(path);
+            } catch (Throwable ignored) {
+            }
+        }
         initPlugin(path);
         Sponge.getCommandManager().register(this, this, Violets.PLUGIN_ID);
         Sponge.getEventManager().registerListeners(this, new EventListener());

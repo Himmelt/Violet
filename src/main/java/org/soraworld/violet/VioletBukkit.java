@@ -13,6 +13,7 @@ import rikka.RikkaAPI;
 import rikka.api.command.CommandArgs;
 import rikka.api.command.ExecuteResult;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class VioletBukkit extends JavaPlugin {
@@ -21,7 +22,14 @@ public class VioletBukkit extends JavaPlugin {
     protected VioletCommand command;
 
     public void onEnable() {
-        initPlugin(getDataFolder().toPath());
+        Path path = getDataFolder().toPath();
+        if (Files.notExists(path)) {
+            try {
+                Files.createDirectories(path);
+            } catch (Throwable ignored) {
+            }
+        }
+        initPlugin(path);
         Bukkit.getPluginManager().registerEvents(new EventListener(), this);
     }
 

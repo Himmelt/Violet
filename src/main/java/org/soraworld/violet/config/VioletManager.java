@@ -77,7 +77,10 @@ public class VioletManager implements OperationManager {
         ConfigurationLoader loader = HoconConfigurationLoader.builder().setPath(file).build();
         boolean extract = false;
         try {
-            if (Files.notExists(file)) Files.copy(this.getClass().getResourceAsStream("/lang/" + lang + ".lang"), file);
+            if (Files.notExists(file)) {
+                Files.createDirectories(file.getParent());
+                Files.copy(this.getClass().getResourceAsStream("/lang/" + lang + ".lang"), file);
+            }
             extract = true;
             langNode = loader.load();
         } catch (Throwable e) {
@@ -124,9 +127,9 @@ public class VioletManager implements OperationManager {
 
     public void console(String msg) {
         if (RikkaAPI.BUKKIT) {
-            Bukkit.getConsoleSender().sendMessage(msg);
+            Bukkit.getConsoleSender().sendMessage(colorize(msg));
         } else if (RikkaAPI.SPONGE) {
-            Sponge.getServer().getConsole().sendMessage(Text.of(msg));
+            Sponge.getServer().getConsole().sendMessage(Text.of(colorize(msg)));
         }
     }
 
