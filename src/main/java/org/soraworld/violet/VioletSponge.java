@@ -25,7 +25,6 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -73,11 +72,11 @@ public class VioletSponge implements CommandCallable {
 
     @Nonnull
     public List<String> getSuggestions(@Nonnull CommandSource source, @Nonnull String arguments, @Nullable Location<World> world) {
-        return new ArrayList<>();
+        return this.command.tabCompletions(new CommandArgs(arguments));
     }
 
     public boolean testPermission(@Nonnull CommandSource source) {
-        return true;
+        return this.command.canRun(RikkaAPI.getCommandSender(source));
     }
 
     @Nonnull

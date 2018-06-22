@@ -10,6 +10,6 @@ public class VioletSetting {
     public String lang = "zh_cn";
     @Setting(comment = "Debug Mode")
     public boolean debug = false;
-    @Setting(comment = "Version")
+    @Setting(comment = "Plugin Version")
     public String version = Violets.PLUGIN_VERSION;
 }

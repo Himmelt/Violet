@@ -15,6 +15,7 @@ import rikka.api.command.ExecuteResult;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 public class VioletBukkit extends JavaPlugin {
 
@@ -43,6 +44,10 @@ public class VioletBukkit extends JavaPlugin {
         manager = new VioletManager(path, new VioletSetting());
         manager.load();
         command = new VioletCommand(Violets.PERM_ADMIN, false, manager, Violets.PLUGIN_ID);
+    }
+
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        return this.command.tabCompletions(new CommandArgs(args));
     }
 
 }
