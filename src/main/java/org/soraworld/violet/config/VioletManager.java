@@ -8,8 +8,6 @@ import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.commented.SimpleCommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 import org.bukkit.Bukkit;
 import org.soraworld.violet.api.OperationManager;
 import org.soraworld.violet.constant.Violets;
@@ -26,14 +24,13 @@ import java.util.Locale;
 
 import static java.util.Locale.CHINA;
 
-@ConfigSerializable
 public class VioletManager implements OperationManager {
 
-    @Setting(value = "language", comment = "comment_lang")
+    @Setting(comment = "comment_lang")
     public String lang = "zh_cn";
     @Setting(comment = "comment_debug")
     public boolean debug = false;
-    @Setting(comment = "comment_version")
+    @Setting(comment = "comment_version", immortal = true)
     public String version = Violets.PLUGIN_VERSION;
 
 
@@ -47,13 +44,6 @@ public class VioletManager implements OperationManager {
 
     private static final TypeToken<? extends VioletManager> TOKEN = TypeToken.of(VioletManager.class);
 
-    private VioletManager() {
-        path = null;
-        plugin = null;
-        confile = null;
-        loader = null;
-    }
-
     public VioletManager(IPlugin plugin, Path path) {
         this.path = path;
         this.plugin = plugin;
@@ -62,8 +52,6 @@ public class VioletManager implements OperationManager {
     }
 
     public boolean load() {
-        System.out.println(confile);
-        System.out.println(Files.notExists(confile));
         if (Files.notExists(confile)) {
             setLang(CHINA.equals(Locale.getDefault()) ? "zh_cn" : "en_us");
             save();
@@ -73,9 +61,8 @@ public class VioletManager implements OperationManager {
             rootNode = loader.load(options);
             for (Field field : this.getClass().getFields()) {
                 Setting set = field.getAnnotation(Setting.class);
-                if (set != null) {
+                if (set != null && !set.immortal()) {
                     String name = set.value().isEmpty() ? field.getName() : set.value();
-                    // not null value int
                     Object value = rootNode.getNode(name).getValue();
                     if (value != null) field.set(this, value);
                 }
@@ -96,7 +83,11 @@ public class VioletManager implements OperationManager {
                 if (set != null) {
                     String name = set.value().isEmpty() ? field.getName() : set.value();
                     String comment = set.comment().startsWith("comment_") ? trans(set.comment()) : set.comment();
-                    rootNode.getNode(name).setValue(field.get(this)).setComment(comment.isEmpty() ? null : comment);
+                    Object value = field.get(this);
+                    if (value != null) {
+                        rootNode.getNode(name).setValue(value);
+                        if (comment != null && !comment.isEmpty()) rootNode.getNode(name).setComment(comment);
+                    }
                 }
             }
             loader.save(rootNode);

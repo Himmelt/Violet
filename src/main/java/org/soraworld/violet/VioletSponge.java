@@ -42,7 +42,6 @@ public class VioletSponge implements IPlugin, CommandCallable {
     @Listener
     public void onEnable(GameInitializationEvent event) {
         Path path = Sponge.getConfigManager().getPluginConfig(this).getDirectory();
-        System.out.println(path);
         if (Files.notExists(path)) {
             try {
                 Files.createDirectories(path);
