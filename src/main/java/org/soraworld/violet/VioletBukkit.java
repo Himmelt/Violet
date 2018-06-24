@@ -6,10 +6,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.soraworld.violet.command.VioletCommand;
 import org.soraworld.violet.config.VioletManager;
-import org.soraworld.violet.config.VioletSetting;
 import org.soraworld.violet.constant.Violets;
 import org.soraworld.violet.listener.EventListener;
 import rikka.RikkaAPI;
+import rikka.api.IPlugin;
 import rikka.api.command.CommandArgs;
 import rikka.api.command.ExecuteResult;
 
@@ -17,7 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-public class VioletBukkit extends JavaPlugin {
+public class VioletBukkit extends JavaPlugin implements IPlugin {
 
     protected VioletManager manager;
     protected VioletCommand command;
@@ -41,13 +41,17 @@ public class VioletBukkit extends JavaPlugin {
 
 
     protected void initPlugin(Path path) {
-        manager = new VioletManager(path, new VioletSetting());
+        manager = new VioletManager(this, path);
         manager.load();
         command = new VioletCommand(Violets.PERM_ADMIN, false, manager, Violets.PLUGIN_ID);
     }
 
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         return this.command.tabCompletions(new CommandArgs(args));
+    }
+
+    public String getId() {
+        return Violets.PLUGIN_ID;
     }
 
 }

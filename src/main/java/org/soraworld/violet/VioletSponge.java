@@ -2,14 +2,12 @@ package org.soraworld.violet;
 
 import org.soraworld.violet.command.VioletCommand;
 import org.soraworld.violet.config.VioletManager;
-import org.soraworld.violet.config.VioletSetting;
 import org.soraworld.violet.constant.Violets;
 import org.soraworld.violet.listener.EventListener;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
@@ -17,12 +15,12 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import rikka.RikkaAPI;
+import rikka.api.IPlugin;
 import rikka.api.command.CommandArgs;
 import rikka.api.command.ExecuteResult;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -36,17 +34,15 @@ import java.util.Optional;
         url = "https://github.com/Himmelt/Violet",
         description = "Violet Plugin Library."
 )
-public class VioletSponge implements CommandCallable {
-
-    @ConfigDir(sharedRoot = false)
-    private Path path;
+public class VioletSponge implements IPlugin, CommandCallable {
 
     protected VioletManager manager;
     protected VioletCommand command;
 
     @Listener
     public void onEnable(GameInitializationEvent event) {
-        if (path == null) path = new File("config").toPath().resolve(Violets.PLUGIN_ID);
+        Path path = Sponge.getConfigManager().getPluginConfig(this).getDirectory();
+        System.out.println(path);
         if (Files.notExists(path)) {
             try {
                 Files.createDirectories(path);
@@ -54,7 +50,7 @@ public class VioletSponge implements CommandCallable {
             }
         }
         initPlugin(path);
-        Sponge.getCommandManager().register(this, this, Violets.PLUGIN_ID);
+        Sponge.getCommandManager().register(this, this, command.getName());
         Sponge.getEventManager().registerListeners(this, new EventListener());
     }
 
@@ -65,7 +61,7 @@ public class VioletSponge implements CommandCallable {
     }
 
     protected void initPlugin(Path path) {
-        manager = new VioletManager(path, new VioletSetting());
+        manager = new VioletManager(this, path);
         manager.load();
         command = new VioletCommand(Violets.PERM_ADMIN, false, manager, Violets.PLUGIN_ID);
     }
@@ -92,6 +88,10 @@ public class VioletSponge implements CommandCallable {
     @Nonnull
     public Text getUsage(@Nonnull CommandSource source) {
         return Text.EMPTY;
+    }
+
+    public String getId() {
+        return Violets.PLUGIN_ID;
     }
 
 }

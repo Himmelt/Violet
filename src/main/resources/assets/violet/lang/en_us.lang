@@ -1,0 +1,25 @@
+# English Language File
+# Please keep UTF-8 encoding
+
+chatHead = "[Violet] "
+
+getVersion = "Current plugin version &a%s"
+getLang = "Current language is &e%s&r ."
+setLang = "Current language is set to &e%s&r ."
+configSaved = "&aConfig file saved."
+configSaveFailed = "&cConfig file save failed !!!"
+configLoaded = "&aConfig file loaded."
+configLoadFailed = "&cConfig file load failed !!!"
+debugON = "DEBUG mode &aON&r ."
+debugOFF = "DEBUG mode &cOFF&r ."
+onlyPlayer = "Only in-game player can execute this cmd."
+invalidArg = "Arg is empty or invalid , please enter correct args."
+onlyPlayerOrInvalidArg = "Arg is empty or invalid , add valid arg or execute it in game."
+noCommandPerm = "You need permission <&c%s&r> to execute this command."
+
+invalidInt = "Arg is invalid int."
+invalidFloat = "Arg is invalid float."
+
+comment_lang = "Display Language"
+comment_debug = "Debug Mode"
+comment_version = "Plugin Version"

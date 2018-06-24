@@ -1,7 +1,6 @@
 package org.soraworld.violet.command;
 
 import org.soraworld.violet.config.VioletManager;
-import org.soraworld.violet.config.VioletSetting;
 import rikka.api.command.CommandArgs;
 import rikka.api.command.ExecuteResult;
 import rikka.api.command.ICommandSender;
@@ -14,14 +13,13 @@ public class VioletCommand extends IICommand {
 
     public VioletCommand(String perm, boolean onlyPlayer, VioletManager manager, String... aliases) {
         super(perm, onlyPlayer, aliases);
-        final VioletSetting setting = manager.getSetting();
-        addSub(new IICommand(manager.adminPerm(), false, "lang") {
+        addSub(new IICommand(manager.adminPerm(), false, "assets/violet/lang") {
             public ExecuteResult execute(ICommandSender sender, CommandArgs args) {
                 if (args.notEmpty()) {
                     manager.setLang(args.first());
                     manager.save();
-                    manager.sendKey(sender, KEY_SET_LANG, setting.lang);
-                } else manager.sendKey(sender, KEY_GET_LANG, setting.lang);
+                    manager.sendKey(sender, KEY_SET_LANG, manager.lang);
+                } else manager.sendKey(sender, KEY_GET_LANG, manager.lang);
                 return SUCCESS;
             }
         });
@@ -33,8 +31,8 @@ public class VioletCommand extends IICommand {
         });
         addSub(new IICommand(manager.adminPerm(), false, "debug") {
             public ExecuteResult execute(ICommandSender sender, CommandArgs args) {
-                setting.debug = !setting.debug;
-                manager.sendKey(sender, setting.debug ? KEY_DEBUG_ON : KEY_DEBUG_OFF);
+                manager.debug = !manager.debug;
+                manager.sendKey(sender, manager.debug ? KEY_DEBUG_ON : KEY_DEBUG_OFF);
                 return SUCCESS;
             }
         });
