@@ -5,6 +5,10 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 @Documented
+/*
+ * Only primitive types & list & map
+ *
+ * */
 public @interface Setting {
     /**
      * The path this setting is located at

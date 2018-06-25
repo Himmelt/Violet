@@ -13,7 +13,7 @@ public class VioletCommand extends IICommand {
 
     public VioletCommand(String perm, boolean onlyPlayer, VioletManager manager, String... aliases) {
         super(perm, onlyPlayer, aliases);
-        addSub(new IICommand(manager.adminPerm(), false, "assets/violet/lang") {
+        addSub(new IICommand(manager.adminPerm(), false, "lang") {
             public ExecuteResult execute(ICommandSender sender, CommandArgs args) {
                 if (args.notEmpty()) {
                     manager.setLang(args.first());
