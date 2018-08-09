@@ -81,7 +81,7 @@ bintray {
         publicDownloadNumbers = true
         version {
             name = project.version
-            desc = 'Spigot/Bukkit/Sponge Violet Plugin Library.'
+            desc = 'Violet Plugin Library.'
             released = new Date()
         }
     }
