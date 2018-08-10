@@ -1,4 +1,4 @@
-package org.soraworld.violet.constant;
+package org.soraworld.violet;
 
 public final class Violets {
 

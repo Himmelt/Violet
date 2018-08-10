@@ -1,35 +1,35 @@
 package org.soraworld.violet.command;
 
 import org.bukkit.command.CommandSender;
-import org.soraworld.violet.config.VioletManager;
+import org.soraworld.violet.api.IManager;
 
-import static org.soraworld.violet.constant.Violets.*;
+import static org.soraworld.violet.Violets.*;
 
-public class VioletCommand extends IICommand {
+public class VioletCommand extends ICommand {
 
-    public VioletCommand(String perm, boolean onlyPlayer, VioletManager manager, String... aliases) {
-        super(perm, onlyPlayer, aliases);
-        addSub(new IICommand(manager.adminPerm(), false, "lang") {
+    public VioletCommand(String perm, boolean onlyPlayer, IManager manager, String... aliases) {
+        super(perm, onlyPlayer, manager, aliases);
+        addSub(new ICommand(manager.defAdminPerm(), false, manager, "lang") {
             public void execute(CommandSender sender, CommandArgs args) {
                 if (args.notEmpty()) {
                     manager.setLang(args.first());
                     manager.save();
-                    manager.sendKey(sender, KEY_SET_LANG, manager.lang());
-                } else manager.sendKey(sender, KEY_GET_LANG, manager.lang());
+                    manager.sendKey(sender, KEY_SET_LANG, manager.getLang());
+                } else manager.sendKey(sender, KEY_GET_LANG, manager.getLang());
             }
         });
-        addSub(new IICommand(manager.adminPerm(), false, "save") {
+        addSub(new ICommand(manager.defAdminPerm(), false, manager, "save") {
             public void execute(CommandSender sender, CommandArgs args) {
                 manager.sendKey(sender, manager.save() ? KEY_CFG_SAVE : KEY_CFG_SAVE_FAIL);
             }
         });
-        addSub(new IICommand(manager.adminPerm(), false, "debug") {
+        addSub(new ICommand(manager.defAdminPerm(), false, manager, "debug") {
             public void execute(CommandSender sender, CommandArgs args) {
-                manager.debug(!manager.debug());
-                manager.sendKey(sender, manager.debug() ? KEY_DEBUG_ON : KEY_DEBUG_OFF);
+                manager.setDebug(!manager.isDebug());
+                manager.sendKey(sender, manager.isDebug() ? KEY_DEBUG_ON : KEY_DEBUG_OFF);
             }
         });
-        addSub(new IICommand(manager.adminPerm(), false, "reload") {
+        addSub(new ICommand(manager.defAdminPerm(), false, manager, "reload") {
             public void execute(CommandSender sender, CommandArgs args) {
                 manager.sendKey(sender, manager.load() ? KEY_CFG_LOAD : KEY_CFG_LOAD_FAIL);
             }

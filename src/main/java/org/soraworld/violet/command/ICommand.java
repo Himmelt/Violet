@@ -2,19 +2,22 @@ package org.soraworld.violet.command;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.soraworld.violet.api.IManager;
 
 import java.util.*;
 
-public abstract class IICommand {
+public abstract class ICommand {
 
     private final String perm;
+    private final IManager manager;
     private final boolean onlyPlayer;
 
     private final List<String> aliases = new ArrayList<>();
-    private final HashMap<String, IICommand> subs = new LinkedHashMap<>();
+    private final HashMap<String, ICommand> subs = new LinkedHashMap<>();
 
-    public IICommand(String perm, boolean onlyPlayer, String... aliases) {
+    public ICommand(String perm, boolean onlyPlayer, IManager manager, String... aliases) {
         this.perm = perm;
+        this.manager = manager;
         this.onlyPlayer = onlyPlayer;
         this.aliases.addAll(Arrays.asList(aliases));
     }
@@ -25,7 +28,7 @@ public abstract class IICommand {
 
     public void execute(CommandSender sender, CommandArgs args) {
         if (args.notEmpty()) {
-            IICommand sub = subs.get(args.first());
+            ICommand sub = subs.get(args.first());
             if (sub != null) {
                 if (sub.canRun(sender)) {
                     args.next();
@@ -51,7 +54,7 @@ public abstract class IICommand {
         return new ArrayList<>();
     }
 
-    protected void addSub(IICommand sub) {
+    protected void addSub(ICommand sub) {
         for (String alias : sub.aliases) {
             subs.putIfAbsent(alias, sub);
         }

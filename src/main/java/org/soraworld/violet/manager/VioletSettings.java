@@ -1,4 +1,4 @@
-package org.soraworld.violet.config;
+package org.soraworld.violet.manager;
 
 import org.soraworld.hocon.Setting;
 

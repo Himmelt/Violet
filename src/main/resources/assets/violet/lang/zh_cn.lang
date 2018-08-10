@@ -20,6 +20,8 @@ noCommandPerm = "你需要权限 <&c%s&r> 才能执行此命令."
 invalidInt = "参数不是有效整数."
 invalidFloat = "参数不是有效小数."
 
-comment_lang = "显示语言"
-comment_debug = "调试模式"
-comment_version = "插件版本"
+comment {
+  lang = "显示语言"
+  debug = "调试模式"
+  version = "插件版本"
+}

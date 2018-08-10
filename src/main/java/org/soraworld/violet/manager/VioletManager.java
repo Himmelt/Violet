@@ -1,12 +1,12 @@
-package org.soraworld.violet.config;
+package org.soraworld.violet.manager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.soraworld.hocon.FileNode;
 import org.soraworld.hocon.NodeOptions;
-import org.soraworld.violet.VioletPlugin;
+import org.soraworld.violet.Violets;
 import org.soraworld.violet.api.IManager;
-import org.soraworld.violet.constant.Violets;
+import org.soraworld.violet.api.IPlugin;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,20 +15,19 @@ import java.util.Locale;
 
 import static java.util.Locale.CHINA;
 
-public class VioletManager implements IManager {
+public abstract class VioletManager implements IManager {
 
-    private final Path path;
-    private final Path confile;
-    private final VioletPlugin plugin;
-    private HashMap<String, String> langMap = new HashMap<>();
+    protected final Path path;
+    protected final Path confile;
+    protected final IPlugin plugin;
+    protected final VioletSettings settings;
+    protected final NodeOptions options = NodeOptions.newOptions();
+    protected final HashMap<String, String> langMap = new HashMap<>();
 
-    private final VioletSettings settings;
-    private final NodeOptions options = NodeOptions.newOptions();
-
-    public VioletManager(VioletPlugin plugin, Path path, VioletSettings settings) {
+    public VioletManager(IPlugin plugin, Path path, VioletSettings settings) {
         this.path = path;
         this.plugin = plugin;
-        this.confile = path.resolve("config.conf");
+        this.confile = path.resolve("manager.conf");
         this.settings = settings != null ? settings : new VioletSettings();
     }
 
@@ -76,7 +75,7 @@ public class VioletManager implements IManager {
             extract = true;
             FileNode langNode = new FileNode(langFile.toFile(), options);
             langNode.load();
-            langMap = langNode.asStringMap();
+            langMap.putAll(langNode.asStringMap());
         } catch (Throwable e) {
             if (extract) console("&cLang file " + lang + " load exception !!!");
             else console("&cLang file " + lang + " extract exception !!!");
@@ -128,20 +127,15 @@ public class VioletManager implements IManager {
         System.out.println("plainHead " + msg);
     }
 
-    public String lang() {
+    public String getLang() {
         return settings.lang;
     }
 
-    public boolean debug() {
+    public boolean isDebug() {
         return settings.debug;
     }
 
-    public void debug(boolean debug) {
+    public void setDebug(boolean debug) {
         settings.debug = debug;
     }
-
-    public String adminPerm() {
-        return Violets.PERM_ADMIN;
-    }
-
 }
