@@ -1,7 +1,7 @@
 name: Violet
 version: 2.0.0
 author: Himmelt
-main: org.soraworld.violet.VioletPlugin
+main: org.soraworld.violet.Violet
 website: https://github.com/Himmelt/Violet
 description: Violet Library Plugin.
 

@@ -2,8 +2,8 @@ package org.soraworld.violet.manager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.soraworld.hocon.FileNode;
-import org.soraworld.hocon.NodeOptions;
+import org.soraworld.hocon.node.FileNode;
+import org.soraworld.hocon.node.NodeOptions;
 import org.soraworld.violet.Violets;
 import org.soraworld.violet.api.IManager;
 import org.soraworld.violet.api.IPlugin;
@@ -27,7 +27,7 @@ public abstract class VioletManager implements IManager {
     public VioletManager(IPlugin plugin, Path path, VioletSettings settings) {
         this.path = path;
         this.plugin = plugin;
-        this.confile = path.resolve("manager.conf");
+        this.confile = path.resolve(plugin.getId().replace(' ', '_') + ".conf");
         this.settings = settings != null ? settings : new VioletSettings();
     }
 
@@ -75,6 +75,7 @@ public abstract class VioletManager implements IManager {
             extract = true;
             FileNode langNode = new FileNode(langFile.toFile(), options);
             langNode.load();
+            langMap.clear();
             langMap.putAll(langNode.asStringMap());
         } catch (Throwable e) {
             if (extract) console("&cLang file " + lang + " load exception !!!");

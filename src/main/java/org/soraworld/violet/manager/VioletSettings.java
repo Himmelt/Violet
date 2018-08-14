@@ -1,10 +1,10 @@
 package org.soraworld.violet.manager;
 
-import org.soraworld.hocon.Setting;
+import org.soraworld.hocon.node.Setting;
 
 public class VioletSettings {
     @Setting(comment = "comment.lang")
-    public String lang = "zh_cn";
+    protected String lang = "zh_cn";
     @Setting(comment = "comment.debug")
-    public boolean debug = false;
+    protected boolean debug = false;
 }

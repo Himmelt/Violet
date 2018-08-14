@@ -1,6 +1,5 @@
 plugins {
     id "com.jfrog.bintray" version "1.8.0"
-    id 'org.spongepowered.plugin' version '0.8.1'
 }
 
 apply plugin: 'java'
@@ -26,36 +25,20 @@ repositories {
 
 configurations {
     shade
-    shaded
     compile.extendsFrom(shade)
-    compile.extendsFrom(shaded)
 }
 
 dependencies {
-    shade 'com.typesafe:config:1.3.1'
-    shade 'ninja.leaping.configurate:configurate-core:3.3'
-    shade 'ninja.leaping.configurate:configurate-hocon:3.3'
-    shade 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
-    shade 'org.spongepowered:spongeapi:7.1.0-SNAPSHOT'
-    shade files('lib/Rikka-0.0.1.jar')
+    compile 'com.google.code.findbugs:jsr305:3.0.2'
+    compile 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
+    shade files('lib/Hocon-1.0.0.jar')
+    testCompile 'junit:junit:4.12'
 }
 
 jar {
     configurations.shade.copyRecursive().setTransitive(false).each {
         artifact -> from(zipTree(artifact))
     }
-}
-
-task shaded(type: Jar) {
-    from(sourceSets.main.output) {
-    }
-    configurations.shade.copyRecursive().setTransitive(false).each {
-        artifact -> from(zipTree(artifact))
-    }
-    configurations.shaded.copyRecursive().setTransitive(false).each {
-        artifact -> from(zipTree(artifact))
-    }
-    classifier = 'shaded'
 }
 
 publishing {
