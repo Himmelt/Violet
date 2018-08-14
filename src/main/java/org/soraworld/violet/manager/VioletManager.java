@@ -66,22 +66,9 @@ public abstract class VioletManager implements IManager {
 
     public void setLang(String lang) {
         settings.lang = lang;
-        Path langFile = path.resolve("lang").resolve(lang + ".lang");
-        boolean extract = false;
-        try {
-            if (Files.notExists(langFile)) {
-                Files.createDirectories(langFile.getParent());
-                Files.copy(plugin.getAsset("lang/" + lang + ".lang"), langFile);
-            }
-            extract = true;
-            FileNode langNode = new FileNode(langFile.toFile(), options);
-            langNode.load();
-            langMap = langNode.asStringMap();
-        } catch (Throwable e) {
-            if (extract) console("&cLang file " + lang + " load exception !!!");
-            else console("&cLang file " + lang + " extract exception !!!");
-            if (settings.debug) e.printStackTrace();
-        }
+        HashMap<String, String> temp = loadLangMap(lang);
+        if (!temp.isEmpty()) langMap = temp;
+        else consoleKey("emptyLangMap");
     }
 
     public String trans(String key) {
@@ -138,4 +125,25 @@ public abstract class VioletManager implements IManager {
     public void setDebug(boolean debug) {
         settings.debug = debug;
     }
+
+    public HashMap<String, String> loadLangMap(String lang) {
+        Path langFile = path.resolve("lang").resolve(lang + ".lang");
+        boolean extract = false;
+        try {
+            if (Files.notExists(langFile)) {
+                Files.createDirectories(langFile.getParent());
+                Files.copy(plugin.getAsset("lang/" + lang + ".lang"), langFile);
+            }
+            extract = true;
+            FileNode langNode = new FileNode(langFile.toFile(), options);
+            langNode.load();
+            return langNode.asStringMap();
+        } catch (Throwable e) {
+            if (extract) console("&cLang file " + lang + " load exception !!!");
+            else console("&cLang file " + lang + " extract exception !!!");
+            if (settings.debug) e.printStackTrace();
+            return new HashMap<>();
+        }
+    }
+
 }
