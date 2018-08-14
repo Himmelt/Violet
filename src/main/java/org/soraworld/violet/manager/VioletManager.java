@@ -22,11 +22,12 @@ public abstract class VioletManager implements IManager {
     protected final IPlugin plugin;
     protected final VioletSettings settings;
     protected final NodeOptions options = NodeOptions.newOptions();
-    protected final HashMap<String, String> langMap = new HashMap<>();
+    protected HashMap<String, String> langMap = new HashMap<>();
 
     public VioletManager(IPlugin plugin, Path path, VioletSettings settings) {
         this.path = path;
         this.plugin = plugin;
+        this.options.setTranslator(this::trans);
         this.confile = path.resolve(plugin.getId().replace(' ', '_') + ".conf");
         this.settings = settings != null ? settings : new VioletSettings();
     }
@@ -75,8 +76,7 @@ public abstract class VioletManager implements IManager {
             extract = true;
             FileNode langNode = new FileNode(langFile.toFile(), options);
             langNode.load();
-            langMap.clear();
-            langMap.putAll(langNode.asStringMap());
+            langMap = langNode.asStringMap();
         } catch (Throwable e) {
             if (extract) console("&cLang file " + lang + " load exception !!!");
             else console("&cLang file " + lang + " extract exception !!!");
@@ -85,7 +85,6 @@ public abstract class VioletManager implements IManager {
     }
 
     public String trans(String key) {
-        // TODO xx.b.c ?
         return langMap.get(key);
     }
 
