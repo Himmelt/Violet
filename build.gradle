@@ -29,9 +29,9 @@ configurations {
 }
 
 dependencies {
+    shade project(':Hocon')
     compile 'com.google.code.findbugs:jsr305:3.0.2'
     compile 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
-    shade files('lib/Hocon-1.0.0.jar')
     testCompile 'junit:junit:4.12'
 }
 

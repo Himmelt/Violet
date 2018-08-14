@@ -1,0 +1,3 @@
+rootProject.name = 'Violet'
+
+include 'Hocon'
