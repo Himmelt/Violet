@@ -1,0 +1,3 @@
+[submodule "Hocon"]
+	path = Hocon
+	url = https://github.com/Himmelt/Hocon.git
