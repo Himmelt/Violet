@@ -5,6 +5,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.NodeOptions;
+import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.api.IManager;
 import org.soraworld.violet.api.IPlugin;
 
@@ -18,21 +19,24 @@ import static org.soraworld.violet.Violets.*;
 
 public abstract class VioletManager implements IManager {
 
+    @Setting(comment = "comment.lang")
+    protected String lang = "zh_cn";
+    @Setting(comment = "comment.debug")
+    protected boolean debug = false;
+
     protected final Path path;
     protected final Path confile;
     protected final IPlugin plugin;
     protected String plainHead;
     protected String colorHead;
-    protected final VioletSettings settings;
     protected final NodeOptions options = NodeOptions.newOptions();
     protected HashMap<String, String> langMap = new HashMap<>();
 
-    public VioletManager(IPlugin plugin, Path path, VioletSettings settings) {
+    public VioletManager(IPlugin plugin, Path path) {
         this.path = path;
         this.plugin = plugin;
         this.options.setTranslator(this::trans);
         this.confile = path.resolve(plugin.getId().replace(' ', '_') + ".conf");
-        this.settings = settings != null ? settings : new VioletSettings();
         setHead(defChatHead());
     }
 
@@ -45,12 +49,12 @@ public abstract class VioletManager implements IManager {
         try {
             FileNode rootNode = new FileNode(confile.toFile(), options);
             rootNode.load();
-            rootNode.modify(settings);
-            setLang(settings.lang);
+            rootNode.modify(this);
+            setLang(lang);
             return true;
         } catch (Throwable e) {
             console("&cConfig file load exception !!!");
-            if (settings.debug) e.printStackTrace();
+            if (debug) e.printStackTrace();
             return false;
         }
     }
@@ -58,27 +62,28 @@ public abstract class VioletManager implements IManager {
     public boolean save() {
         try {
             FileNode rootNode = new FileNode(confile.toFile(), options);
-            rootNode.extract(settings);
+            rootNode.extract(this);
             rootNode.save();
             return true;
         } catch (Throwable e) {
             console("&cConfig file save exception !!!");
-            if (settings.debug) e.printStackTrace();
+            if (debug) e.printStackTrace();
             return false;
         }
     }
 
     public String getLang() {
-        return settings.lang;
+        return lang;
     }
 
     public void setLang(@Nonnull String lang) {
-        settings.lang = lang;
+        this.lang = lang;
         HashMap<String, String> temp = loadLangMap(lang);
-        if (!temp.isEmpty()) langMap = temp;
-        else consoleKey("emptyLangMap");
-        String head = langMap.get(KEY_CHAT_HEAD);
-        if (head != null && !head.isEmpty()) setHead(head);
+        if (!temp.isEmpty()) {
+            langMap = temp;
+            String head = langMap.get(KEY_CHAT_HEAD);
+            if (head != null && !head.isEmpty()) setHead(head);
+        } else consoleKey("emptyLangMap");
     }
 
     private void setHead(@Nonnull String head) {
@@ -87,17 +92,17 @@ public abstract class VioletManager implements IManager {
     }
 
     public boolean isDebug() {
-        return settings.debug;
+        return debug;
     }
 
     public void setDebug(boolean debug) {
-        settings.debug = debug;
+        this.debug = debug;
     }
 
     public String trans(@Nonnull String key, Object... args) {
         String text = langMap.get(key);
         // fallback to Violet
-        if (text == null || text.isEmpty()) text = Manager.trans(settings.lang, key);
+        if (text == null || text.isEmpty()) text = Manager.trans(lang, key);
         return (text == null || text.isEmpty()) ? key : args.length > 0 ? String.format(text, args) : text;
     }
 
@@ -144,7 +149,7 @@ public abstract class VioletManager implements IManager {
         } catch (Throwable e) {
             if (extract) console("&cLang file " + lang + " load exception !!!");
             else console("&cLang file " + lang + " extract exception !!!");
-            if (settings.debug) e.printStackTrace();
+            if (debug) e.printStackTrace();
             return new HashMap<>();
         }
     }

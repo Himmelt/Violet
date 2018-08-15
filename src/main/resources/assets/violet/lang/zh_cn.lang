@@ -19,6 +19,7 @@ noCommandPerm = "你需要权限 <&c%s&r> 才能执行此命令."
 cmdUsage = "用法 %s"
 pluginEnabled = "插件 &e%s&r 已 &a启用&r."
 pluginDisabled = "插件 &e%s&r 已 &c禁用&r."
+emptyLangMap = "&c语言文件键值对为空 !!!"
 
 invalidInt = "参数不是有效整数."
 invalidFloat = "参数不是有效小数."

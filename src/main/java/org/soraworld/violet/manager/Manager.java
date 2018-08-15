@@ -14,8 +14,8 @@ public class Manager extends VioletManager {
     private static Manager manager;
     private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
 
-    public Manager(IPlugin plugin, Path path, VioletSettings settings) {
-        super(plugin, path, settings);
+    public Manager(IPlugin plugin, Path path) {
+        super(plugin, path);
         manager = this;
     }
 

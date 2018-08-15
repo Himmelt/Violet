@@ -5,7 +5,6 @@ import org.soraworld.violet.api.IManager;
 import org.soraworld.violet.command.ICommand;
 import org.soraworld.violet.command.VioletCommand;
 import org.soraworld.violet.manager.Manager;
-import org.soraworld.violet.manager.VioletSettings;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -22,7 +21,7 @@ public class Violet extends VioletPlugin {
 
     @Nonnull
     public IManager registerManager(Path path) {
-        return new Manager(this, path, new VioletSettings());
+        return new Manager(this, path);
     }
 
     @Nonnull

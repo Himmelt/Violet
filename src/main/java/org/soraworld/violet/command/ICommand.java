@@ -34,7 +34,7 @@ public abstract class ICommand {
                 if (sub.canRun(sender)) {
                     args.next();
                     if (sender instanceof Player) sub.execute((Player) sender, args);
-                    else if (!onlyPlayer) sub.execute(sender, args);
+                    else if (!sub.onlyPlayer) sub.execute(sender, args);
                     else manager.sendKey(sender, Violets.KEY_ONLY_PLAYER);
                 } else manager.sendKey(sender, Violets.KEY_NO_CMD_PERM);
             } else sendUsage(sender);

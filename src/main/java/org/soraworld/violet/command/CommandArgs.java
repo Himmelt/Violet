@@ -1,5 +1,7 @@
 package org.soraworld.violet.command;
 
+import java.util.StringJoiner;
+
 public final class CommandArgs {
 
     private final String[] args;
@@ -48,4 +50,12 @@ public final class CommandArgs {
         return args[current + index];
     }
 
+    public String toString() {
+        if (args != null) {
+            StringJoiner joiner = new StringJoiner(", ", "{ ", " }");
+            for (String arg : args) joiner.add(arg);
+            return joiner.toString();
+        }
+        return "{ null }";
+    }
 }

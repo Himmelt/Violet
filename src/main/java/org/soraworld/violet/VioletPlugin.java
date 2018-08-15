@@ -39,6 +39,7 @@ public abstract class VioletPlugin extends JavaPlugin implements IPlugin {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        // TODO main command perm & onlyPlayer ???
         this.command.execute(sender, new CommandArgs(args));
         return true;
     }
