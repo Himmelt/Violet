@@ -46,4 +46,17 @@ public abstract class VioletPlugin extends JavaPlugin implements IPlugin {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         return this.command.tabCompletions(new CommandArgs(args));
     }
+
+    public void onDisable() {
+        beforeDisable();
+        super.onDisable();
+    }
+
+    public void afterEnable() {
+        manager.consoleKey(Violets.KEY_PLUGIN_ENABLED, getId());
+    }
+
+    public void beforeDisable() {
+        manager.consoleKey(Violets.KEY_PLUGIN_DISABLED, getId());
+    }
 }

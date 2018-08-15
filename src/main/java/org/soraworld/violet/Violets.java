@@ -32,4 +32,7 @@ public final class Violets {
     public static final char COLOR_CHAR = '\u00A7';
     public static final Pattern COLOR_PATTERN = Pattern.compile("((?<!&)&[0-9a-fk-or])+");
 
+    public static final String KEY_PLUGIN_ENABLED = "pluginEnabled";
+    public static final String KEY_PLUGIN_DISABLED = "pluginDisabled";
+
 }

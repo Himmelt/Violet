@@ -34,10 +34,4 @@ public class Violet extends VioletPlugin {
     public ICommand registerCommand() {
         return new VioletCommand(null, false, manager, Violets.PLUGIN_ID);
     }
-
-    public void afterEnable() {
-    }
-
-    public void beforeDisable() {
-    }
 }

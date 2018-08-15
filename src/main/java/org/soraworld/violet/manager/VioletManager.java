@@ -106,7 +106,7 @@ public abstract class VioletManager implements IManager {
     }
 
     public void sendKey(@Nonnull CommandSender sender, @Nonnull String key, Object... args) {
-        sender.sendMessage(trans(key, args));
+        send(sender, trans(key, args));
     }
 
     public void broadcast(@Nonnull String format) {
