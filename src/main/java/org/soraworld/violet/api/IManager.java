@@ -11,37 +11,47 @@ public interface IManager {
     @Nonnull
     String defChatHead();
 
-    @Nonnull
-    ChatColor defChatColor();
-
     @Nullable
     String defAdminPerm();
 
-    void afterLoad();
+    @Nonnull
+    ChatColor defChatColor();
 
     boolean load();
 
     boolean save();
 
+    void afterLoad();
+
     String getLang();
 
-    void setLang(String lang);
-
-    void sendMsg(CommandSender sender, String msg);
-
-    void sendKey(CommandSender sender, String key, Object... args);
-
-    void console(String msg);
-
-    void consoleKey(String key, Object... args);
-
-    void broadcast(String msg);
-
-    void broadcastKey(String key, Object... args);
-
-    void println(String msg);
+    void setLang(@Nonnull String lang);
 
     boolean isDebug();
 
     void setDebug(boolean debug);
+
+    /* No Color */
+    String trans(@Nonnull String key, Object... args);
+
+    /* With Color */
+    void send(@Nonnull CommandSender sender, @Nonnull String msg);
+
+    /* With Color */
+    void sendKey(@Nonnull CommandSender sender, @Nonnull String key, Object... args);
+
+    /* With Color */
+    void console(@Nonnull String format);
+
+    /* With Color */
+    void consoleKey(@Nonnull String key, Object... args);
+
+    /* With Color */
+    void broadcast(@Nonnull String format);
+
+    /* With Color */
+    void broadcastKey(@Nonnull String key, Object... args);
+
+    /* No Color */
+    void println(@Nonnull String plain);
 }

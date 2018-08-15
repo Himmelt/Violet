@@ -19,6 +19,11 @@ public class Manager extends VioletManager {
         manager = this;
     }
 
+    public String trans(@Nonnull String key, Object... args) {
+        String text = langMap.get(key);
+        return (text == null || text.isEmpty()) ? key : args.length > 0 ? String.format(text, args) : text;
+    }
+
     @Nonnull
     public String defChatHead() {
         return "[" + Violets.PLUGIN_NAME + "] ";
@@ -40,6 +45,7 @@ public class Manager extends VioletManager {
     public static String trans(String lang, String key, Object... args) {
         String text = langMaps.computeIfAbsent(lang, s -> manager.loadLangMap(s)).get(key);
         if (text == null || text.isEmpty()) {
+            // fallback current lang
             if (manager != null) return manager.trans(key, args);
             else return key;
         } else return text;

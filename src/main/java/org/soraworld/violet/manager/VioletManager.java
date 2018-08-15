@@ -1,25 +1,28 @@
 package org.soraworld.violet.manager;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.NodeOptions;
-import org.soraworld.violet.Violets;
 import org.soraworld.violet.api.IManager;
 import org.soraworld.violet.api.IPlugin;
 
+import javax.annotation.Nonnull;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Locale;
 
-import static java.util.Locale.CHINA;
+import static org.soraworld.violet.Violets.*;
 
 public abstract class VioletManager implements IManager {
 
     protected final Path path;
     protected final Path confile;
     protected final IPlugin plugin;
+    protected String plainHead;
+    protected String colorHead;
     protected final VioletSettings settings;
     protected final NodeOptions options = NodeOptions.newOptions();
     protected HashMap<String, String> langMap = new HashMap<>();
@@ -30,11 +33,12 @@ public abstract class VioletManager implements IManager {
         this.options.setTranslator(this::trans);
         this.confile = path.resolve(plugin.getId().replace(' ', '_') + ".conf");
         this.settings = settings != null ? settings : new VioletSettings();
+        setHead(defChatHead());
     }
 
     public boolean load() {
         if (Files.notExists(confile)) {
-            setLang(CHINA.equals(Locale.getDefault()) ? "zh_cn" : "en_us");
+            setLang(Locale.CHINA.equals(Locale.getDefault()) ? "zh_cn" : "en_us");
             save();
             return true;
         }
@@ -64,58 +68,22 @@ public abstract class VioletManager implements IManager {
         }
     }
 
-    public void setLang(String lang) {
+    public String getLang() {
+        return settings.lang;
+    }
+
+    public void setLang(@Nonnull String lang) {
         settings.lang = lang;
         HashMap<String, String> temp = loadLangMap(lang);
         if (!temp.isEmpty()) langMap = temp;
         else consoleKey("emptyLangMap");
+        String head = langMap.get(KEY_CHAT_HEAD);
+        if (head != null && !head.isEmpty()) setHead(head);
     }
 
-    public String trans(String key) {
-        return langMap.get(key);
-    }
-
-    public String trans(String key, Object... args) {
-        String text = langMap.get(key);
-        return text == null || text.isEmpty() ? key : String.format(text, args);
-    }
-
-    public static String colorize(String text) {
-        return text == null ? null : text.replace('&', Violets.COLOR_CHAR);
-    }
-
-    public void sendMsg(CommandSender sender, String msg) {
-        // TODO
-        sender.sendMessage(msg);
-    }
-
-    public void sendKey(CommandSender sender, String key, Object... args) {
-        sender.sendMessage(colorize(trans(key, args)));
-    }
-
-    public void broadcast(String msg) {
-        Bukkit.broadcastMessage(msg);
-    }
-
-    public void broadcastKey(String key, Object... args) {
-        broadcast(trans(key, args));
-    }
-
-    public void console(String msg) {
-        Bukkit.getConsoleSender().sendMessage(colorize(msg));
-    }
-
-    public void consoleKey(String key, Object... args) {
-        console(trans(key, args));
-    }
-
-    public void println(String msg) {
-        // TODO plainHead
-        System.out.println("plainHead " + msg);
-    }
-
-    public String getLang() {
-        return settings.lang;
+    private void setHead(@Nonnull String head) {
+        this.colorHead = defChatColor() + head.replace('&', COLOR_CHAR) + ChatColor.RESET;
+        this.plainHead = COLOR_PATTERN.matcher(colorHead).replaceAll("");
     }
 
     public boolean isDebug() {
@@ -126,7 +94,42 @@ public abstract class VioletManager implements IManager {
         settings.debug = debug;
     }
 
-    public HashMap<String, String> loadLangMap(String lang) {
+    public String trans(@Nonnull String key, Object... args) {
+        String text = langMap.get(key);
+        // fallback to Violet
+        if (text == null || text.isEmpty()) text = Manager.trans(settings.lang, key);
+        return (text == null || text.isEmpty()) ? key : args.length > 0 ? String.format(text, args) : text;
+    }
+
+    public void send(@Nonnull CommandSender sender, @Nonnull String format) {
+        sender.sendMessage(colorHead + format.replace('&', COLOR_CHAR));
+    }
+
+    public void sendKey(@Nonnull CommandSender sender, @Nonnull String key, Object... args) {
+        sender.sendMessage(trans(key, args));
+    }
+
+    public void broadcast(@Nonnull String format) {
+        Bukkit.broadcastMessage(colorHead + format.replace('&', COLOR_CHAR));
+    }
+
+    public void broadcastKey(@Nonnull String key, Object... args) {
+        broadcast(trans(key, args));
+    }
+
+    public void console(@Nonnull String format) {
+        Bukkit.getConsoleSender().sendMessage(colorHead + format.replace('&', COLOR_CHAR));
+    }
+
+    public void consoleKey(@Nonnull String key, Object... args) {
+        console(trans(key, args));
+    }
+
+    public void println(@Nonnull String plain) {
+        System.out.println(plainHead + plain);
+    }
+
+    final HashMap<String, String> loadLangMap(@Nonnull String lang) {
         Path langFile = path.resolve("lang").resolve(lang + ".lang");
         boolean extract = false;
         try {
@@ -145,5 +148,4 @@ public abstract class VioletManager implements IManager {
             return new HashMap<>();
         }
     }
-
 }

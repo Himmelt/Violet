@@ -2,6 +2,7 @@ package org.soraworld.violet.command;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.soraworld.violet.Violets;
 import org.soraworld.violet.api.IManager;
 
 import java.util.*;
@@ -9,8 +10,8 @@ import java.util.*;
 public abstract class ICommand {
 
     private final String perm;
-    private final IManager manager;
     private final boolean onlyPlayer;
+    protected final IManager manager;
 
     private final List<String> aliases = new ArrayList<>();
     private final HashMap<String, ICommand> subs = new LinkedHashMap<>();
@@ -34,10 +35,14 @@ public abstract class ICommand {
                     args.next();
                     if (sender instanceof Player) sub.execute((Player) sender, args);
                     else if (!onlyPlayer) sub.execute(sender, args);
-                    //else TODO only player
-                }//else TODO no permission
-            }//else TODO not sub -> usage
-        }//else TODO usage
+                    else manager.sendKey(sender, Violets.KEY_ONLY_PLAYER);
+                } else manager.sendKey(sender, Violets.KEY_NO_CMD_PERM);
+            } else sendUsage(sender);
+        } else sendUsage(sender);
+    }
+
+    protected void sendUsage(CommandSender sender) {
+        // pretend empty output
     }
 
     public void execute(Player player, CommandArgs args) {
