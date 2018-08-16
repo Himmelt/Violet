@@ -6,7 +6,7 @@ import org.bukkit.World;
 import org.soraworld.hocon.node.Node;
 import org.soraworld.hocon.node.NodeBase;
 import org.soraworld.hocon.node.NodeMap;
-import org.soraworld.hocon.node.NodeOptions;
+import org.soraworld.hocon.node.Options;
 import org.soraworld.hocon.serializer.TypeSerializer;
 
 import javax.annotation.Nonnull;
@@ -33,7 +33,7 @@ public class LocationSerializer implements TypeSerializer<Location> {
     }
 
     @Override
-    public Node serialize(@Nonnull Type type, Location loc, @Nonnull NodeOptions options) {
+    public Node serialize(@Nonnull Type type, Location loc, @Nonnull Options options) {
         if (loc != null) {
             NodeMap map = new NodeMap(options);
             World world = loc.getWorld();

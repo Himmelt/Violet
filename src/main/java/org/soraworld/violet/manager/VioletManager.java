@@ -4,7 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.soraworld.hocon.node.FileNode;
-import org.soraworld.hocon.node.NodeOptions;
+import org.soraworld.hocon.node.Options;
 import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.api.IManager;
 import org.soraworld.violet.api.IPlugin;
@@ -30,7 +30,7 @@ public abstract class VioletManager implements IManager {
     protected final IPlugin plugin;
     protected String plainHead;
     protected String colorHead;
-    protected final NodeOptions options = NodeOptions.newOptions();
+    protected final Options options = Options.newOptions();
     protected HashMap<String, String> langMap = new HashMap<>();
 
     public VioletManager(IPlugin plugin, Path path) {
