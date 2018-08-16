@@ -29,6 +29,10 @@ public abstract class ICommand {
         return aliases.isEmpty() ? "emptyCmdName" : aliases.get(0);
     }
 
+    public boolean isOnlyPlayer() {
+        return onlyPlayer;
+    }
+
     public void execute(CommandSender sender, CommandArgs args) {
         if (args.notEmpty()) {
             ICommand sub = subs.get(args.first());

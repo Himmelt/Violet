@@ -2,6 +2,7 @@ package org.soraworld.violet;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.soraworld.violet.api.IManager;
@@ -39,8 +40,9 @@ public abstract class VioletPlugin extends JavaPlugin implements IPlugin {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        // TODO main command perm & onlyPlayer ???
-        this.command.execute(sender, new CommandArgs(args));
+        if (sender instanceof Player) this.command.execute((Player) sender, new CommandArgs(args));
+        else if (!this.command.isOnlyPlayer()) this.command.execute(sender, new CommandArgs(args));
+        else manager.sendKey(sender, Violets.KEY_ONLY_PLAYER);
         return true;
     }
 
