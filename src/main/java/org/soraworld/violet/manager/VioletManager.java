@@ -30,7 +30,7 @@ public abstract class VioletManager implements IManager {
     protected final IPlugin plugin;
     protected String plainHead;
     protected String colorHead;
-    protected final Options options = Options.newOptions();
+    protected final Options options = Options.build();
     protected HashMap<String, String> langMap = new HashMap<>();
 
     public VioletManager(IPlugin plugin, Path path) {
