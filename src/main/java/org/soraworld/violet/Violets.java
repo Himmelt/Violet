@@ -6,7 +6,7 @@ public final class Violets {
 
     public static final String PLUGIN_ID = "violet";
     public static final String PLUGIN_NAME = "Violet";
-    public static final String PLUGIN_VERSION = "2.1.0";
+    public static final String PLUGIN_VERSION = "2.1.1";
 
     public static final String KEY_CHAT_HEAD = "chatHead";
     public static final String KEY_GET_VERSION = "getVersion";

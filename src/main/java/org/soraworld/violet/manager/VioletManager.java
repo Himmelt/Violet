@@ -8,6 +8,7 @@ import org.soraworld.hocon.node.NodeOptions;
 import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.api.IManager;
 import org.soraworld.violet.api.IPlugin;
+import org.soraworld.violet.serializers.LocationSerializer;
 
 import javax.annotation.Nonnull;
 import java.nio.file.Files;
@@ -36,6 +37,7 @@ public abstract class VioletManager implements IManager {
         this.path = path;
         this.plugin = plugin;
         this.options.setTranslator(this::trans);
+        options.getSerializers().registerType(new LocationSerializer());
         this.confile = path.resolve(plugin.getId().replace(' ', '_') + ".conf");
         setHead(defChatHead());
     }
