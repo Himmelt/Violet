@@ -7,6 +7,8 @@ import org.soraworld.violet.api.IManager;
 
 import java.util.*;
 
+import static org.soraworld.violet.Violets.KEY_CMD_USAGE;
+
 public abstract class ICommand {
 
     private final String perm;
@@ -42,7 +44,14 @@ public abstract class ICommand {
     }
 
     protected void sendUsage(CommandSender sender) {
-        // pretend empty output
+        String usage = getUsage();
+        if (usage != null && !usage.isEmpty()) {
+            manager.sendKey(sender, KEY_CMD_USAGE, usage);
+        }
+    }
+
+    protected String getUsage() {
+        return null;
     }
 
     public void execute(Player player, CommandArgs args) {

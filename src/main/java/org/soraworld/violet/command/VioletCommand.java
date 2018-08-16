@@ -36,8 +36,7 @@ public class VioletCommand extends ICommand {
         });
     }
 
-    protected void sendUsage(CommandSender sender) {
-        manager.sendKey(sender, KEY_CMD_USAGE, "/violet lang|debug|save|reload");
+    protected String getUsage() {
+        return "/violet lang|debug|save|reload";
     }
-
 }
