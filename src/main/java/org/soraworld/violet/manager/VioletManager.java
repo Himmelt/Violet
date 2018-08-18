@@ -37,7 +37,7 @@ public abstract class VioletManager implements IManager {
         this.path = path;
         this.plugin = plugin;
         this.options.setTranslator(this::trans);
-        options.getSerializers().registerType(new LocationSerializer());
+        this.options.registerType(new LocationSerializer());
         this.confile = path.resolve(plugin.getId().replace(' ', '_') + ".conf");
         setHead(defChatHead());
     }
@@ -50,9 +50,10 @@ public abstract class VioletManager implements IManager {
         }
         try {
             FileNode rootNode = new FileNode(confile.toFile(), options);
-            rootNode.load();
+            rootNode.load(true);
             rootNode.modify(this);
             setLang(lang);
+            options.setDebug(debug);
             return true;
         } catch (Throwable e) {
             console("&cConfig file load exception !!!");
@@ -99,6 +100,7 @@ public abstract class VioletManager implements IManager {
 
     public void setDebug(boolean debug) {
         this.debug = debug;
+        options.setDebug(debug);
     }
 
     public String trans(@Nonnull String key, Object... args) {
@@ -146,7 +148,7 @@ public abstract class VioletManager implements IManager {
             }
             extract = true;
             FileNode langNode = new FileNode(langFile.toFile(), options);
-            langNode.load();
+            langNode.load(true);
             return langNode.asStringMap();
         } catch (Throwable e) {
             if (extract) console("&cLang file " + lang + " load exception !!!");

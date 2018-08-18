@@ -37,12 +37,12 @@ public class LocationSerializer implements TypeSerializer<Location> {
         if (loc != null) {
             NodeMap map = new NodeMap(options);
             World world = loc.getWorld();
-            map.setNode("world", world == null ? null : world.getName());
-            map.setNode("x", loc.getX());
-            map.setNode("y", loc.getY());
-            map.setNode("z", loc.getZ());
-            map.setNode("yaw", loc.getYaw());
-            map.setNode("pitch", loc.getPitch());
+            map.set("world", world == null ? null : world.getName());
+            map.set("x", loc.getX());
+            map.set("y", loc.getY());
+            map.set("z", loc.getZ());
+            map.set("yaw", loc.getYaw());
+            map.set("pitch", loc.getPitch());
             return map;
         } else return new NodeBase(options, null, false);
     }
