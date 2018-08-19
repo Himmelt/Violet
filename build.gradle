@@ -6,7 +6,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
 
-group = 'org.soraworld.violet'
+group = 'org.soraworld'
 version = '2.1.1'
 archivesBaseName = 'Violet'
 
@@ -17,6 +17,9 @@ compileJava {
 
 repositories {
     jcenter()
+    maven {
+        url "https://dl.bintray.com/himmelt/Minecraft"
+    }
     maven {
         name = 'spigot'
         url = 'https://hub.spigotmc.org/nexus/content/groups/public/'
@@ -29,10 +32,25 @@ configurations {
 }
 
 dependencies {
-    shade project(':Hocon')
+    shade 'org.soraworld:hocon:1.0.3'
     compile 'com.google.code.findbugs:jsr305:3.0.2'
     compile 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
     testCompile 'junit:junit:4.12'
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+javadoc {
+    options.encoding = 'UTF-8'
+    options.locale = 'en'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
 }
 
 jar {
@@ -41,13 +59,21 @@ jar {
     }
 }
 
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
+
 publishing {
     publications {
-        VioletMaven(MavenPublication) {
+        mavenJava(MavenPublication) {
             from components.java
             groupId = 'org.soraworld'
             artifactId = 'violet'
             version = project.version
+            artifact sourcesJar
+            artifact javadocJar
         }
     }
 }
@@ -55,7 +81,7 @@ publishing {
 bintray {
     key = BINTRAY_KEY
     user = BINTRAY_USER
-    publications = ['VioletMaven']
+    publications = ['mavenJava']
     pkg {
         repo = 'Minecraft'
         name = 'Violet'
