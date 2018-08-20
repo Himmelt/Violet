@@ -43,11 +43,6 @@ version = '2.2.0'
 
 sourceCompatibility = targetCompatibility = 1.8
 
-configurations {
-    shade
-    compile.extendsFrom(shade)
-}
-
 repositories {
     jcenter()
     maven {
@@ -56,13 +51,7 @@ repositories {
 }
 
 dependencies {
-    shade 'org.soraworld:hocon:1.0.3'
+    compile 'org.soraworld:hocon:1.0.3'
     compile 'com.google.code.findbugs:jsr305:3.0.2'
     testCompile 'junit:junit:4.12'
-}
-
-jar {
-    configurations.shade.copyRecursive().setTransitive(false).each {
-        artifact -> from(zipTree(artifact))
-    }
 }
