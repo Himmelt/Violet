@@ -26,11 +26,6 @@ public class SpongeViolet extends SpongePlugin {
     }
 
     @Nonnull
-    public String getName() {
-        return Violet.PLUGIN_NAME;
-    }
-
-    @Nonnull
     public SpongeManager registerManager(Path path) {
         return new SpongeManager.Manager(this, path);
     }

@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.util.List;
 
-public interface IPlugin extends ILogger {
+public interface IPlugin {
 
     @Nonnull
     String getId();

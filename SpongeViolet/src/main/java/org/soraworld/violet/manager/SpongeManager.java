@@ -12,8 +12,6 @@ import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.HashMap;
 
-import static org.soraworld.violet.Violet.COLOR_CHAR;
-
 public abstract class SpongeManager extends VioletManager {
 
     public SpongeManager(IPlugin plugin, Path path) {
@@ -28,7 +26,7 @@ public abstract class SpongeManager extends VioletManager {
     }
 
     public void send(@Nonnull CommandSource sender, @Nonnull String message) {
-        sender.sendMessage(Text.of(colorHead + message.replace('&', COLOR_CHAR)));
+        sender.sendMessage(Text.of(colorHead + message.replace('&', ChatColor.COLOR_CHAR)));
     }
 
     public void sendKey(@Nonnull CommandSource sender, @Nonnull String key, Object... args) {
@@ -36,11 +34,11 @@ public abstract class SpongeManager extends VioletManager {
     }
 
     public void console(@Nonnull String text) {
-        Sponge.getServer().getConsole().sendMessage(Text.of(colorHead + text.replace('&', COLOR_CHAR)));
+        Sponge.getServer().getConsole().sendMessage(Text.of(colorHead + text.replace('&', ChatColor.COLOR_CHAR)));
     }
 
     public void broadcast(@Nonnull String text) {
-        Sponge.getServer().getBroadcastChannel().send(Text.of(colorHead + text.replace('&', COLOR_CHAR)));
+        Sponge.getServer().getBroadcastChannel().send(Text.of(colorHead + text.replace('&', ChatColor.COLOR_CHAR)));
     }
 
     public static class Manager extends SpongeManager {

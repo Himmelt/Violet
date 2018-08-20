@@ -1,7 +1,6 @@
 package org.soraworld.violet.command;
 
 import org.soraworld.violet.Violet;
-import org.soraworld.violet.api.ICommand;
 import org.soraworld.violet.manager.SpongeManager;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
@@ -10,7 +9,7 @@ import java.util.*;
 
 import static org.soraworld.violet.Violet.*;
 
-public class SpongeCommand implements ICommand {
+public abstract class SpongeCommand {
 
     protected final String perm;
     protected final boolean onlyPlayer;
@@ -44,11 +43,7 @@ public class SpongeCommand implements ICommand {
         execute((CommandSource) player, args);
     }
 
-    public String getName() {
-        return aliases.isEmpty() ? "emptyCmdName" : aliases.get(0);
-    }
-
-    public boolean notOnlyPlayer() {
+    public boolean nop() {
         return !onlyPlayer;
     }
 
@@ -58,7 +53,7 @@ public class SpongeCommand implements ICommand {
 
     public List<String> tabCompletions(CommandArgs args) {
         String first = args.first();
-        if (args.size() == 1) return ICommand.getMatchList(first, subs.keySet());
+        if (args.size() == 1) return getMatchList(first, subs.keySet());
         if (subs.containsKey(first)) {
             args.next();
             return subs.get(first).tabCompletions(args);
@@ -81,6 +76,13 @@ public class SpongeCommand implements ICommand {
 
     protected boolean canRun(CommandSource sender) {
         return perm == null || sender.hasPermission(perm);
+    }
+
+    public static List<String> getMatchList(String text, Collection<String> possibles) {
+        ArrayList<String> list = new ArrayList<>();
+        if (text.isEmpty()) list.addAll(possibles);
+        else for (String s : possibles) if (s.startsWith(text)) list.add(s);
+        return list;
     }
 
     public static class CommandViolet extends SpongeCommand {

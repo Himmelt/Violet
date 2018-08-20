@@ -3,6 +3,7 @@ package org.soraworld.violet.manager;
 import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.Options;
 import org.soraworld.hocon.node.Setting;
+import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IManager;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.util.ChatColor;
@@ -13,8 +14,6 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Locale;
 
-import static org.soraworld.violet.Violet.*;
-
 public abstract class VioletManager implements IManager {
 
     @Setting(comment = "comment.lang")
@@ -22,11 +21,11 @@ public abstract class VioletManager implements IManager {
     @Setting(comment = "comment.debug")
     protected boolean debug = false;
 
+    protected String plainHead;
+    protected String colorHead;
     protected final Path path;
     protected final Path confile;
     protected final IPlugin plugin;
-    protected String plainHead;
-    protected String colorHead;
     protected final Options options = Options.build();
     protected HashMap<String, String> langMap = new HashMap<>();
 
@@ -39,8 +38,8 @@ public abstract class VioletManager implements IManager {
     }
 
     private void setHead(@Nonnull String head) {
-        this.colorHead = defChatColor() + head.replace('&', COLOR_CHAR) + ChatColor.RESET;
-        this.plainHead = COLOR_PATTERN.matcher(colorHead).replaceAll("");
+        this.colorHead = defChatColor() + head.replace('&', ChatColor.COLOR_CHAR) + ChatColor.RESET;
+        this.plainHead = ChatColor.COLOR_PATTERN.matcher(colorHead).replaceAll("");
     }
 
     final HashMap<String, String> loadLangMap(@Nonnull String lang) {
@@ -105,7 +104,7 @@ public abstract class VioletManager implements IManager {
         HashMap<String, String> temp = loadLangMap(lang);
         if (!temp.isEmpty()) {
             langMap = temp;
-            String head = langMap.get(KEY_CHAT_HEAD);
+            String head = langMap.get(Violet.KEY_CHAT_HEAD);
             if (head != null && !head.isEmpty()) setHead(head);
         } else consoleKey("emptyLangMap");
     }
@@ -129,21 +128,5 @@ public abstract class VioletManager implements IManager {
 
     public void println(@Nonnull String text) {
         System.out.println(plainHead + text);
-    }
-
-    public void info(String message) {
-        plugin.info(message);
-    }
-
-    public void debug(String message) {
-        plugin.debug(message);
-    }
-
-    public void warn(String message) {
-        plugin.warn(message);
-    }
-
-    public void error(String message) {
-        plugin.error(message);
     }
 }

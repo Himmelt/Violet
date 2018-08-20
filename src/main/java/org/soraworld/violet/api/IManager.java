@@ -5,7 +5,7 @@ import org.soraworld.violet.util.ChatColor;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public interface IManager extends ILogger {
+public interface IManager {
 
     @Nonnull
     String defChatHead();

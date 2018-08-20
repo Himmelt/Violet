@@ -18,11 +18,13 @@ dependencies {
     compile 'org.spongepowered:spongeapi:7.1.0-SNAPSHOT'
     testCompile 'junit:junit:4.12'
 }
+
 jar {
     configurations.shade.copyRecursive().setTransitive(false).each {
         artifact -> from(zipTree(artifact))
     }
 }
+
 publishing {
     publications {
         mavenJava(MavenPublication) {

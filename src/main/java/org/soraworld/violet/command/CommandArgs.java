@@ -26,9 +26,8 @@ public final class CommandArgs {
         return current < length;
     }
 
-    public CommandArgs next() {
+    public void next() {
         if (current < length) current++;
-        return this;
     }
 
     public CommandArgs revert() {

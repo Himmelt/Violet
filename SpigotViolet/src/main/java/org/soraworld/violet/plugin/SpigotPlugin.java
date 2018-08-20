@@ -15,7 +15,6 @@ import javax.annotation.Nonnull;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.logging.Level;
 
 public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
 
@@ -59,7 +58,7 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
 
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (sender instanceof Player) command.execute(((Player) sender), new CommandArgs(args));
-        else if (command.notOnlyPlayer()) command.execute(sender, new CommandArgs(args));
+        else if (command.nop()) command.execute(sender, new CommandArgs(args));
         else manager.sendKey(sender, Violet.KEY_ONLY_PLAYER);
         return true;
     }
@@ -74,21 +73,5 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
 
     public void beforeDisable() {
         if (manager != null) manager.consoleKey(Violet.KEY_PLUGIN_DISABLED, getId());
-    }
-
-    public void info(String message) {
-        getLogger().info(message);
-    }
-
-    public void debug(String message) {
-        getLogger().info(message);
-    }
-
-    public void warn(String message) {
-        getLogger().warning(message);
-    }
-
-    public void error(String message) {
-        getLogger().log(Level.ALL, message);
     }
 }

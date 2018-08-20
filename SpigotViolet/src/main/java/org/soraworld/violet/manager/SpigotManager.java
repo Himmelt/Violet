@@ -11,8 +11,6 @@ import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.HashMap;
 
-import static org.soraworld.violet.Violet.COLOR_CHAR;
-
 public abstract class SpigotManager extends VioletManager {
 
     public SpigotManager(IPlugin plugin, Path path) {
@@ -27,7 +25,7 @@ public abstract class SpigotManager extends VioletManager {
     }
 
     public void send(@Nonnull CommandSender sender, @Nonnull String message) {
-        sender.sendMessage(colorHead + message.replace('&', COLOR_CHAR));
+        sender.sendMessage(colorHead + message.replace('&', ChatColor.COLOR_CHAR));
     }
 
     public void sendKey(@Nonnull CommandSender sender, @Nonnull String key, Object... args) {
@@ -35,11 +33,11 @@ public abstract class SpigotManager extends VioletManager {
     }
 
     public void console(@Nonnull String text) {
-        Bukkit.getConsoleSender().sendMessage(colorHead + text.replace('&', COLOR_CHAR));
+        Bukkit.getConsoleSender().sendMessage(colorHead + text.replace('&', ChatColor.COLOR_CHAR));
     }
 
     public void broadcast(@Nonnull String text) {
-        Bukkit.broadcastMessage(colorHead + text.replace('&', COLOR_CHAR));
+        Bukkit.broadcastMessage(colorHead + text.replace('&', ChatColor.COLOR_CHAR));
     }
 
     public static class Manager extends SpigotManager {

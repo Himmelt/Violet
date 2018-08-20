@@ -1,7 +1,5 @@
 package org.soraworld.violet.plugin;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.command.CommandArgs;
@@ -37,8 +35,6 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
     @Inject
     @ConfigDir(sharedRoot = false)
     private Path path;
-    @Inject
-    private Logger logger;
 
     @Listener
     public void onEnable(GameInitializationEvent event) {
@@ -50,7 +46,6 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
                 e.printStackTrace();
             }
         }
-        if (logger == null) logger = LoggerFactory.getLogger(getName());
         manager = registerManager(path);
         manager.load();
         manager.afterLoad();
@@ -77,12 +72,9 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
     protected abstract SpongeCommand registerCommand();
 
     @Nonnull
-    protected abstract String getName();
-
-    @Nonnull
     public CommandResult process(@Nonnull CommandSource sender, @Nonnull String args) {
         if (sender instanceof Player) command.execute(((Player) sender), new CommandArgs(args));
-        else if (command.notOnlyPlayer()) command.execute(sender, new CommandArgs(args));
+        else if (command.nop()) command.execute(sender, new CommandArgs(args));
         else manager.sendKey(sender, Violet.KEY_ONLY_PLAYER);
         return CommandResult.success();
     }
@@ -117,25 +109,5 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
 
     public void beforeDisable() {
         if (manager != null) manager.consoleKey(Violet.KEY_PLUGIN_DISABLED, getId());
-    }
-
-    public void broadcast(@Nonnull String message) {
-
-    }
-
-    public void info(String message) {
-        logger.info(message);
-    }
-
-    public void debug(String message) {
-        logger.debug(message);
-    }
-
-    public void warn(String message) {
-        logger.warn(message);
-    }
-
-    public void error(String message) {
-        logger.error(message);
     }
 }

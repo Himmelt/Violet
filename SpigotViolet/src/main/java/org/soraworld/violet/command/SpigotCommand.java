@@ -3,14 +3,13 @@ package org.soraworld.violet.command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.soraworld.violet.Violet;
-import org.soraworld.violet.api.ICommand;
 import org.soraworld.violet.manager.SpigotManager;
 
 import java.util.*;
 
 import static org.soraworld.violet.Violet.*;
 
-public class SpigotCommand implements ICommand {
+public abstract class SpigotCommand {
 
     protected final String perm;
     protected final boolean onlyPlayer;
@@ -26,11 +25,7 @@ public class SpigotCommand implements ICommand {
         this.aliases.addAll(Arrays.asList(aliases));
     }
 
-    public String getName() {
-        return aliases.isEmpty() ? "emptyCmdName" : aliases.get(0);
-    }
-
-    public boolean notOnlyPlayer() {
+    public boolean nop() {
         return !onlyPlayer;
     }
 
@@ -40,7 +35,7 @@ public class SpigotCommand implements ICommand {
 
     public List<String> tabCompletions(CommandArgs args) {
         String first = args.first();
-        if (args.size() == 1) return ICommand.getMatchList(first, subs.keySet());
+        if (args.size() == 1) return getMatchList(first, subs.keySet());
         if (subs.containsKey(first)) {
             args.next();
             return subs.get(first).tabCompletions(args);
@@ -81,6 +76,13 @@ public class SpigotCommand implements ICommand {
 
     public boolean canRun(CommandSender sender) {
         return perm == null || sender.hasPermission(perm);
+    }
+
+    public static List<String> getMatchList(String text, Collection<String> possibles) {
+        ArrayList<String> list = new ArrayList<>();
+        if (text.isEmpty()) list.addAll(possibles);
+        else for (String s : possibles) if (s.startsWith(text)) list.add(s);
+        return list;
     }
 
     public static class CommandViolet extends SpigotCommand {
