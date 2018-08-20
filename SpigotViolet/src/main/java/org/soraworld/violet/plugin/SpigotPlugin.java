@@ -32,6 +32,7 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
             }
         }
         manager = registerManager(path);
+        manager.beforeLoad();
         manager.load();
         manager.afterLoad();
         command = registerCommand();

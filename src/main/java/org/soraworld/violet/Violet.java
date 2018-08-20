@@ -8,13 +8,14 @@ public final class Violet {
     public static final String PLUGIN_NAME = "Violet";
     public static final String SPIGOT_NAME = "SpigotViolet";
     public static final String SPONGE_NAME = "SpongeViolet";
-    public static final String PLUGIN_VERSION = "2.2.0";
+    public static final String PLUGIN_VERSION = "2.2.3";
     public static final String PERM_ADMIN = PLUGIN_ID + ".admin";
 
     public static final String KEY_CHAT_HEAD = "chatHead";
     public static final String KEY_GET_VERSION = "getVersion";
     public static final String KEY_GET_LANG = "getLang";
     public static final String KEY_SET_LANG = "setLang";
+    public static final String KEY_SET_LANG_FAILED = "setLangFailed";
     public static final String KEY_CFG_SAVE = "configSaved";
     public static final String KEY_CFG_SAVE_FAIL = "configSaveFailed";
     public static final String KEY_CFG_LOAD = "configLoaded";

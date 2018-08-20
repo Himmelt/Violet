@@ -1,3 +1,20 @@
+apply plugin: 'java'
+
+group = 'org.soraworld'
+version = '2.2.3'
+
+sourceCompatibility = targetCompatibility = 1.8
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile 'org.soraworld:hocon:1.0.3'
+    compile 'com.google.code.findbugs:jsr305:3.0.2'
+    testCompile 'junit:junit:4.12'
+}
+
 subprojects {
     apply plugin: 'java'
     apply plugin: 'maven'
@@ -16,11 +33,13 @@ subprojects {
     }
     task sourcesJar(type: Jar) {
         classifier = 'sources'
-        from sourceSets.main.allJava
+        from sourceSets.main.allJava, rootProject.sourceSets.main.allJava
     }
     javadoc {
         options.encoding = 'UTF-8'
-        options.locale = 'en'
+        options.charSet = 'UTF-8'
+        source = sourceSets.main.allJava
+        source += rootProject.sourceSets.main.allJava
     }
     task javadocJar(type: Jar, dependsOn: javadoc) {
         classifier = 'javadoc'
@@ -31,21 +50,4 @@ subprojects {
         archives javadocJar
         archives sourcesJar
     }
-}
-
-apply plugin: 'java'
-
-group = 'org.soraworld'
-version = '2.2.0'
-
-sourceCompatibility = targetCompatibility = 1.8
-
-repositories {
-    jcenter()
-}
-
-dependencies {
-    compile 'org.soraworld:hocon:1.0.3'
-    compile 'com.google.code.findbugs:jsr305:3.0.2'
-    testCompile 'junit:junit:4.12'
 }

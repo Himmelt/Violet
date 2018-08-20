@@ -91,9 +91,12 @@ public abstract class SpigotCommand {
             addSub(new SpigotCommand(manager.defAdminPerm(), false, manager, "lang") {
                 public void execute(CommandSender sender, CommandArgs args) {
                     if (args.notEmpty()) {
-                        manager.setLang(args.first());
-                        manager.save();
-                        manager.sendKey(sender, KEY_SET_LANG, manager.getLang());
+                        if (manager.setLang(args.first())) {
+                            manager.save();
+                            manager.sendKey(sender, KEY_SET_LANG, manager.getLang());
+                        } else {
+                            manager.sendKey(sender, KEY_SET_LANG_FAILED, args.first());
+                        }
                     } else manager.sendKey(sender, KEY_GET_LANG, manager.getLang());
                 }
             });

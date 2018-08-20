@@ -72,7 +72,9 @@ public abstract class VioletManager implements IManager {
             FileNode rootNode = new FileNode(confile.toFile(), options);
             rootNode.load(true);
             rootNode.modify(this);
-            setLang(lang);
+            if (!setLang(lang)) {
+                setLang(Locale.CHINA.equals(Locale.getDefault()) ? "zh_cn" : "en_us");
+            }
             options.setDebug(debug);
             return true;
         } catch (Throwable e) {
@@ -99,14 +101,18 @@ public abstract class VioletManager implements IManager {
         return lang;
     }
 
-    public void setLang(@Nonnull String lang) {
-        this.lang = lang;
+    public boolean setLang(@Nonnull String lang) {
         HashMap<String, String> temp = loadLangMap(lang);
         if (!temp.isEmpty()) {
+            this.lang = lang;
             langMap = temp;
             String head = langMap.get(Violet.KEY_CHAT_HEAD);
             if (head != null && !head.isEmpty()) setHead(head);
-        } else consoleKey("emptyLangMap");
+            return true;
+        } else {
+            consoleKey("emptyLangMap");
+            return false;
+        }
     }
 
     public boolean isDebug() {

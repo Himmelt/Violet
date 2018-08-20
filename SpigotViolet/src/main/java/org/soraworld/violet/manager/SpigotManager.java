@@ -65,6 +65,9 @@ public abstract class SpigotManager extends VioletManager {
             return ChatColor.DARK_PURPLE;
         }
 
+        public void beforeLoad() {
+        }
+
         @Nullable
         public String defAdminPerm() {
             return Violet.PERM_ADMIN;

@@ -20,11 +20,13 @@ public interface IManager {
 
     boolean save();
 
+    void beforeLoad();
+
     void afterLoad();
 
     String getLang();
 
-    void setLang(@Nonnull String lang);
+    boolean setLang(@Nonnull String lang);
 
     boolean isDebug();
 
