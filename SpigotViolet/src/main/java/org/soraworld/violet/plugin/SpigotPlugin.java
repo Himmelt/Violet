@@ -12,6 +12,7 @@ import org.soraworld.violet.command.SpigotCommand;
 import org.soraworld.violet.manager.SpigotManager;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -34,12 +35,10 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
         manager.load();
         manager.afterLoad();
         command = registerCommand();
-        List<Object> listeners = registerListeners();
+        List<Listener> listeners = registerListeners();
         if (listeners != null && !listeners.isEmpty()) {
-            for (Object listener : listeners) {
-                if (listener instanceof Listener) {
-                    this.getServer().getPluginManager().registerEvents((Listener) listener, this);
-                }
+            for (Listener listener : listeners) {
+                this.getServer().getPluginManager().registerEvents(listener, this);
             }
         }
         afterEnable();
@@ -55,6 +54,9 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
 
     @Nonnull
     protected abstract SpigotCommand registerCommand();
+
+    @Nullable
+    protected abstract List<Listener> registerListeners();
 
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (sender instanceof Player) command.execute(((Player) sender), new CommandArgs(args));

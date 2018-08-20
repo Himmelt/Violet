@@ -1,5 +1,6 @@
 package org.soraworld.violet;
 
+import org.bukkit.event.Listener;
 import org.soraworld.violet.command.SpigotCommand;
 import org.soraworld.violet.manager.SpigotManager;
 import org.soraworld.violet.plugin.SpigotPlugin;
@@ -27,7 +28,7 @@ public class SpigotViolet extends SpigotPlugin {
     }
 
     @Nullable
-    public List<Object> registerListeners() {
+    public List<Listener> registerListeners() {
         return null;
     }
 }

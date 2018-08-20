@@ -71,6 +71,9 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
     @Nonnull
     protected abstract SpongeCommand registerCommand();
 
+    @Nullable
+    protected abstract List<Object> registerListeners();
+
     @Nonnull
     public CommandResult process(@Nonnull CommandSource sender, @Nonnull String args) {
         if (sender instanceof Player) command.execute(((Player) sender), new CommandArgs(args));
