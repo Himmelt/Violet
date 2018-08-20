@@ -1,12 +1,11 @@
 package org.soraworld.violet.api;
 
-import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
+import org.soraworld.violet.util.ChatColor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public interface IManager {
+public interface IManager extends ILogger {
 
     @Nonnull
     String defChatHead();
@@ -31,27 +30,15 @@ public interface IManager {
 
     void setDebug(boolean debug);
 
-    /* No Color */
     String trans(@Nonnull String key, Object... args);
 
-    /* With Color */
-    void send(@Nonnull CommandSender sender, @Nonnull String msg);
+    void console(@Nonnull String text);
 
-    /* With Color */
-    void sendKey(@Nonnull CommandSender sender, @Nonnull String key, Object... args);
-
-    /* With Color */
-    void console(@Nonnull String format);
-
-    /* With Color */
     void consoleKey(@Nonnull String key, Object... args);
 
-    /* With Color */
-    void broadcast(@Nonnull String format);
+    void broadcast(@Nonnull String text);
 
-    /* With Color */
     void broadcastKey(@Nonnull String key, Object... args);
 
-    /* No Color */
-    void println(@Nonnull String plain);
+    void println(@Nonnull String text);
 }

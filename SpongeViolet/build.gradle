@@ -1,0 +1,55 @@
+plugins {
+    id "com.jfrog.bintray" version "1.8.0"
+    id 'org.spongepowered.plugin' version '0.8.1'
+}
+
+group rootProject.group
+version rootProject.version
+
+sourceCompatibility = 1.8
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    shade rootProject
+    compile 'com.google.code.findbugs:jsr305:3.0.2'
+    compile 'org.spongepowered:spongeapi:7.1.0-SNAPSHOT'
+    testCompile 'junit:junit:4.12'
+}
+jar {
+    configurations.shade.copyRecursive().setTransitive(false).each {
+        artifact -> from(zipTree(artifact))
+    }
+}
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            groupId = 'org.soraworld'
+            artifactId = 'violet-sponge'
+            version = project.version
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+}
+
+bintray {
+    key = BINTRAY_KEY
+    user = BINTRAY_USER
+    publications = ['mavenJava']
+    pkg {
+        repo = 'Minecraft'
+        name = 'Violet'
+        licenses = ['MIT']
+        vcsUrl = 'https://github.com/Himmelt/Violet.git'
+        publicDownloadNumbers = true
+        version {
+            name = project.version
+            desc = 'Violet Plugin Library.'
+            released = new Date()
+        }
+    }
+}

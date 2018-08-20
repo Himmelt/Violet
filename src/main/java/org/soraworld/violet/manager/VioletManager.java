@@ -1,14 +1,11 @@
 package org.soraworld.violet.manager;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
 import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.Options;
 import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.api.IManager;
 import org.soraworld.violet.api.IPlugin;
-import org.soraworld.violet.serializers.LocationSerializer;
+import org.soraworld.violet.util.ChatColor;
 
 import javax.annotation.Nonnull;
 import java.nio.file.Files;
@@ -16,7 +13,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Locale;
 
-import static org.soraworld.violet.Violets.*;
+import static org.soraworld.violet.Violet.*;
 
 public abstract class VioletManager implements IManager {
 
@@ -37,9 +34,33 @@ public abstract class VioletManager implements IManager {
         this.path = path;
         this.plugin = plugin;
         this.options.setTranslator(this::trans);
-        this.options.registerType(new LocationSerializer());
         this.confile = path.resolve(plugin.getId().replace(' ', '_') + ".conf");
         setHead(defChatHead());
+    }
+
+    private void setHead(@Nonnull String head) {
+        this.colorHead = defChatColor() + head.replace('&', COLOR_CHAR) + ChatColor.RESET;
+        this.plainHead = COLOR_PATTERN.matcher(colorHead).replaceAll("");
+    }
+
+    final HashMap<String, String> loadLangMap(@Nonnull String lang) {
+        Path langFile = path.resolve("lang").resolve(lang + ".lang");
+        boolean extract = false;
+        try {
+            if (Files.notExists(langFile)) {
+                Files.createDirectories(langFile.getParent());
+                Files.copy(plugin.getAsset("lang/" + lang + ".lang"), langFile);
+            }
+            extract = true;
+            FileNode langNode = new FileNode(langFile.toFile(), options);
+            langNode.load(true);
+            return langNode.asStringMap();
+        } catch (Throwable e) {
+            if (extract) console("&cLang file " + lang + " load exception !!!");
+            else console("&cLang file " + lang + " extract exception !!!");
+            if (debug) e.printStackTrace();
+            return new HashMap<>();
+        }
     }
 
     public boolean load() {
@@ -89,11 +110,6 @@ public abstract class VioletManager implements IManager {
         } else consoleKey("emptyLangMap");
     }
 
-    private void setHead(@Nonnull String head) {
-        this.colorHead = defChatColor() + head.replace('&', COLOR_CHAR) + ChatColor.RESET;
-        this.plainHead = COLOR_PATTERN.matcher(colorHead).replaceAll("");
-    }
-
     public boolean isDebug() {
         return debug;
     }
@@ -103,58 +119,31 @@ public abstract class VioletManager implements IManager {
         options.setDebug(debug);
     }
 
-    public String trans(@Nonnull String key, Object... args) {
-        String text = langMap.get(key);
-        // fallback to Violet
-        if (text == null || text.isEmpty()) text = Manager.trans(lang, key);
-        return (text == null || text.isEmpty()) ? key : args.length > 0 ? String.format(text, args) : text;
-    }
-
-    public void send(@Nonnull CommandSender sender, @Nonnull String format) {
-        sender.sendMessage(colorHead + format.replace('&', COLOR_CHAR));
-    }
-
-    public void sendKey(@Nonnull CommandSender sender, @Nonnull String key, Object... args) {
-        send(sender, trans(key, args));
-    }
-
-    public void broadcast(@Nonnull String format) {
-        Bukkit.broadcastMessage(colorHead + format.replace('&', COLOR_CHAR));
-    }
-
     public void broadcastKey(@Nonnull String key, Object... args) {
         broadcast(trans(key, args));
-    }
-
-    public void console(@Nonnull String format) {
-        Bukkit.getConsoleSender().sendMessage(colorHead + format.replace('&', COLOR_CHAR));
     }
 
     public void consoleKey(@Nonnull String key, Object... args) {
         console(trans(key, args));
     }
 
-    public void println(@Nonnull String plain) {
-        System.out.println(plainHead + plain);
+    public void println(@Nonnull String text) {
+        System.out.println(plainHead + text);
     }
 
-    final HashMap<String, String> loadLangMap(@Nonnull String lang) {
-        Path langFile = path.resolve("lang").resolve(lang + ".lang");
-        boolean extract = false;
-        try {
-            if (Files.notExists(langFile)) {
-                Files.createDirectories(langFile.getParent());
-                Files.copy(plugin.getAsset("lang/" + lang + ".lang"), langFile);
-            }
-            extract = true;
-            FileNode langNode = new FileNode(langFile.toFile(), options);
-            langNode.load(true);
-            return langNode.asStringMap();
-        } catch (Throwable e) {
-            if (extract) console("&cLang file " + lang + " load exception !!!");
-            else console("&cLang file " + lang + " extract exception !!!");
-            if (debug) e.printStackTrace();
-            return new HashMap<>();
-        }
+    public void info(String message) {
+        plugin.info(message);
+    }
+
+    public void debug(String message) {
+        plugin.debug(message);
+    }
+
+    public void warn(String message) {
+        plugin.warn(message);
+    }
+
+    public void error(String message) {
+        plugin.error(message);
     }
 }

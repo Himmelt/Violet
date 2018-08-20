@@ -1,15 +1,11 @@
 package org.soraworld.violet.api;
 
-import org.bukkit.event.Listener;
-import org.soraworld.violet.command.ICommand;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.InputStream;
-import java.nio.file.Path;
 import java.util.List;
 
-public interface IPlugin {
+public interface IPlugin extends ILogger {
 
     @Nonnull
     String getId();
@@ -18,14 +14,8 @@ public interface IPlugin {
         return getClass().getResourceAsStream("/assets/" + getId() + '/' + path);
     }
 
-    @Nonnull
-    IManager registerManager(Path path);
-
-    @Nonnull
-    List<Listener> registerEvents();
-
     @Nullable
-    ICommand registerCommand();
+    List<Object> registerListeners();
 
     void afterEnable();
 
