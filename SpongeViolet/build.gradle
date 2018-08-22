@@ -3,26 +3,8 @@ plugins {
     id 'org.spongepowered.plugin' version '0.8.1'
 }
 
-group rootProject.group
-version rootProject.version
-
-sourceCompatibility = 1.8
-
-repositories {
-    jcenter()
-}
-
 dependencies {
-    shade rootProject
-    compile 'com.google.code.findbugs:jsr305:3.0.2'
     compile 'org.spongepowered:spongeapi:7.1.0-SNAPSHOT'
-    testCompile 'junit:junit:4.12'
-}
-
-jar {
-    configurations.shade.copyRecursive().setTransitive(false).each {
-        artifact -> from(zipTree(artifact))
-    }
 }
 
 publishing {

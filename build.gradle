@@ -19,16 +19,25 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
+
+    group rootProject.group
+    version rootProject.version
+
     sourceCompatibility = targetCompatibility = 1.8
+
     repositories {
         jcenter()
     }
     configurations {
         shade
         compile.extendsFrom(shade)
+        shadeOnly
+        compileOnly.extendsFrom(shadeOnly)
     }
     dependencies {
-        shade 'org.soraworld:hocon:1.0.3'
+        shadeOnly rootProject
+        shade 'org.soraworld:hocon:1.0.4'
+        compile 'com.google.code.findbugs:jsr305:3.0.2'
         testCompile 'junit:junit:4.12'
     }
     task sourcesJar(type: Jar) {
@@ -44,6 +53,14 @@ subprojects {
     task javadocJar(type: Jar, dependsOn: javadoc) {
         classifier = 'javadoc'
         from javadoc.destinationDir
+    }
+    jar {
+        configurations.shade.copyRecursive().setTransitive(false).each {
+            artifact -> from(zipTree(artifact))
+        }
+        configurations.shadeOnly.copyRecursive().setTransitive(false).each {
+            artifact -> from(zipTree(artifact))
+        }
     }
     artifacts {
         archives jar

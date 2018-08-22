@@ -2,13 +2,7 @@ plugins {
     id "com.jfrog.bintray" version "1.8.0"
 }
 
-group rootProject.group
-version rootProject.version
-
-sourceCompatibility = 1.8
-
 repositories {
-    jcenter()
     maven {
         name = 'spigot'
         url = 'https://hub.spigotmc.org/nexus/content/groups/public/'
@@ -16,16 +10,7 @@ repositories {
 }
 
 dependencies {
-    shade rootProject
-    compile 'com.google.code.findbugs:jsr305:3.0.2'
-    compile 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
-    testCompile 'junit:junit:4.12'
-}
-
-jar {
-    configurations.shade.copyRecursive().setTransitive(false).each {
-        artifact -> from(zipTree(artifact))
-    }
+    compileOnly 'org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT'
 }
 
 publishing {
