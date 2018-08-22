@@ -28,7 +28,9 @@ public enum ChatColor {
 
     private final String string;
     public static final char COLOR_CHAR = '\u00A7';
-    public static final Pattern COLOR_PATTERN = Pattern.compile("((?<!&)&[0-9a-fk-or])+");
+    public static final String D_COLOR = "" + COLOR_CHAR + COLOR_CHAR;
+    public static final Pattern COLOR_PATTERN = Pattern.compile("(&[&|0-9a-fk-or])+");
+    public static final Pattern REAL_COLOR = Pattern.compile("(\u00A7[0-9a-fk-or])+");
 
     ChatColor(char code) {
         this.string = new String(new char[]{COLOR_CHAR, code});

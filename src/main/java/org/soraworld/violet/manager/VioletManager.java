@@ -14,6 +14,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Matcher;
 
 public abstract class VioletManager implements IManager {
 
@@ -41,8 +43,8 @@ public abstract class VioletManager implements IManager {
     }
 
     private void setHead(@Nonnull String head) {
-        this.colorHead = defChatColor() + head.replace('&', ChatColor.COLOR_CHAR) + ChatColor.RESET;
-        this.plainHead = ChatColor.COLOR_PATTERN.matcher(colorHead).replaceAll("");
+        this.colorHead = defChatColor() + colorize(head) + ChatColor.RESET;
+        this.plainHead = ChatColor.REAL_COLOR.matcher(colorHead).replaceAll("");
     }
 
     final HashMap<String, String> loadLangMap(@Nonnull String lang) {
@@ -56,13 +58,31 @@ public abstract class VioletManager implements IManager {
             extract = true;
             FileNode langNode = new FileNode(langFile.toFile(), options);
             langNode.load(true);
-            return langNode.asStringMap();
+            HashMap<String, String> map = langNode.asStringMap();
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                entry.setValue(colorize(entry.getValue()));
+            }
+            return map;
         } catch (Throwable e) {
-            if (extract) console("&cLang file " + lang + " load exception !!!");
-            else console("&cLang file " + lang + " extract exception !!!");
+            if (extract) console(ChatColor.RED + "Lang file " + lang + " load exception !!!");
+            else console(ChatColor.RED + "Lang file " + lang + " extract exception !!!");
             if (debug) e.printStackTrace();
             return new HashMap<>();
         }
+    }
+
+    private static String colorize(@Nonnull String text) {
+        Matcher matcher = ChatColor.COLOR_PATTERN.matcher(text);
+        StringBuilder builder = new StringBuilder();
+        int head = 0;
+        while (matcher.find()) {
+            String group = matcher.group().replace('&', ChatColor.COLOR_CHAR).replace(ChatColor.D_COLOR, "&");
+            int start = matcher.start();
+            builder.append(text, head, start).append(group);
+            head = matcher.end();
+        }
+        builder.append(text, head, text.length());
+        return builder.toString();
     }
 
     public boolean load() {
@@ -81,7 +101,7 @@ public abstract class VioletManager implements IManager {
             options.setDebug(debug);
             return true;
         } catch (Throwable e) {
-            console("&cConfig file load exception !!!");
+            console(ChatColor.RED + "Config file load exception !!!");
             if (debug) e.printStackTrace();
             return false;
         }
@@ -94,7 +114,7 @@ public abstract class VioletManager implements IManager {
             rootNode.save();
             return true;
         } catch (Throwable e) {
-            console("&cConfig file save exception !!!");
+            console(ChatColor.RED + "Config file save exception !!!");
             if (debug) e.printStackTrace();
             return false;
         }

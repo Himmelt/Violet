@@ -25,7 +25,7 @@ public abstract class SpigotManager extends VioletManager {
     }
 
     public void send(@Nonnull CommandSender sender, @Nonnull String message) {
-        sender.sendMessage(colorHead + message.replace('&', ChatColor.COLOR_CHAR));
+        sender.sendMessage(colorHead + message);
     }
 
     public void sendKey(@Nonnull CommandSender sender, @Nonnull String key, Object... args) {
@@ -33,11 +33,11 @@ public abstract class SpigotManager extends VioletManager {
     }
 
     public void console(@Nonnull String text) {
-        Bukkit.getConsoleSender().sendMessage(colorHead + text.replace('&', ChatColor.COLOR_CHAR));
+        Bukkit.getConsoleSender().sendMessage(colorHead + text);
     }
 
     public void broadcast(@Nonnull String text) {
-        Bukkit.broadcastMessage(colorHead + text.replace('&', ChatColor.COLOR_CHAR));
+        Bukkit.broadcastMessage(colorHead + text);
     }
 
     public static class Manager extends SpigotManager {
