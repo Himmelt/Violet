@@ -26,6 +26,8 @@ emptyLangMap = "&cLang file map is empty !!!"
 invalidInt = "Arg is invalid int."
 invalidFloat = "Arg is invalid float."
 
+pluginInfo = "Plugin info  id - &a%s&r  version - &e%s"
+
 comment {
   lang = "Display Language"
   debug = "Debug Mode"

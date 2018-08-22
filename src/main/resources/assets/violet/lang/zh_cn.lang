@@ -25,6 +25,8 @@ emptyLangMap = "&c语言文件键值对为空 !!!"
 invalidInt = "参数不是有效整数."
 invalidFloat = "参数不是有效小数."
 
+pluginInfo = "插件信息  id - &a%s&r  version - &e%s"
+
 comment {
   lang = "显示语言"
   debug = "调试模式"

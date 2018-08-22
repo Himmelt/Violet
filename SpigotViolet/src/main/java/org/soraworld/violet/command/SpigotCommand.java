@@ -43,7 +43,7 @@ public abstract class SpigotCommand {
         return new ArrayList<>();
     }
 
-    protected void addSub(SpigotCommand sub) {
+    public void addSub(SpigotCommand sub) {
         for (String alias : sub.aliases) {
             subs.putIfAbsent(alias, sub);
         }

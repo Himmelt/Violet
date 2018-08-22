@@ -1,6 +1,8 @@
 package org.soraworld.violet;
 
+import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
+import org.soraworld.violet.command.CommandArgs;
 import org.soraworld.violet.command.SpigotCommand;
 import org.soraworld.violet.manager.SpigotManager;
 import org.soraworld.violet.plugin.SpigotPlugin;
@@ -18,6 +20,11 @@ public class SpigotViolet extends SpigotPlugin {
     }
 
     @Nonnull
+    public String getVersion() {
+        return Violet.PLUGIN_VERSION;
+    }
+
+    @Nonnull
     public SpigotManager registerManager(Path path) {
         return new SpigotManager.Manager(this, path);
     }
@@ -25,6 +32,17 @@ public class SpigotViolet extends SpigotPlugin {
     @Nonnull
     public SpigotCommand registerCommand() {
         return new SpigotCommand.CommandViolet(null, false, manager, getId());
+    }
+
+    public void afterEnable() {
+        command.addSub(new SpigotCommand(manager.defAdminPerm(), false, manager, "plugins") {
+            public void execute(CommandSender sender, CommandArgs args) {
+                if (manager instanceof SpigotManager.Manager) {
+                    ((SpigotManager.Manager) manager).listPlugins(sender);
+                }
+            }
+        });
+        super.afterEnable();
     }
 
     @Nullable

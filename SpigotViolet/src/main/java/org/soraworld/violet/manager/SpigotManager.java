@@ -83,5 +83,11 @@ public abstract class SpigotManager extends VioletManager {
                 else return key;
             } else return text;
         }
+
+        public void listPlugins(CommandSender sender) {
+            for (IPlugin plugin : plugins) {
+                sendKey(sender, "pluginInfo", plugin.getId(), plugin.getVersion());
+            }
+        }
     }
 }

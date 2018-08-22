@@ -11,6 +11,7 @@ import org.soraworld.violet.util.ChatColor;
 import javax.annotation.Nonnull;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -28,13 +29,15 @@ public abstract class VioletManager implements IManager {
     protected final IPlugin plugin;
     protected final Options options = Options.build();
     protected HashMap<String, String> langMap = new HashMap<>();
+    protected static final ArrayList<IPlugin> plugins = new ArrayList<>();
 
-    public VioletManager(IPlugin plugin, Path path) {
+    public VioletManager(@Nonnull IPlugin plugin, @Nonnull Path path) {
         this.path = path;
         this.plugin = plugin;
         this.options.setTranslator(this::trans);
         this.confile = path.resolve(plugin.getId().replace(' ', '_') + ".conf");
         setHead(defChatHead());
+        if (!plugins.contains(plugin)) plugins.add(plugin);
     }
 
     private void setHead(@Nonnull String head) {
