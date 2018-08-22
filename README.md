@@ -1,7 +1,7 @@
 # Violet
 Violet Library Plugin
 # 紫罗兰
-紫罗兰 Spigot(Bukkit) 模板插件
+紫罗兰 Spigot/Sponge 模板插件
 
 [ ![Download](https://api.bintray.com/packages/himmelt/Minecraft/Violet/images/download.svg) ](https://bintray.com/himmelt/Minecraft/Violet/_latestVersion)
 
@@ -13,9 +13,6 @@ Violet Library Plugin
 
 ### 特性
 1. 语言文件第一次会从jar包内提取到lang文件夹，如果需要自定义化翻译，可直接修改语言文件，然后重载。
-
-#### 当前支持版本 `MC-1.7.10-CraftBukkit-v1_7_R4`
-由于使用了`NMS`，所以目前只能在`CraftBukkit-v1_7_R4`版本的服务器运行
 
 ### 自律规则
 1. 高耦合的类应该合并到一个类中，避免循环依赖造成不必要的麻烦。
