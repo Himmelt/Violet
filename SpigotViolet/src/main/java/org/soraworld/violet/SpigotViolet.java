@@ -23,11 +23,6 @@ public class SpigotViolet extends SpigotPlugin {
     }
 
     @Nonnull
-    public String getVersion() {
-        return Violet.PLUGIN_VERSION;
-    }
-
-    @Nonnull
     public SpigotManager registerManager(Path path) {
         return new SpigotManager.Manager(this, path);
     }

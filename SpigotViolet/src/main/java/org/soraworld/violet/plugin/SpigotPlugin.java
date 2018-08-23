@@ -54,6 +54,11 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
         afterEnable();
     }
 
+    @Nonnull
+    public String getVersion() {
+        return getDescription().getVersion();
+    }
+
     public void onDisable() {
         beforeDisable();
         super.onDisable();

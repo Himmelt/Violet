@@ -14,6 +14,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -139,6 +140,18 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
     @Nonnull
     public Text getUsage(@Nonnull CommandSource source) {
         return Text.of(command.getUsage());
+    }
+
+    @Nonnull
+    public String getVersion() {
+        Optional<PluginContainer> container = Sponge.getPluginManager().fromInstance(this);
+        if (container.isPresent()) {
+            Optional<String> version = container.get().getVersion();
+            if (version.isPresent()) {
+                return version.get();
+            }
+        }
+        return "x.y.z";
     }
 
     public void afterEnable() {
