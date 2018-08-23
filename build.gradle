@@ -33,14 +33,14 @@ subprojects {
         jcenter()
     }
     configurations {
-        shade
-        compile.extendsFrom(shade)
+        hocon
+        compile.extendsFrom(hocon)
         shadeOnly
         compileOnly.extendsFrom(shadeOnly)
     }
     dependencies {
         shadeOnly rootProject
-        shade 'org.soraworld:hocon:1.0.4'
+        hocon 'org.soraworld:hocon:1.0.4'
         compile 'com.google.code.findbugs:jsr305:3.0.2'
         testCompile 'junit:junit:4.12'
     }
@@ -59,10 +59,14 @@ subprojects {
         from javadoc.destinationDir
     }
     jar {
-        configurations.shade.copyRecursive().setTransitive(false).each {
+        configurations.shadeOnly.copyRecursive().setTransitive(false).each {
             artifact -> from(zipTree(artifact))
         }
-        configurations.shadeOnly.copyRecursive().setTransitive(false).each {
+    }
+    task release(type: Jar) {
+        classifier = 'hocon'
+        from sourceSets.main.output, rootProject.sourceSets.main.output
+        configurations.hocon.copyRecursive().setTransitive(false).each {
             artifact -> from(zipTree(artifact))
         }
     }
