@@ -1,7 +1,7 @@
 package org.soraworld.violet.manager;
 
 import org.soraworld.violet.Violet;
-import org.soraworld.violet.api.IPlugin;
+import org.soraworld.violet.plugin.SpongePlugin;
 import org.soraworld.violet.util.ChatColor;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
@@ -12,10 +12,20 @@ import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.HashMap;
 
-public abstract class SpongeManager extends VioletManager {
+public abstract class SpongeManager extends VioletManager<SpongePlugin> {
 
-    public SpongeManager(IPlugin plugin, Path path) {
+    public SpongeManager(SpongePlugin plugin, Path path) {
         super(plugin, path);
+    }
+
+    public void asyncSave() {
+        if (!asyncLock) {
+            asyncLock = true;
+            Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
+                save();
+                asyncLock = false;
+            });
+        }
     }
 
     public String trans(@Nonnull String key, Object... args) {
@@ -46,7 +56,7 @@ public abstract class SpongeManager extends VioletManager {
         private static Manager manager;
         private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
 
-        public Manager(IPlugin plugin, Path path) {
+        public Manager(SpongePlugin plugin, Path path) {
             super(plugin, path);
             manager = this;
         }

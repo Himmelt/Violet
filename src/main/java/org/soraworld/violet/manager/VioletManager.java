@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public abstract class VioletManager implements IManager {
+public abstract class VioletManager<T extends IPlugin> implements IManager {
 
     @Setting(comment = "comment.lang")
     protected String lang = "zh_cn";
@@ -25,14 +25,15 @@ public abstract class VioletManager implements IManager {
 
     protected String plainHead;
     protected String colorHead;
+    protected boolean asyncLock = false;
     protected final Path path;
     protected final Path confile;
-    protected final IPlugin plugin;
+    protected final T plugin;
     protected final Options options = Options.build();
     protected HashMap<String, String> langMap = new HashMap<>();
     protected static final ArrayList<IPlugin> plugins = new ArrayList<>();
 
-    public VioletManager(@Nonnull IPlugin plugin, @Nonnull Path path) {
+    public VioletManager(@Nonnull T plugin, @Nonnull Path path) {
         this.path = path;
         this.plugin = plugin;
         this.options.setTranslator(this::trans);
@@ -104,6 +105,8 @@ public abstract class VioletManager implements IManager {
             return false;
         }
     }
+
+    public abstract void asyncSave();
 
     public String getLang() {
         return lang;

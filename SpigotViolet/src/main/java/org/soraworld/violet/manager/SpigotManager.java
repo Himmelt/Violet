@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IPlugin;
+import org.soraworld.violet.plugin.SpigotPlugin;
 import org.soraworld.violet.util.ChatColor;
 
 import javax.annotation.Nonnull;
@@ -11,10 +12,20 @@ import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.HashMap;
 
-public abstract class SpigotManager extends VioletManager {
+public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
 
-    public SpigotManager(IPlugin plugin, Path path) {
+    public SpigotManager(SpigotPlugin plugin, Path path) {
         super(plugin, path);
+    }
+
+    public void asyncSave() {
+        if (!asyncLock) {
+            asyncLock = true;
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                save();
+                asyncLock = false;
+            });
+        }
     }
 
     public String trans(@Nonnull String key, Object... args) {
@@ -45,7 +56,7 @@ public abstract class SpigotManager extends VioletManager {
         private static Manager manager;
         private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
 
-        public Manager(IPlugin plugin, Path path) {
+        public Manager(SpigotPlugin plugin, Path path) {
             super(plugin, path);
             manager = this;
         }

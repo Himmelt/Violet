@@ -92,7 +92,7 @@ public abstract class SpigotCommand {
                 public void execute(CommandSender sender, CommandArgs args) {
                     if (args.notEmpty()) {
                         if (manager.setLang(args.first())) {
-                            manager.save();
+                            manager.asyncSave();
                             manager.sendKey(sender, KEY_SET_LANG, manager.getLang());
                         } else {
                             manager.sendKey(sender, KEY_SET_LANG_FAILED, args.first());

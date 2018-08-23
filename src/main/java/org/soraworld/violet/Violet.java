@@ -8,7 +8,7 @@ public final class Violet {
     public static final String PLUGIN_NAME = "Violet";
     public static final String SPIGOT_NAME = "SpigotViolet";
     public static final String SPONGE_NAME = "SpongeViolet";
-    public static final String PLUGIN_VERSION = "2.2.4";
+    public static final String PLUGIN_VERSION = "2.2.5";
     public static final String PERM_ADMIN = PLUGIN_ID + ".admin";
 
     public static final String KEY_CHAT_HEAD = "chatHead";
