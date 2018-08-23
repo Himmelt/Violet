@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Matcher;
 
 public abstract class VioletManager implements IManager {
 
@@ -43,7 +42,7 @@ public abstract class VioletManager implements IManager {
     }
 
     private void setHead(@Nonnull String head) {
-        this.colorHead = defChatColor() + colorize(head) + ChatColor.RESET;
+        this.colorHead = defChatColor() + ChatColor.colorize(head) + ChatColor.RESET;
         this.plainHead = ChatColor.REAL_COLOR.matcher(colorHead).replaceAll("");
     }
 
@@ -60,7 +59,7 @@ public abstract class VioletManager implements IManager {
             langNode.load(true);
             HashMap<String, String> map = langNode.asStringMap();
             for (Map.Entry<String, String> entry : map.entrySet()) {
-                entry.setValue(colorize(entry.getValue()));
+                entry.setValue(ChatColor.colorize(entry.getValue()));
             }
             return map;
         } catch (Throwable e) {
@@ -69,20 +68,6 @@ public abstract class VioletManager implements IManager {
             if (debug) e.printStackTrace();
             return new HashMap<>();
         }
-    }
-
-    private static String colorize(@Nonnull String text) {
-        Matcher matcher = ChatColor.COLOR_PATTERN.matcher(text);
-        StringBuilder builder = new StringBuilder();
-        int head = 0;
-        while (matcher.find()) {
-            String group = matcher.group().replace('&', ChatColor.COLOR_CHAR).replace(ChatColor.D_COLOR, "&");
-            int start = matcher.start();
-            builder.append(text, head, start).append(group);
-            head = matcher.end();
-        }
-        builder.append(text, head, text.length());
-        return builder.toString();
     }
 
     public boolean load() {
