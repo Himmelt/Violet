@@ -12,6 +12,9 @@ import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.List;
 
+/**
+ * SpigotViolet 插件.
+ */
 public class SpigotViolet extends SpigotPlugin {
 
     @Nonnull
@@ -34,6 +37,11 @@ public class SpigotViolet extends SpigotPlugin {
         return new SpigotCommand.CommandViolet(null, false, manager, getId());
     }
 
+    @Nullable
+    public List<Listener> registerListeners() {
+        return null;
+    }
+
     public void afterEnable() {
         command.addSub(new SpigotCommand(manager.defAdminPerm(), false, manager, "plugins") {
             public void execute(CommandSender sender, CommandArgs args) {
@@ -43,10 +51,5 @@ public class SpigotViolet extends SpigotPlugin {
             }
         });
         super.afterEnable();
-    }
-
-    @Nullable
-    public List<Listener> registerListeners() {
-        return null;
     }
 }

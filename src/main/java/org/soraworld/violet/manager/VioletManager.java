@@ -16,23 +16,67 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+/**
+ * 管理器抽象类.
+ *
+ * @param <T> 插件类型参数
+ */
 public abstract class VioletManager<T extends IPlugin> implements IManager {
 
+    /**
+     * 语言设置项.
+     */
     @Setting(comment = "comment.lang")
     protected String lang = "zh_cn";
+    /**
+     * 调试设置项.
+     */
     @Setting(comment = "comment.debug")
     protected boolean debug = false;
 
+    /**
+     * 纯文本抬头.
+     */
     protected String plainHead;
+    /**
+     * 带颜色抬头.
+     */
     protected String colorHead;
+    /**
+     * 异步锁.
+     */
     protected boolean asyncLock = false;
+    /**
+     * 配置保存路径.
+     */
     protected final Path path;
+    /**
+     * 配置文件.
+     */
     protected final Path confile;
+    /**
+     * 插件实例.
+     */
     protected final T plugin;
+    /**
+     * Hocon 配置选项.
+     */
     protected final Options options = Options.build();
+    /**
+     * 语言翻译映射表.
+     */
     protected HashMap<String, String> langMap = new HashMap<>();
+    /**
+     * 插件统计列表.
+     */
     protected static final ArrayList<IPlugin> plugins = new ArrayList<>();
 
+    /**
+     * 实例化管理器.
+     *
+     * @param plugin 插件实例
+     * @param path   配置文件路径
+     */
     public VioletManager(@Nonnull T plugin, @Nonnull Path path) {
         this.path = path;
         this.plugin = plugin;
@@ -47,6 +91,12 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         this.plainHead = ChatColor.REAL_COLOR.matcher(colorHead).replaceAll("");
     }
 
+    /**
+     * 获取对应语言的翻译映射表.
+     *
+     * @param lang 目标语言
+     * @return 翻译映射表
+     */
     final HashMap<String, String> loadLangMap(@Nonnull String lang) {
         Path langFile = path.resolve("lang").resolve(lang + ".lang");
         boolean extract = false;
@@ -106,6 +156,9 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         }
     }
 
+    /**
+     * 异步保存配置.
+     */
     public abstract void asyncSave();
 
     public String getLang() {

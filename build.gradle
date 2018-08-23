@@ -25,6 +25,10 @@ subprojects {
 
     sourceCompatibility = targetCompatibility = 1.8
 
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
+
     repositories {
         jcenter()
     }
@@ -67,6 +71,10 @@ subprojects {
         archives javadocJar
         archives sourcesJar
     }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
 }
 
 compileJava.doFirst {

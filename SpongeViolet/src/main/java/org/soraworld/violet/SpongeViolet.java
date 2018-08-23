@@ -1,8 +1,10 @@
 package org.soraworld.violet;
 
+import org.soraworld.violet.command.CommandArgs;
 import org.soraworld.violet.command.SpongeCommand;
 import org.soraworld.violet.manager.SpongeManager;
 import org.soraworld.violet.plugin.SpongePlugin;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.plugin.Plugin;
 
 import javax.annotation.Nonnull;
@@ -10,6 +12,9 @@ import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.List;
 
+/**
+ * SpongeViolet 插件.
+ */
 @Plugin(
         id = Violet.SPONGE_ID,
         name = Violet.SPONGE_NAME,
@@ -43,5 +48,16 @@ public class SpongeViolet extends SpongePlugin {
     @Nullable
     public List<Object> registerListeners() {
         return null;
+    }
+
+    public void afterEnable() {
+        command.addSub(new SpongeCommand(manager.defAdminPerm(), false, manager, "plugins") {
+            public void execute(CommandSource sender, CommandArgs args) {
+                if (manager instanceof SpongeManager.Manager) {
+                    ((SpongeManager.Manager) manager).listPlugins(sender);
+                }
+            }
+        });
+        super.afterEnable();
     }
 }

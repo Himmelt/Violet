@@ -27,15 +27,29 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Sponge 插件.
+ */
 public abstract class SpongePlugin implements IPlugin, CommandCallable {
 
+    /**
+     * 管理器.
+     */
     protected SpongeManager manager;
+    /**
+     * 主命令.
+     */
     protected SpongeCommand command;
 
     @Inject
     @ConfigDir(sharedRoot = false)
     private Path path;
 
+    /**
+     * 插件启用时(游戏初始化事件监听).
+     *
+     * @param event {@link GameInitializationEvent}
+     */
     @Listener
     public void onEnable(GameInitializationEvent event) {
         if (path == null) path = new File("config", getId()).toPath();
@@ -60,17 +74,38 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
         afterEnable();
     }
 
+    /**
+     * 插件禁用时(服务器停止中事件监听).
+     *
+     * @param event {@link GameStoppingServerEvent}
+     */
     @Listener
     public void onDisable(GameStoppingServerEvent event) {
         beforeDisable();
     }
 
+    /**
+     * 注册 Sponge 管理器.
+     *
+     * @param path 配置文件路径
+     * @return 管理器
+     */
     @Nonnull
     protected abstract SpongeManager registerManager(Path path);
 
+    /**
+     * 注册 Sponge 命令.
+     *
+     * @return 命令
+     */
     @Nonnull
     protected abstract SpongeCommand registerCommand();
 
+    /**
+     * 注册监听器.
+     *
+     * @return 监听器列表
+     */
     @Nullable
     protected abstract List<Object> registerListeners();
 

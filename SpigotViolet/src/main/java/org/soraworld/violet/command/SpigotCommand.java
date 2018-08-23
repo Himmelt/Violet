@@ -9,15 +9,42 @@ import java.util.*;
 
 import static org.soraworld.violet.Violet.*;
 
+/**
+ * Spigot 命令.
+ */
 public abstract class SpigotCommand {
 
+    /**
+     * 权限.
+     */
     protected final String perm;
+    /**
+     * 只有玩家可以执行.
+     */
     protected final boolean onlyPlayer;
+    /**
+     * 管理器.
+     */
     protected final SpigotManager manager;
 
+    /**
+     * 命令别名.
+     */
     protected final List<String> aliases = new ArrayList<>();
+    /**
+     * 子命令.
+     */
     protected final HashMap<String, SpigotCommand> subs = new LinkedHashMap<>();
 
+    /**
+     * 实例化命令.
+     * 至少填写一个别名，第一个别名将作为命令主名.
+     *
+     * @param perm       权限
+     * @param onlyPlayer 是否仅玩家可执行
+     * @param manager    管理器
+     * @param aliases    别名
+     */
     public SpigotCommand(String perm, boolean onlyPlayer, SpigotManager manager, String... aliases) {
         this.perm = perm;
         this.manager = manager;
@@ -25,14 +52,31 @@ public abstract class SpigotCommand {
         this.aliases.addAll(Arrays.asList(aliases));
     }
 
+    /**
+     * 非 仅玩家执行.
+     * notOnlyPlayer
+     *
+     * @return 是否 非仅玩家执行
+     */
     public boolean nop() {
         return !onlyPlayer;
     }
 
+    /**
+     * 用法.
+     *
+     * @return 用法
+     */
     public String getUsage() {
         return "";
     }
 
+    /**
+     * 获取tab补全列表.
+     *
+     * @param args 参数
+     * @return 补全列表
+     */
     public List<String> tabCompletions(CommandArgs args) {
         String first = args.first();
         if (args.size() == 1) return getMatchList(first, subs.keySet());
@@ -43,12 +87,23 @@ public abstract class SpigotCommand {
         return new ArrayList<>();
     }
 
+    /**
+     * 添加子命令.
+     *
+     * @param sub 子命令
+     */
     public void addSub(SpigotCommand sub) {
         for (String alias : sub.aliases) {
             subs.putIfAbsent(alias, sub);
         }
     }
 
+    /**
+     * 执行命令.
+     *
+     * @param sender 命令发送者
+     * @param args   参数
+     */
     public void execute(CommandSender sender, CommandArgs args) {
         if (args.notEmpty()) {
             SpigotCommand sub = subs.get(args.first());
@@ -63,10 +118,21 @@ public abstract class SpigotCommand {
         } else sendUsage(sender);
     }
 
+    /**
+     * 执行玩家命令.
+     *
+     * @param player 玩家
+     * @param args   参数
+     */
     public void execute(Player player, CommandArgs args) {
         execute((CommandSender) player, args);
     }
 
+    /**
+     * 发送使用方法.
+     *
+     * @param sender 信息接收者
+     */
     protected void sendUsage(CommandSender sender) {
         String usage = getUsage();
         if (usage != null && !usage.isEmpty()) {
@@ -74,10 +140,23 @@ public abstract class SpigotCommand {
         }
     }
 
+    /**
+     * 命令发送者是否能执行此命令.
+     *
+     * @param sender 命令发送者
+     * @return 是否能执行此命令
+     */
     public boolean canRun(CommandSender sender) {
         return perm == null || sender.hasPermission(perm);
     }
 
+    /**
+     * 获取字符串匹配列表.
+     *
+     * @param text      待匹配文本
+     * @param possibles 待筛选列表
+     * @return 匹配后列表
+     */
     public static List<String> getMatchList(String text, Collection<String> possibles) {
         ArrayList<String> list = new ArrayList<>();
         if (text.isEmpty()) list.addAll(possibles);
@@ -85,7 +164,18 @@ public abstract class SpigotCommand {
         return list;
     }
 
+    /**
+     * Violet 命令.
+     */
     public static class CommandViolet extends SpigotCommand {
+        /**
+         * 实例化.
+         *
+         * @param perm       权限
+         * @param onlyPlayer 是否仅玩家执行
+         * @param manager    管理器
+         * @param aliases    别名
+         */
         public CommandViolet(String perm, boolean onlyPlayer, SpigotManager manager, String... aliases) {
             super(perm, onlyPlayer, manager, aliases);
             addSub(new SpigotCommand(manager.defAdminPerm(), false, manager, "lang") {

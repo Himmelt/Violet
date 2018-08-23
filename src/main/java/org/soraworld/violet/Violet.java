@@ -1,5 +1,9 @@
 package org.soraworld.violet;
 
+
+/**
+ * Violet 常量.
+ */
 public final class Violet {
 
     public static final String PLUGIN_ID = "violet";

@@ -17,9 +17,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+/**
+ * Spigot 插件.
+ */
 public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
 
+    /**
+     * 管理器.
+     */
     protected SpigotManager manager;
+    /**
+     * 主命令.
+     */
     protected SpigotCommand command;
 
     public void onEnable() {
@@ -50,12 +59,28 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
         super.onDisable();
     }
 
+    /**
+     * 注册 Spigot 管理器.
+     *
+     * @param path 配置文件路径
+     * @return 管理器
+     */
     @Nonnull
     protected abstract SpigotManager registerManager(Path path);
 
+    /**
+     * 注册 Spigot 命令.
+     *
+     * @return 命令
+     */
     @Nonnull
     protected abstract SpigotCommand registerCommand();
 
+    /**
+     * 注册监听器.
+     *
+     * @return 监听器列表
+     */
     @Nullable
     protected abstract List<Listener> registerListeners();
 
