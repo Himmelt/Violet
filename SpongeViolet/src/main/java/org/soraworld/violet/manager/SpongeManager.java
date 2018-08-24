@@ -1,7 +1,9 @@
 package org.soraworld.violet.manager;
 
+import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IPlugin;
+import org.soraworld.violet.bstats.SpongeMetrics;
 import org.soraworld.violet.plugin.SpongePlugin;
 import org.soraworld.violet.util.ChatColor;
 import org.spongepowered.api.Sponge;
@@ -12,6 +14,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * Sponge 管理器.
@@ -80,6 +83,13 @@ public abstract class SpongeManager extends VioletManager<SpongePlugin> {
      */
     public static class Manager extends SpongeManager {
 
+        /**
+         * UUID 用于统计信息.
+         */
+        @Setting(comment = "comment.uuid")
+        protected UUID uuid = UUID.randomUUID();
+
+        private SpongeMetrics metrics;
         private static Manager manager;
         private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
 
@@ -145,6 +155,19 @@ public abstract class SpongeManager extends VioletManager<SpongePlugin> {
             for (IPlugin plugin : plugins) {
                 sendKey(sender, "pluginInfo", plugin.getId(), plugin.getVersion());
             }
+        }
+
+        public UUID getUuid() {
+            if (uuid == null) {
+                uuid = UUID.randomUUID();
+                asyncSave();
+            }
+            return uuid;
+        }
+
+        public void startBstats() {
+            if (metrics == null) metrics = new SpongeMetrics(this);
+            metrics.start();
         }
     }
 }

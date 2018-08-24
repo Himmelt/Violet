@@ -51,7 +51,13 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
                 this.getServer().getPluginManager().registerEvents(listener, this);
             }
         }
+        manager.consoleKey(Violet.KEY_PLUGIN_ENABLED, getId());
         afterEnable();
+    }
+
+    @Nonnull
+    public String getId() {
+        return getName().toLowerCase().replace(' ', '_');
     }
 
     @Nonnull
@@ -59,9 +65,16 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
         return getDescription().getVersion();
     }
 
+    public void afterEnable() {
+    }
+
+    public void beforeDisable() {
+    }
+
     public void onDisable() {
         beforeDisable();
         super.onDisable();
+        if (manager != null) manager.consoleKey(Violet.KEY_PLUGIN_DISABLED, getId());
     }
 
     /**
@@ -98,13 +111,5 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
 
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
         return command.tabCompletions(new CommandArgs(args));
-    }
-
-    public void afterEnable() {
-        if (manager != null) manager.consoleKey(Violet.KEY_PLUGIN_ENABLED, getId());
-    }
-
-    public void beforeDisable() {
-        if (manager != null) manager.consoleKey(Violet.KEY_PLUGIN_DISABLED, getId());
     }
 }

@@ -32,4 +32,5 @@ comment {
   lang = "Display Language"
   debug = "Debug Mode"
   version = "Plugin Version"
+  uuid = "Violet unique id，for stats."
 }

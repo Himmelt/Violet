@@ -141,4 +141,6 @@ public interface IManager {
      * @param text 文本
      */
     void println(@Nonnull String text);
+
+    IPlugin getPlugin();
 }

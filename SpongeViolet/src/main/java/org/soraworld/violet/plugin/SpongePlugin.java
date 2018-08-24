@@ -46,6 +46,9 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
     @ConfigDir(sharedRoot = false)
     private Path path;
 
+    @Inject
+    private PluginContainer container;
+
     /**
      * 插件启用时(游戏初始化事件监听).
      *
@@ -72,6 +75,7 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
                 Sponge.getEventManager().registerListeners(this, listener);
             }
         }
+        manager.consoleKey(Violet.KEY_PLUGIN_ENABLED, getId());
         afterEnable();
     }
 
@@ -83,6 +87,7 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
     @Listener
     public void onDisable(GameStoppingServerEvent event) {
         beforeDisable();
+        if (manager != null) manager.consoleKey(Violet.KEY_PLUGIN_DISABLED, getId());
     }
 
     /**
@@ -143,22 +148,27 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
     }
 
     @Nonnull
+    public String getId() {
+        return container.getId();
+    }
+
+    @Nonnull
+    public String getName() {
+        return container.getName();
+    }
+
+    @Nonnull
     public String getVersion() {
-        Optional<PluginContainer> container = Sponge.getPluginManager().fromInstance(this);
-        if (container.isPresent()) {
-            Optional<String> version = container.get().getVersion();
-            if (version.isPresent()) {
-                return version.get();
-            }
-        }
-        return "x.y.z";
+        return container.getVersion().orElse("x.y.z");
+    }
+
+    public boolean isEnabled() {
+        return Sponge.getPluginManager().isLoaded(container.getId());
     }
 
     public void afterEnable() {
-        if (manager != null) manager.consoleKey(Violet.KEY_PLUGIN_ENABLED, getId());
     }
 
     public void beforeDisable() {
-        if (manager != null) manager.consoleKey(Violet.KEY_PLUGIN_DISABLED, getId());
     }
 }

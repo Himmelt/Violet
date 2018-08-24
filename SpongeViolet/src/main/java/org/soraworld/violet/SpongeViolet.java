@@ -26,11 +26,6 @@ import java.util.List;
 public class SpongeViolet extends SpongePlugin {
 
     @Nonnull
-    public String getId() {
-        return Violet.PLUGIN_ID;
-    }
-
-    @Nonnull
     public SpongeManager registerManager(Path path) {
         return new SpongeManager.Manager(this, path);
     }
@@ -45,6 +40,11 @@ public class SpongeViolet extends SpongePlugin {
         return null;
     }
 
+    @Nonnull
+    public String assetsId() {
+        return Violet.ASSETS_ID;
+    }
+
     public void afterEnable() {
         command.addSub(new SpongeCommand(manager.defAdminPerm(), false, manager, "plugins") {
             public void execute(CommandSource sender, CommandArgs args) {
@@ -53,6 +53,8 @@ public class SpongeViolet extends SpongePlugin {
                 }
             }
         });
-        super.afterEnable();
+        if (manager instanceof SpongeManager.Manager) {
+            ((SpongeManager.Manager) manager).startBstats();
+        }
     }
 }

@@ -18,11 +18,6 @@ import java.util.List;
 public class SpigotViolet extends SpigotPlugin {
 
     @Nonnull
-    public String getId() {
-        return Violet.PLUGIN_ID;
-    }
-
-    @Nonnull
     public SpigotManager registerManager(Path path) {
         return new SpigotManager.Manager(this, path);
     }
@@ -37,6 +32,11 @@ public class SpigotViolet extends SpigotPlugin {
         return null;
     }
 
+    @Nonnull
+    public String assetsId() {
+        return Violet.ASSETS_ID;
+    }
+
     public void afterEnable() {
         command.addSub(new SpigotCommand(manager.defAdminPerm(), false, manager, "plugins") {
             public void execute(CommandSender sender, CommandArgs args) {
@@ -45,6 +45,8 @@ public class SpigotViolet extends SpigotPlugin {
                 }
             }
         });
-        super.afterEnable();
+        if (manager instanceof SpigotManager.Manager) {
+            ((SpigotManager.Manager) manager).startBstats();
+        }
     }
 }

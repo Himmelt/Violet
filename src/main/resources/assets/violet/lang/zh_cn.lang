@@ -31,4 +31,5 @@ comment {
   lang = "显示语言"
   debug = "调试模式"
   version = "插件版本"
+  uuid = "Violet插件唯一识别标志，用于插件统计."
 }

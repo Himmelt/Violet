@@ -6,6 +6,7 @@ import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IManager;
 import org.soraworld.violet.api.IPlugin;
+import org.soraworld.violet.serializers.UUIDSerializer;
 import org.soraworld.violet.util.ChatColor;
 
 import javax.annotation.Nonnull;
@@ -81,6 +82,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         this.path = path;
         this.plugin = plugin;
         this.options.setTranslator(this::trans);
+        options.registerType(new UUIDSerializer());
         this.confile = path.resolve(plugin.getId().replace(' ', '_') + ".conf");
         setHead(defChatHead());
         if (!plugins.contains(plugin)) plugins.add(plugin);
@@ -198,5 +200,18 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
 
     public void println(@Nonnull String text) {
         System.out.println(plainHead + text);
+    }
+
+    public T getPlugin() {
+        return plugin;
+    }
+
+    public static int pluginsSize() {
+        return plugins.size();
+    }
+
+    public static IPlugin getPluginAt(int index) {
+        if (index >= 0 && index < plugins.size()) return plugins.get(index);
+        return null;
     }
 }

@@ -2,8 +2,10 @@ package org.soraworld.violet.manager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IPlugin;
+import org.soraworld.violet.bstats.SpigotMetrics;
 import org.soraworld.violet.plugin.SpigotPlugin;
 import org.soraworld.violet.util.ChatColor;
 
@@ -11,6 +13,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * Spigot 管理器.
@@ -79,6 +82,13 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
      */
     public static class Manager extends SpigotManager {
 
+        /**
+         * UUID 用于统计信息.
+         */
+        @Setting(comment = "comment.uuid")
+        private UUID uuid = UUID.randomUUID();
+
+        private SpigotMetrics metrics;
         private static Manager manager;
         private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
 
@@ -144,6 +154,19 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
             for (IPlugin plugin : plugins) {
                 sendKey(sender, "pluginInfo", plugin.getId(), plugin.getVersion());
             }
+        }
+
+        public UUID getUuid() {
+            if (uuid == null) {
+                uuid = UUID.randomUUID();
+                asyncSave();
+            }
+            return uuid;
+        }
+
+        public void startBstats() {
+            if (metrics == null) metrics = new SpigotMetrics(this);
+            metrics.start();
         }
     }
 }
