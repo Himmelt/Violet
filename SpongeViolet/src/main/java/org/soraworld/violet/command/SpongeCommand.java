@@ -168,12 +168,12 @@ public abstract class SpongeCommand {
      */
     public static class CommandViolet extends SpongeCommand {
         /**
-         * Instantiates a new Command violet.
+         * 实例化.
          *
-         * @param perm       the perm
-         * @param onlyPlayer the only player
-         * @param manager    the manager
-         * @param aliases    the aliases
+         * @param perm       权限
+         * @param onlyPlayer 是否仅玩家执行
+         * @param manager    管理器
+         * @param aliases    别名
          */
         public CommandViolet(String perm, boolean onlyPlayer, SpongeManager manager, String... aliases) {
             super(perm, onlyPlayer, manager, aliases);
