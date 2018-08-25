@@ -1,7 +1,6 @@
 package org.soraworld.violet.manager;
 
 import org.soraworld.hocon.node.Setting;
-import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.bstats.SpongeMetrics;
 import org.soraworld.violet.plugin.SpongePlugin;
@@ -11,7 +10,6 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.UUID;
@@ -81,7 +79,7 @@ public abstract class SpongeManager extends VioletManager<SpongePlugin> {
     /**
      * Violet 管理器.
      */
-    public static class Manager extends SpongeManager {
+    public static final class Manager extends SpongeManager {
 
         /**
          * UUID 用于统计信息.
@@ -110,21 +108,11 @@ public abstract class SpongeManager extends VioletManager<SpongePlugin> {
         }
 
         @Nonnull
-        public String defChatHead() {
-            return "[" + Violet.PLUGIN_NAME + "] ";
-        }
-
-        @Nonnull
         public ChatColor defChatColor() {
             return ChatColor.DARK_PURPLE;
         }
 
         public void beforeLoad() {
-        }
-
-        @Nullable
-        public String defAdminPerm() {
-            return Violet.PERM_ADMIN;
         }
 
         public void afterLoad() {

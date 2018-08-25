@@ -3,14 +3,12 @@ package org.soraworld.violet.manager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.soraworld.hocon.node.Setting;
-import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.bstats.SpigotMetrics;
 import org.soraworld.violet.plugin.SpigotPlugin;
 import org.soraworld.violet.util.ChatColor;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.UUID;
@@ -80,7 +78,7 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
     /**
      * Violet 管理器.
      */
-    public static class Manager extends SpigotManager {
+    public static final class Manager extends SpigotManager {
 
         /**
          * UUID 用于统计信息.
@@ -109,21 +107,11 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
         }
 
         @Nonnull
-        public String defChatHead() {
-            return "[" + Violet.PLUGIN_NAME + "] ";
-        }
-
-        @Nonnull
         public ChatColor defChatColor() {
             return ChatColor.DARK_PURPLE;
         }
 
         public void beforeLoad() {
-        }
-
-        @Nullable
-        public String defAdminPerm() {
-            return Violet.PERM_ADMIN;
         }
 
         public void afterLoad() {

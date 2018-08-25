@@ -3,7 +3,6 @@ package org.soraworld.violet.api;
 import org.soraworld.violet.util.ChatColor;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * 管理器接口.
@@ -20,15 +19,19 @@ public interface IManager {
      * @return 默认抬头
      */
     @Nonnull
-    String defChatHead();
+    default String defChatHead() {
+        return "[" + getPlugin().getName() + "] ";
+    }
 
     /**
      * 默认管理权限，用于给基础管理命令添加权限.
      *
      * @return 默认管理权限
      */
-    @Nullable
-    String defAdminPerm();
+    @Nonnull
+    default String defAdminPerm() {
+        return getPlugin().getId() + ".admin";
+    }
 
     /**
      * 默认聊天颜色.

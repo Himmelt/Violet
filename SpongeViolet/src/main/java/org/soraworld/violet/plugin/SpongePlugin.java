@@ -149,7 +149,7 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
 
     @Nonnull
     public String getId() {
-        return container.getId();
+        return container.getId().toLowerCase().replace(' ', '_');
     }
 
     @Nonnull
