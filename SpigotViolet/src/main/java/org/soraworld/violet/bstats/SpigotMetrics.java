@@ -27,19 +27,21 @@ public class SpigotMetrics extends Metrics<SpigotManager.Manager> {
     }
 
     public String getServerJson() {
+        if (serverJson == null) {
+            String bukkitVersion = Bukkit.getVersion();
+            bukkitVersion = bukkitVersion.substring(bukkitVersion.indexOf("MC: ") + 4, bukkitVersion.length() - 1);
+            int onlineMode = Bukkit.getOnlineMode() ? 1 : 0;
+            serverJson = BUKKIT_JSON
+                    .replace("%serverUUID%", manager.getUuid().toString())
+                    .replace("%onlineMode%", String.valueOf(onlineMode))
+                    .replace("%bukkitVersion%", bukkitVersion)
+                    .replace("%javaVersion%", JAVA_VERSION)
+                    .replace("%osName%", OS_NAME)
+                    .replace("%osArch%", OS_ARCH)
+                    .replace("%osVersion%", OS_VERSION)
+                    .replace("%coreCount%", String.valueOf(CORE_COUNT));
+        }
         int playerAmount = Bukkit.getServer().getOnlinePlayers().size();
-        int onlineMode = Bukkit.getOnlineMode() ? 1 : 0;
-        String bukkitVersion = Bukkit.getVersion();
-        bukkitVersion = bukkitVersion.substring(bukkitVersion.indexOf("MC: ") + 4, bukkitVersion.length() - 1);
-        return BUKKIT_JSON
-                .replace("%serverUUID%", manager.getUuid().toString())
-                .replace("%playerAmount%", String.valueOf(playerAmount))
-                .replace("%onlineMode%", String.valueOf(onlineMode))
-                .replace("%bukkitVersion%", bukkitVersion)
-                .replace("%javaVersion%", JAVA_VERSION)
-                .replace("%osName%", OS_NAME)
-                .replace("%osArch%", OS_ARCH)
-                .replace("%osVersion%", OS_VERSION)
-                .replace("%coreCount%", String.valueOf(CORE_COUNT));
+        return serverJson.replace("%playerAmount%", String.valueOf(playerAmount));
     }
 }

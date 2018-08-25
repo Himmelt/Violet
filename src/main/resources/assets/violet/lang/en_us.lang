@@ -35,4 +35,5 @@ comment {
   debug = "Debug Mode"
   version = "Plugin Version"
   uuid = "Violet unique id，for stats."
+  enableStats = "Enable Violet plugin stats."
 }

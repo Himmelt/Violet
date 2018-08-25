@@ -30,6 +30,7 @@ public abstract class Metrics<T extends VioletManager> {
     protected static final String PLUGIN_JSON = "{\"pluginName\":\"%pluginName%\",\"pluginVersion\":\"%pluginVersion%\"}";
 
     protected final T manager;
+    String serverJson = null;
     Timer timer;
 
     Metrics(T manager) {

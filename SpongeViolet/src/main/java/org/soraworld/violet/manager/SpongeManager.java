@@ -86,6 +86,8 @@ public abstract class SpongeManager extends VioletManager<SpongePlugin> {
          */
         @Setting(comment = "comment.uuid")
         protected UUID uuid = UUID.randomUUID();
+        @Setting(comment = "comment.enableStats")
+        private boolean enableStats = true;
 
         private SpongeMetrics metrics;
         private static Manager manager;
@@ -155,7 +157,7 @@ public abstract class SpongeManager extends VioletManager<SpongePlugin> {
 
         public void startBstats() {
             if (metrics == null) metrics = new SpongeMetrics(this);
-            metrics.start();
+            if (enableStats) metrics.start();
         }
     }
 }

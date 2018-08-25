@@ -32,23 +32,23 @@ public class SpongeMetrics extends Metrics<SpongeManager.Manager> {
     }
 
     public String getServerJson() {
-        // Minecraft specific data
+        if (serverJson == null) {
+            int onlineMode = Sponge.getServer().getOnlineMode() ? 1 : 0;
+            String minecraftVersion = Sponge.getGame().getPlatform().getMinecraftVersion().getName();
+            String spongeImplementation = Sponge.getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getName();
+            serverJson = SPONGE_JSON
+                    .replace("%serverUUID%", manager.getUuid().toString())
+                    .replace("%onlineMode%", String.valueOf(onlineMode))
+                    .replace("%minecraftVersion%", minecraftVersion)
+                    .replace("%spongeImplementation%", spongeImplementation)
+                    .replace("%javaVersion%", JAVA_VERSION)
+                    .replace("%osName%", OS_NAME)
+                    .replace("%osArch%", OS_ARCH)
+                    .replace("%osVersion%", OS_VERSION)
+                    .replace("%coreCount%", String.valueOf(CORE_COUNT));
+        }
         int playerAmount = Sponge.getServer().getOnlinePlayers().size();
         playerAmount = playerAmount > 200 ? 200 : playerAmount;
-        int onlineMode = Sponge.getServer().getOnlineMode() ? 1 : 0;
-        String minecraftVersion = Sponge.getGame().getPlatform().getMinecraftVersion().getName();
-        String spongeImplementation = Sponge.getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getName();
-
-        return SPONGE_JSON
-                .replace("%serverUUID%", manager.getUuid().toString())
-                .replace("%playerAmount%", String.valueOf(playerAmount))
-                .replace("%onlineMode%", String.valueOf(onlineMode))
-                .replace("%minecraftVersion%", minecraftVersion)
-                .replace("%spongeImplementation%", spongeImplementation)
-                .replace("%javaVersion%", JAVA_VERSION)
-                .replace("%osName%", OS_NAME)
-                .replace("%osArch%", OS_ARCH)
-                .replace("%osVersion%", OS_VERSION)
-                .replace("%coreCount%", String.valueOf(CORE_COUNT));
+        return serverJson.replace("%playerAmount%", String.valueOf(playerAmount));
     }
 }

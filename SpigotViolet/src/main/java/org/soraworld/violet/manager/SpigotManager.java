@@ -85,6 +85,8 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
          */
         @Setting(comment = "comment.uuid")
         private UUID uuid = UUID.randomUUID();
+        @Setting(comment = "comment.enableStats")
+        private boolean enableStats = true;
 
         private SpigotMetrics metrics;
         private static Manager manager;
@@ -154,7 +156,7 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
 
         public void startBstats() {
             if (metrics == null) metrics = new SpigotMetrics(this);
-            metrics.start();
+            if (enableStats) metrics.start();
         }
     }
 }

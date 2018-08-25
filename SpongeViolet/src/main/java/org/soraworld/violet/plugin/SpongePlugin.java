@@ -98,7 +98,10 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
     @Listener
     public void onDisable(GameStoppingServerEvent event) {
         beforeDisable();
-        if (manager != null) manager.consoleKey(Violet.KEY_PLUGIN_DISABLED, getId());
+        if (manager != null) {
+            manager.consoleKey(Violet.KEY_PLUGIN_DISABLED, getId());
+            manager.save();
+        }
     }
 
     /**
