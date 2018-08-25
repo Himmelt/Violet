@@ -16,8 +16,8 @@ import java.util.List;
  * SpongeViolet 插件.
  */
 @Plugin(
-        id = Violet.SPONGE_ID,
-        name = Violet.SPONGE_NAME,
+        id = Violet.PLUGIN_ID,
+        name = Violet.PLUGIN_NAME,
         version = Violet.PLUGIN_VERSION,
         authors = {"Himmelt"},
         url = "https://github.com/Himmelt/Violet",

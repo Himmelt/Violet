@@ -27,6 +27,8 @@ invalidFloat = "参数不是有效小数."
 
 pluginInfo = "插件信息  id - &a%s&r  version - &e%s"
 
+bStatsFailed = "统计信息发送失败!"
+
 comment {
   lang = "显示语言"
   debug = "调试模式"

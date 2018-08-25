@@ -28,6 +28,8 @@ invalidFloat = "Arg is invalid float."
 
 pluginInfo = "Plugin info  id - &a%s&r  version - &e%s"
 
+bStatsFailed = "Stats data send failed!"
+
 comment {
   lang = "Display Language"
   debug = "Debug Mode"

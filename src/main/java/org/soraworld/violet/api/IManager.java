@@ -145,5 +145,10 @@ public interface IManager {
      */
     void println(@Nonnull String text);
 
+    /**
+     * 获取插件实例.
+     *
+     * @return 获取
+     */
     IPlugin getPlugin();
 }

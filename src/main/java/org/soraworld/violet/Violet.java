@@ -7,13 +7,9 @@ package org.soraworld.violet;
 public final class Violet {
 
     public static final String PLUGIN_ID = "violet";
-    public static final String SPIGOT_ID = "spigotviolet";
-    public static final String SPONGE_ID = "spongeviolet";
+    public static final String ASSETS_ID = "violet";
     public static final String PLUGIN_NAME = "Violet";
-    public static final String SPIGOT_NAME = "SpigotViolet";
-    public static final String SPONGE_NAME = "SpongeViolet";
     public static final String PLUGIN_VERSION = "2.2.6";
-    public static final String PERM_ADMIN = PLUGIN_ID + ".admin";
 
     public static final String KEY_CHAT_HEAD = "chatHead";
     public static final String KEY_GET_VERSION = "getVersion";
@@ -36,5 +32,4 @@ public final class Violet {
     public static final String KEY_PLUGIN_ENABLED = "pluginEnabled";
     public static final String KEY_PLUGIN_DISABLED = "pluginDisabled";
 
-    public static final String ASSETS_ID = "violet";
 }

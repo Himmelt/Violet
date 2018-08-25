@@ -46,8 +46,10 @@ public abstract class Metrics<T extends VioletManager> {
             try {
                 sendData(json, sponge);
             } catch (Throwable e) {
-                if (manager.isDebug()) e.printStackTrace();
-                manager.consoleKey("bStatsFailed");
+                if (manager.isDebug()) {
+                    e.printStackTrace();
+                    manager.consoleKey("bStatsFailed");
+                }
             }
         }).start();
     }
