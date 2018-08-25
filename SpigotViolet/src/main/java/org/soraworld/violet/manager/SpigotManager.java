@@ -80,9 +80,6 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
      */
     public static final class Manager extends SpigotManager {
 
-        /**
-         * UUID 用于统计信息.
-         */
         @Setting(comment = "comment.uuid")
         private UUID uuid = UUID.randomUUID();
         @Setting(comment = "comment.enableStats")
@@ -146,6 +143,11 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
             }
         }
 
+        /**
+         * 获取 Violet 插件运行 uuid，用于统计.
+         *
+         * @return the uuid
+         */
         public UUID getUuid() {
             if (uuid == null) {
                 uuid = UUID.randomUUID();
@@ -154,6 +156,9 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
             return uuid;
         }
 
+        /**
+         * 如果启用统计，则开始统计计划任务.
+         */
         public void startBstats() {
             if (metrics == null) metrics = new SpigotMetrics(this);
             if (enableStats) metrics.start();

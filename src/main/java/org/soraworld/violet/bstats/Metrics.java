@@ -15,19 +15,18 @@ import java.util.zip.GZIPOutputStream;
 
 public abstract class Metrics<T extends VioletManager> {
 
-    protected static final int B_STATS_VERSION = 1;
+    static final String OS_NAME = System.getProperty("os.name");
+    static final String OS_ARCH = System.getProperty("os.arch");
+    static final String OS_VERSION = System.getProperty("os.version");
+    static final String CORE_COUNT = String.valueOf(Runtime.getRuntime().availableProcessors());
+    static final String JAVA_VERSION = System.getProperty("java.version");
+    static final String BUKKIT_JSON = "{\"serverUUID\":\"%serverUUID%\",\"playerAmount\":%playerAmount%,\"onlineMode\":%onlineMode%,\"bukkitVersion\":\"%bukkitVersion%\",\"javaVersion\":\"%javaVersion%\",\"osName\":\"%osName%\",\"osArch\":\"%osArch%\",\"osVersion\":\"%osVersion%\",\"coreCount\":%coreCount%,\"plugins\":[%pluginList%]}";
+    static final String SPONGE_JSON = "{\"serverUUID\":\"%serverUUID%\",\"playerAmount\":%playerAmount%,\"onlineMode\":%onlineMode%,\"minecraftVersion\":\"%minecraftVersion%\",\"spongeImplementation\":\"%spongeImplementation%\",\"javaVersion\":\"%javaVersion%\",\"osName\":\"%osName%\",\"osArch\":\"%osArch%\",\"osVersion\":\"%osVersion%\",\"coreCount\":%coreCount%,\"plugins\":[%pluginList%]}";
 
-    protected static final String OS_NAME = System.getProperty("os.name");
-    protected static final String OS_ARCH = System.getProperty("os.arch");
-    protected static final String OS_VERSION = System.getProperty("os.version");
-    protected static final String CORE_COUNT = String.valueOf(Runtime.getRuntime().availableProcessors());
-    protected static final String JAVA_VERSION = System.getProperty("java.version");
-
-    protected static final String BUKKIT_URL = "https://bStats.org/submitData/bukkit";
-    protected static final String SPONGE_URL = "https://bStats.org/submitData/sponge";
-    protected static final String BUKKIT_JSON = "{\"serverUUID\":\"%serverUUID%\",\"playerAmount\":%playerAmount%,\"onlineMode\":%onlineMode%,\"bukkitVersion\":\"%bukkitVersion%\",\"javaVersion\":\"%javaVersion%\",\"osName\":\"%osName%\",\"osArch\":\"%osArch%\",\"osVersion\":\"%osVersion%\",\"coreCount\":%coreCount%,\"plugins\":[%pluginList%]}";
-    protected static final String SPONGE_JSON = "{\"serverUUID\":\"%serverUUID%\",\"playerAmount\":%playerAmount%,\"onlineMode\":%onlineMode%,\"minecraftVersion\":\"%minecraftVersion%\",\"spongeImplementation\":\"%spongeImplementation%\",\"javaVersion\":\"%javaVersion%\",\"osName\":\"%osName%\",\"osArch\":\"%osArch%\",\"osVersion\":\"%osVersion%\",\"coreCount\":%coreCount%,\"plugins\":[%pluginList%]}";
-    protected static final String PLUGIN_JSON = "{\"pluginName\":\"%pluginName%\",\"pluginVersion\":\"%pluginVersion%\"}";
+    private static final int B_STATS_VERSION = 1;
+    private static final String BUKKIT_URL = "https://bStats.org/submitData/bukkit";
+    private static final String SPONGE_URL = "https://bStats.org/submitData/sponge";
+    private static final String PLUGIN_JSON = "{\"pluginName\":\"%pluginName%\",\"pluginVersion\":\"%pluginVersion%\"}";
 
     protected final T manager;
     String serverJson = null;
