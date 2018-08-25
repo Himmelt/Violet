@@ -13,6 +13,8 @@ import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
+import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
+import org.spongepowered.api.event.game.state.GameStartingServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
@@ -49,13 +51,8 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
     @Inject
     private PluginContainer container;
 
-    /**
-     * 插件启用时(游戏初始化事件监听).
-     *
-     * @param event {@link GameInitializationEvent}
-     */
     @Listener
-    public void onEnable(GameInitializationEvent event) {
+    public void onPreInit(GamePreInitializationEvent event) {
         if (path == null) path = new File("config", getId()).toPath();
         if (Files.notExists(path)) {
             try {
@@ -65,16 +62,30 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
             }
         }
         manager = registerManager(path);
+        command = registerCommand();
+    }
+
+    /**
+     * 插件启用时(游戏初始化事件监听).
+     *
+     * @param event {@link GameInitializationEvent}
+     */
+    @Listener
+    public void onInit(GameInitializationEvent event) {
+        manager.beforeLoad();
         manager.load();
         manager.afterLoad();
-        command = registerCommand();
-        Sponge.getCommandManager().register(this, this, getId());
         List<Object> listeners = registerListeners();
         if (listeners != null && !listeners.isEmpty()) {
             for (Object listener : listeners) {
                 Sponge.getEventManager().registerListeners(this, listener);
             }
         }
+    }
+
+    @Listener
+    public void onStarting(GameStartingServerEvent event) {
+        Sponge.getCommandManager().register(this, this, getId());
         manager.consoleKey(Violet.KEY_PLUGIN_ENABLED, getId());
         afterEnable();
     }

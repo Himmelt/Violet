@@ -126,10 +126,10 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
          * @return 全局翻译结果
          */
         public static String trans(String lang, String key, Object... args) {
+            if (manager == null) return key;
             String text = langMaps.computeIfAbsent(lang, s -> manager.loadLangMap(s)).get(key);
             if (text == null || text.isEmpty()) {
-                if (manager != null) return manager.trans(key, args);
-                else return key;
+                return manager.trans(key, args);
             } else return text;
         }
 

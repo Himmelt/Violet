@@ -41,10 +41,10 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
             }
         }
         manager = registerManager(path);
+        command = registerCommand();
         manager.beforeLoad();
         manager.load();
         manager.afterLoad();
-        command = registerCommand();
         List<Listener> listeners = registerListeners();
         if (listeners != null && !listeners.isEmpty()) {
             for (Listener listener : listeners) {

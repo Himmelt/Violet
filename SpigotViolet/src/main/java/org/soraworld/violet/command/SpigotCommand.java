@@ -113,7 +113,7 @@ public abstract class SpigotCommand {
                     if (sender instanceof org.bukkit.entity.Player) sub.execute((org.bukkit.entity.Player) sender, args);
                     else if (!sub.onlyPlayer) sub.execute(sender, args);
                     else manager.sendKey(sender, Violet.KEY_ONLY_PLAYER);
-                } else manager.sendKey(sender, Violet.KEY_NO_CMD_PERM);
+                } else manager.sendKey(sender, Violet.KEY_NO_CMD_PERM, sub.perm);
             } else sendUsage(sender);
         } else sendUsage(sender);
     }

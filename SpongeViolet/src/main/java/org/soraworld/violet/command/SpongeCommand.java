@@ -66,7 +66,7 @@ public abstract class SpongeCommand {
                     if (sender instanceof Player) sub.execute((Player) sender, args);
                     else if (!sub.onlyPlayer) sub.execute(sender, args);
                     else manager.sendKey(sender, Violet.KEY_ONLY_PLAYER);
-                } else manager.sendKey(sender, Violet.KEY_NO_CMD_PERM);
+                } else manager.sendKey(sender, Violet.KEY_NO_CMD_PERM, sub.perm);
             } else sendUsage(sender);
         } else sendUsage(sender);
     }
