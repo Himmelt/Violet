@@ -9,6 +9,11 @@ import org.soraworld.violet.manager.SpigotManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.invoke.LambdaMetafactory;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.Method;
 import java.util.*;
 
 import static org.soraworld.violet.Violet.*;
@@ -30,6 +35,12 @@ public abstract class SpigotCommand extends Command {
      * 子命令.
      */
     protected final HashMap<String, SpigotCommand> subs = new LinkedHashMap<>();
+
+    private static final MethodType METHOD_VOID = MethodType.methodType(void.class);
+    private static final MethodType INVOKE_EXEC = MethodType.methodType(Executor.class);
+
+    /* 注册的 参数里可以加上方法名，根据方法名查找更快*/
+    // 先获取 class 下所有的 @Sub Method
 
     /**
      * 实例化 Spigot 命令.
@@ -76,6 +87,11 @@ public abstract class SpigotCommand extends Command {
         for (String alias : sub.getAliases()) {
             subs.putIfAbsent(alias, sub);
         }
+    }
+
+    public void extractMethod(Object target, Class<?> upper) {
+        if ()
+            LambdaMetafactory.metafactory()
     }
 
     /**
@@ -219,5 +235,9 @@ public abstract class SpigotCommand extends Command {
         public String getUsage() {
             return "/violet lang|debug|save|reload";
         }
+    }
+
+    public interface Executor {
+        void execute(CommandSender sender, CommandArgs args);
     }
 }
