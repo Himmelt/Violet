@@ -108,38 +108,59 @@ public class SpigotCommand extends Command {
     }
 
     /* TODO 搞一个类 专门注解存储方法 然后 提取那个类 或 其实例*/
-    public void extractSub(Object target, Class<?> clazz) {
-        if (target == null && clazz == null) return;
-        if (target != null && clazz == null) clazz = target.getClass();
-        ArrayList<Method> methods = Reflects.getMethods(clazz);
+    public void extractSub(Object target) {
+        if (target == null) return;
+        boolean isClass = target instanceof Class;
+        ArrayList<Method> methods = getMethods(isClass ? (Class<?>) target : target.getClass());
         for (Method method : methods) {
-            if (CommandSender.class.isAssignableFrom(method.getParameterTypes()[0])) {
-                boolean isStatic = Modifier.isStatic(method.getModifiers());
-                if (target == null && !isStatic) continue;
+            boolean isStatic = Modifier.isStatic(method.getModifiers());
+            if (isClass && !isStatic) continue;
+            Sub sub = method.getAnnotation(Sub.class);
+            MethodHandles.Lookup lookup = MethodHandles.lookup();
+            try {
+                MethodHandle handle = lookup.unreflect(method);
+                //implArity + receiverArity != capturedArity + samArity
+                CallSite site = LambdaMetafactory.metafactory(lookup, "execute", INVOKE_EXEC, METHOD_VOID, handle, METHOD_VOID);
+                Executor executor = isStatic ? (Executor) site.getTarget().invokeExact() : (Executor) site.getTarget().invokeExact(target);
+                Paths paths = new Paths(sub.paths());
+                String name = paths.empty() ? method.getName().toLowerCase() : paths.first().replace(' ', '_').replace(':', '_');
+                if (paths.empty()) paths = new Paths(name);
+                else paths.set(0, name);
+                String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
+                SpigotCommand command = getOrCreateSub(paths);
+                command.executor = executor;
+                command.setPermission(perm);
+                command.onlyPlayer = sub.onlyPlayer();
+                command.setAliases(new ArrayList<>(Arrays.asList(sub.aliases())));
+                command.setTabCompletions(sub.tabs());
+                command.setUsage(sub.usage());
+                addSub(command);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static ArrayList<Method> getMethods(Class<?> clazz) {
+        if (clazz == null || clazz == Object.class || clazz == Class.class) return new ArrayList<>();
+        ArrayList<Method> list = new ArrayList<>();
+        Method[] methods = clazz.getDeclaredMethods();
+        if (methods != null && methods.length > 0) {
+            for (Method method : methods) {
+                if (!Modifier.isPublic(method.getModifiers())) continue;
                 Sub sub = method.getAnnotation(Sub.class);
-                MethodHandles.Lookup lookup = MethodHandles.lookup();
-                try {
-                    MethodHandle handle = lookup.unreflect(method);
-                    CallSite site = LambdaMetafactory.metafactory(lookup, "execute", INVOKE_EXEC, METHOD_VOID, handle, METHOD_VOID);
-                    Executor executor = isStatic ? (Executor) site.getTarget().invokeExact() : (Executor) site.getTarget().invokeExact(target);
-                    Paths paths = new Paths(sub.paths());
-                    String name = paths.empty() ? method.getName().toLowerCase() : paths.first().replace(' ', '_').replace(':', '_');
-                    if (paths.empty()) paths = new Paths(name);
-                    else paths.set(0, name);
-                    String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
-                    SpigotCommand command = getOrCreateSub(paths);
-                    command.executor = executor;
-                    command.setPermission(perm);
-                    command.onlyPlayer = sub.onlyPlayer();
-                    command.setAliases(new ArrayList<>(Arrays.asList(sub.aliases())));
-                    command.setTabCompletions(sub.tabs());
-                    command.setUsage(sub.usage());
-                    addSub(command);
-                } catch (Throwable e) {
-                    e.printStackTrace();
+                if (sub == null) continue;
+                Class<?> ret = method.getReturnType();
+                if (!ret.equals(Void.class) && !ret.equals(void.class)) continue;
+                Class<?>[] params = method.getParameterTypes();
+                if (params.length == 2 && params[0] == CommandSender.class && params[1] == CommandArgs.class) {
+                    method.setAccessible(true);
+                    list.add(method);
                 }
             }
         }
+        list.addAll(getMethods(clazz.getSuperclass()));
+        return list;
     }
 
     public SpigotCommand getOrCreateSub(Paths paths) {
