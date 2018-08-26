@@ -135,9 +135,11 @@ public abstract class SpigotCommand extends Command {
     }
 
     public final boolean execute(CommandSender sender, String commandLabel, String[] args) {
-        if (sender instanceof Player) execute(((Player) sender), new CommandArgs(args));
-        else if (!onlyPlayer) execute(sender, new CommandArgs(args));
-        else manager.sendKey(sender, Violet.KEY_ONLY_PLAYER);
+        if (testPermission(sender)) {
+            if (sender instanceof Player) execute(((Player) sender), new CommandArgs(args));
+            else if (!onlyPlayer) execute(sender, new CommandArgs(args));
+            else manager.sendKey(sender, Violet.KEY_ONLY_PLAYER);
+        } else manager.sendKey(sender, Violet.KEY_NO_CMD_PERM, getPermission());
         return true;
     }
 

@@ -37,7 +37,7 @@ public class SpongeViolet extends SpongePlugin {
     }
 
     public void registerCommands() {
-        SpongeCommand command = new SpongeCommand.CommandViolet(getId(), null, false, manager);
+        SpongeCommand command = new SpongeCommand.CommandViolet(getId(), manager.defAdminPerm(), false, manager);
         command.addSub(new SpongeCommand("plugins", manager.defAdminPerm(), false, manager) {
             public void execute(CommandSource sender, CommandArgs args) {
                 if (manager instanceof SpongeManager.Manager) {

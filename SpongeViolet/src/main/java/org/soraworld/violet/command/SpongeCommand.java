@@ -155,9 +155,11 @@ public abstract class SpongeCommand implements CommandCallable {
 
     @Nonnull
     public CommandResult process(@Nonnull CommandSource sender, @Nonnull String args) {
-        if (sender instanceof Player) execute(((Player) sender), new CommandArgs(args));
-        else if (!onlyPlayer) execute(sender, new CommandArgs(args));
-        else manager.sendKey(sender, Violet.KEY_ONLY_PLAYER);
+        if (testPermission(sender)) {
+            if (sender instanceof Player) execute(((Player) sender), new CommandArgs(args));
+            else if (!onlyPlayer) execute(sender, new CommandArgs(args));
+            else manager.sendKey(sender, Violet.KEY_ONLY_PLAYER);
+        } else manager.sendKey(sender, Violet.KEY_NO_CMD_PERM, perm);
         return CommandResult.success();
     }
 
