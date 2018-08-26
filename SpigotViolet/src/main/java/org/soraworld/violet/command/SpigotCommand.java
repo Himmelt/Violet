@@ -9,11 +9,9 @@ import org.soraworld.violet.manager.SpigotManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.invoke.LambdaMetafactory;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
+import java.lang.invoke.*;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 import static org.soraworld.violet.Violet.*;
@@ -21,16 +19,29 @@ import static org.soraworld.violet.Violet.*;
 /**
  * Spigot 命令.
  */
-public abstract class SpigotCommand extends Command {
+public class SpigotCommand extends Command {
+
+    public boolean isOnlyPlayer() {
+        return onlyPlayer;
+    }
+
+    private void setOnlyPlayer(boolean onlyPlayer) {
+        this.onlyPlayer = onlyPlayer;
+    }
 
     /**
      * 只有玩家可以执行.
      */
-    protected final boolean onlyPlayer;
+    private boolean onlyPlayer;
     /**
      * 管理器.
      */
     protected final SpigotManager manager;
+
+    protected ArrayList<String> tabs;
+
+    protected Executor executor;
+
     /**
      * 子命令.
      */
@@ -68,6 +79,7 @@ public abstract class SpigotCommand extends Command {
      * @return 补全列表
      */
     public List<String> tabCompletions(CommandArgs args) {
+        if (tabs != null && !tabs.isEmpty()) return tabs;
         String first = args.first();
         if (args.size() == 1) return getMatchList(first, subs.keySet());
         if (subs.containsKey(first)) {
@@ -75,6 +87,12 @@ public abstract class SpigotCommand extends Command {
             return subs.get(first).tabCompletions(args);
         }
         return new ArrayList<>();
+    }
+
+    public void setTabCompletions(String[] tabs) {
+        if (tabs != null && tabs.length > 0) {
+            this.tabs = new ArrayList<>(Arrays.asList(tabs));
+        }
     }
 
     /**
@@ -89,9 +107,46 @@ public abstract class SpigotCommand extends Command {
         }
     }
 
-    public void extractMethod(Object target, Class<?> upper) {
-        if ()
-            LambdaMetafactory.metafactory()
+    /* TODO 搞一个类 专门注解存储方法 然后 提取那个类 或 其实例*/
+    public void extractSub(Object target, Class<?> clazz) {
+        if (target == null && clazz == null) return;
+        if (target != null && clazz == null) clazz = target.getClass();
+        ArrayList<Method> methods = Reflects.getMethods(clazz);
+        for (Method method : methods) {
+            if (CommandSender.class.isAssignableFrom(method.getParameterTypes()[0])) {
+                boolean isStatic = Modifier.isStatic(method.getModifiers());
+                if (target == null && !isStatic) continue;
+                Sub sub = method.getAnnotation(Sub.class);
+                MethodHandles.Lookup lookup = MethodHandles.lookup();
+                try {
+                    MethodHandle handle = lookup.unreflect(method);
+                    CallSite site = LambdaMetafactory.metafactory(lookup, "execute", INVOKE_EXEC, METHOD_VOID, handle, METHOD_VOID);
+                    Executor executor = isStatic ? (Executor) site.getTarget().invokeExact() : (Executor) site.getTarget().invokeExact(target);
+                    Paths paths = new Paths(sub.paths());
+                    String name = paths.empty() ? method.getName().toLowerCase() : paths.first().replace(' ', '_').replace(':', '_');
+                    if (paths.empty()) paths = new Paths(name);
+                    else paths.set(0, name);
+                    String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
+                    SpigotCommand command = getOrCreateSub(paths);
+                    command.executor = executor;
+                    command.setPermission(perm);
+                    command.onlyPlayer = sub.onlyPlayer();
+                    command.setAliases(new ArrayList<>(Arrays.asList(sub.aliases())));
+                    command.setTabCompletions(sub.tabs());
+                    command.setUsage(sub.usage());
+                    addSub(command);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public SpigotCommand getOrCreateSub(Paths paths) {
+        if (paths.empty()) return this;
+        SpigotCommand sub = subs.get(paths.first());
+        if (sub == null) sub = new SpigotCommand(paths.first(), null, false, manager);
+        return sub.getOrCreateSub(paths.next());
     }
 
     /**
@@ -101,7 +156,8 @@ public abstract class SpigotCommand extends Command {
      * @param args   参数
      */
     public void execute(CommandSender sender, CommandArgs args) {
-        if (args.notEmpty()) {
+        if (executor != null) executor.execute(sender, args);
+        else if (args.notEmpty()) {
             SpigotCommand sub = subs.get(args.first());
             if (sub != null) {
                 if (sub.testPermission(sender)) {
@@ -235,9 +291,5 @@ public abstract class SpigotCommand extends Command {
         public String getUsage() {
             return "/violet lang|debug|save|reload";
         }
-    }
-
-    public interface Executor {
-        void execute(CommandSender sender, CommandArgs args);
     }
 }

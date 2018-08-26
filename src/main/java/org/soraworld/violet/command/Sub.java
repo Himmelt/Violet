@@ -6,11 +6,15 @@ import java.lang.annotation.*;
 @Target(ElementType.METHOD)
 @Documented
 public @interface Sub {
-    String path() default "";
+    String[] paths() default {};
 
     String perm() default "";
 
+    boolean onlyPlayer() default false;
+
     String[] aliases() default {};
+
+    String[] tabs() default {};
 
     String usage() default "";
 }
