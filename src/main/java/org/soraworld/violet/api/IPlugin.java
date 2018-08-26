@@ -66,10 +66,12 @@ public interface IPlugin {
     /**
      * 插件启用后.
      */
-    void afterEnable();
+    default void afterEnable() {
+    }
 
     /**
      * 插件停用前.
      */
-    void beforeDisable();
+    default void beforeDisable() {
+    }
 }

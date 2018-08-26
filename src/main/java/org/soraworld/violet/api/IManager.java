@@ -60,12 +60,14 @@ public interface IManager {
     /**
      * 在配置加载之前执行.
      */
-    void beforeLoad();
+    default void beforeLoad() {
+    }
 
     /**
      * 在配置加载之后执行.
      */
-    void afterLoad();
+    default void afterLoad() {
+    }
 
     /**
      * 获取当前语言.

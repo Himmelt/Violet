@@ -1,18 +1,17 @@
 package org.soraworld.violet.plugin;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import org.bukkit.Bukkit;
+import org.bukkit.command.CommandMap;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IPlugin;
-import org.soraworld.violet.command.CommandArgs;
 import org.soraworld.violet.command.SpigotCommand;
 import org.soraworld.violet.manager.SpigotManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -22,14 +21,35 @@ import java.util.List;
  */
 public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
 
+    private static final CommandMap commandMap;
+
+    static {
+        CommandMap map = null;
+        try {
+            Field field = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+            field.setAccessible(true);
+            Object object = field.get(Bukkit.getServer());
+            if (object instanceof CommandMap) {
+                map = (CommandMap) object;
+            } else System.out.println("Invalid CommandMap in Server !!!");
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        commandMap = map;
+    }
+
+    public static void register(IPlugin plugin, SpigotCommand command) {
+        if (commandMap != null) {
+            if (!commandMap.register(plugin.getId(), command)) {
+                System.out.println("Command " + command.getName() + " in plugin " + plugin.getName() + " register failed !!!");
+            }
+        } else System.out.println("Null commandMap !!!!!!!!!!!!!!!!!!!!");
+    }
+
     /**
-     * 管理器.
+     * 主管理器.
      */
     protected SpigotManager manager;
-    /**
-     * 主命令.
-     */
-    protected SpigotCommand command;
 
     public void onEnable() {
         Path path = getDataFolder().toPath();
@@ -41,7 +61,6 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
             }
         }
         manager = registerManager(path);
-        command = registerCommand();
         manager.beforeLoad();
         manager.load();
         manager.afterLoad();
@@ -51,6 +70,7 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
                 this.getServer().getPluginManager().registerEvents(listener, this);
             }
         }
+        registerCommands();
         manager.consoleKey(Violet.KEY_PLUGIN_ENABLED, getId());
         afterEnable();
     }
@@ -63,12 +83,6 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
     @Nonnull
     public String getVersion() {
         return getDescription().getVersion();
-    }
-
-    public void afterEnable() {
-    }
-
-    public void beforeDisable() {
     }
 
     public void onDisable() {
@@ -90,14 +104,6 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
     protected abstract SpigotManager registerManager(Path path);
 
     /**
-     * 注册 Spigot 命令.
-     *
-     * @return 命令
-     */
-    @Nonnull
-    protected abstract SpigotCommand registerCommand();
-
-    /**
      * 注册监听器.
      *
      * @return 监听器列表
@@ -105,14 +111,9 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
     @Nullable
     protected abstract List<Listener> registerListeners();
 
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (sender instanceof Player) command.execute(((Player) sender), new CommandArgs(args));
-        else if (command.nop()) command.execute(sender, new CommandArgs(args));
-        else manager.sendKey(sender, Violet.KEY_ONLY_PLAYER);
-        return true;
-    }
-
-    public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
-        return command.tabCompletions(new CommandArgs(args));
-    }
+    /**
+     * 注册 Spigot 命令.
+     * 使用 {@link SpigotPlugin#register} 注册
+     */
+    protected abstract void registerCommands();
 }

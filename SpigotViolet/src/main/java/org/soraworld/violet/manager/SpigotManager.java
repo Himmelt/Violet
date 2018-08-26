@@ -110,12 +110,6 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
             return ChatColor.DARK_PURPLE;
         }
 
-        public void beforeLoad() {
-        }
-
-        public void afterLoad() {
-        }
-
         /**
          * 全局翻译.
          *

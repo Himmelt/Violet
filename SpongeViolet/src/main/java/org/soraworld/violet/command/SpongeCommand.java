@@ -2,9 +2,16 @@ package org.soraworld.violet.command;
 
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.manager.SpongeManager;
+import org.spongepowered.api.command.CommandCallable;
+import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
 
 import static org.soraworld.violet.Violet.*;
@@ -12,7 +19,7 @@ import static org.soraworld.violet.Violet.*;
 /**
  * Sponge 命令.
  */
-public abstract class SpongeCommand {
+public abstract class SpongeCommand implements CommandCallable {
 
     /**
      * 权限.
@@ -39,16 +46,19 @@ public abstract class SpongeCommand {
     /**
      * 实例化 Sponge 命令.
      *
+     * @param name       命令主名
      * @param perm       权限
      * @param onlyPlayer 是否仅玩家执行
      * @param manager    管理器
      * @param aliases    别名
      */
-    public SpongeCommand(String perm, boolean onlyPlayer, SpongeManager manager, String... aliases) {
+    public SpongeCommand(@Nonnull String name, @Nullable String perm, boolean onlyPlayer, @Nonnull SpongeManager manager, String... aliases) {
         this.perm = perm;
         this.manager = manager;
         this.onlyPlayer = onlyPlayer;
+        this.aliases.add(name);
         this.aliases.addAll(Arrays.asList(aliases));
+        this.aliases.removeIf(s -> s == null || s.isEmpty() || s.contains(" ") || s.contains(":"));
     }
 
     /**
@@ -61,7 +71,7 @@ public abstract class SpongeCommand {
         if (args.notEmpty()) {
             SpongeCommand sub = subs.get(args.first());
             if (sub != null) {
-                if (sub.canRun(sender)) {
+                if (sub.testPermission(sender)) {
                     args.next();
                     if (sender instanceof Player) sub.execute((Player) sender, args);
                     else if (!sub.onlyPlayer) sub.execute(sender, args);
@@ -79,16 +89,6 @@ public abstract class SpongeCommand {
      */
     public void execute(Player player, CommandArgs args) {
         execute((CommandSource) player, args);
-    }
-
-    /**
-     * 非 仅玩家执行.
-     * notOnlyPlayer
-     *
-     * @return 是否 非仅玩家执行
-     */
-    public boolean nop() {
-        return !onlyPlayer;
     }
 
     /**
@@ -140,16 +140,6 @@ public abstract class SpongeCommand {
     }
 
     /**
-     * 命令发送者是否能执行此命令.
-     *
-     * @param sender 命令发送者
-     * @return 是否能执行此命令
-     */
-    protected boolean canRun(CommandSource sender) {
-        return perm == null || sender.hasPermission(perm);
-    }
-
-    /**
      * 获取字符串匹配列表.
      *
      * @param text      待匹配文本
@@ -163,21 +153,60 @@ public abstract class SpongeCommand {
         return list;
     }
 
+    @Nonnull
+    public CommandResult process(@Nonnull CommandSource sender, @Nonnull String args) {
+        if (sender instanceof Player) execute(((Player) sender), new CommandArgs(args));
+        else if (!onlyPlayer) execute(sender, new CommandArgs(args));
+        else manager.sendKey(sender, Violet.KEY_ONLY_PLAYER);
+        return CommandResult.success();
+    }
+
+    @Nonnull
+    public List<String> getSuggestions(@Nonnull CommandSource sender, @Nonnull String args, @Nullable Location<World> location) {
+        return tabCompletions(new CommandArgs(args));
+    }
+
+    /**
+     * 命令发送者是否能执行此命令.
+     *
+     * @param source 命令发送者
+     * @return 是否能执行此命令
+     */
+    public final boolean testPermission(@Nonnull CommandSource source) {
+        return perm == null || source.hasPermission(perm);
+    }
+
+    @Nonnull
+    public final Optional<Text> getShortDescription(@Nonnull CommandSource source) {
+        return Optional.of(getUsage(source));
+    }
+
+    @Nonnull
+    public final Optional<Text> getHelp(@Nonnull CommandSource source) {
+        return Optional.of(getUsage(source));
+    }
+
+    @Nonnull
+    public final Text getUsage(@Nonnull CommandSource source) {
+        return Text.of(getUsage());
+    }
+
     /**
      * Violet 命令.
      */
     public static class CommandViolet extends SpongeCommand {
         /**
-         * 实例化.
+         * 实例化 violet 命令.
          *
+         * @param name       命令主名
          * @param perm       权限
          * @param onlyPlayer 是否仅玩家执行
          * @param manager    管理器
          * @param aliases    别名
          */
-        public CommandViolet(String perm, boolean onlyPlayer, SpongeManager manager, String... aliases) {
-            super(perm, onlyPlayer, manager, aliases);
-            addSub(new SpongeCommand(manager.defAdminPerm(), false, manager, "lang") {
+        public CommandViolet(@Nonnull String name, @Nullable String perm, boolean onlyPlayer, @Nonnull SpongeManager manager, String... aliases) {
+            super(name, perm, onlyPlayer, manager, aliases);
+            addSub(new SpongeCommand("lang", manager.defAdminPerm(), false, manager) {
                 public void execute(CommandSource sender, CommandArgs args) {
                     if (args.notEmpty()) {
                         if (manager.setLang(args.first())) {
@@ -189,18 +218,18 @@ public abstract class SpongeCommand {
                     } else manager.sendKey(sender, KEY_GET_LANG, manager.getLang());
                 }
             });
-            addSub(new SpongeCommand(manager.defAdminPerm(), false, manager, "save") {
+            addSub(new SpongeCommand("save", manager.defAdminPerm(), false, manager) {
                 public void execute(CommandSource sender, CommandArgs args) {
                     manager.sendKey(sender, manager.save() ? KEY_CFG_SAVE : KEY_CFG_SAVE_FAIL);
                 }
             });
-            addSub(new SpongeCommand(manager.defAdminPerm(), false, manager, "debug") {
+            addSub(new SpongeCommand("debug", manager.defAdminPerm(), false, manager) {
                 public void execute(CommandSource sender, CommandArgs args) {
                     manager.setDebug(!manager.isDebug());
                     manager.sendKey(sender, manager.isDebug() ? KEY_DEBUG_ON : KEY_DEBUG_OFF);
                 }
             });
-            addSub(new SpongeCommand(manager.defAdminPerm(), false, manager, "reload") {
+            addSub(new SpongeCommand("reload", manager.defAdminPerm(), false, manager) {
                 public void execute(CommandSource sender, CommandArgs args) {
                     manager.sendKey(sender, manager.load() ? KEY_CFG_LOAD : KEY_CFG_LOAD_FAIL);
                 }

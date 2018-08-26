@@ -2,24 +2,16 @@ package org.soraworld.violet.plugin;
 
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IPlugin;
-import org.soraworld.violet.command.CommandArgs;
-import org.soraworld.violet.command.SpongeCommand;
 import org.soraworld.violet.manager.SpongeManager;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandCallable;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.config.ConfigDir;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStartingServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -28,21 +20,16 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Sponge 插件.
  */
-public abstract class SpongePlugin implements IPlugin, CommandCallable {
+public abstract class SpongePlugin implements IPlugin {
 
     /**
-     * 管理器.
+     * 主管理器.
      */
     protected SpongeManager manager;
-    /**
-     * 主命令.
-     */
-    protected SpongeCommand command;
 
     @Inject
     @ConfigDir(sharedRoot = false)
@@ -62,7 +49,6 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
             }
         }
         manager = registerManager(path);
-        command = registerCommand();
     }
 
     /**
@@ -85,7 +71,7 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
 
     @Listener
     public void onStarting(GameStartingServerEvent event) {
-        Sponge.getCommandManager().register(this, this, getId());
+        registerCommands();
         manager.consoleKey(Violet.KEY_PLUGIN_ENABLED, getId());
         afterEnable();
     }
@@ -114,14 +100,6 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
     protected abstract SpongeManager registerManager(Path path);
 
     /**
-     * 注册 Sponge 命令.
-     *
-     * @return 命令
-     */
-    @Nonnull
-    protected abstract SpongeCommand registerCommand();
-
-    /**
      * 注册监听器.
      *
      * @return 监听器列表
@@ -129,37 +107,11 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
     @Nullable
     protected abstract List<Object> registerListeners();
 
-    @Nonnull
-    public CommandResult process(@Nonnull CommandSource sender, @Nonnull String args) {
-        if (sender instanceof Player) command.execute(((Player) sender), new CommandArgs(args));
-        else if (command.nop()) command.execute(sender, new CommandArgs(args));
-        else manager.sendKey(sender, Violet.KEY_ONLY_PLAYER);
-        return CommandResult.success();
-    }
-
-    @Nonnull
-    public List<String> getSuggestions(@Nonnull CommandSource sender, @Nonnull String args, @Nullable Location<World> location) {
-        return command.tabCompletions(new CommandArgs(args));
-    }
-
-    public boolean testPermission(@Nonnull CommandSource source) {
-        return true;
-    }
-
-    @Nonnull
-    public Optional<Text> getShortDescription(@Nonnull CommandSource source) {
-        return Optional.of(getUsage(source));
-    }
-
-    @Nonnull
-    public Optional<Text> getHelp(@Nonnull CommandSource source) {
-        return Optional.of(getUsage(source));
-    }
-
-    @Nonnull
-    public Text getUsage(@Nonnull CommandSource source) {
-        return Text.of(command.getUsage());
-    }
+    /**
+     * 注册 Sponge 命令.
+     * 使用 {@link CommandManager#register} 注册.
+     */
+    protected abstract void registerCommands();
 
     @Nonnull
     public String getId() {
@@ -178,11 +130,5 @@ public abstract class SpongePlugin implements IPlugin, CommandCallable {
 
     public boolean isEnabled() {
         return Sponge.getPluginManager().isLoaded(container.getId());
-    }
-
-    public void afterEnable() {
-    }
-
-    public void beforeDisable() {
     }
 }

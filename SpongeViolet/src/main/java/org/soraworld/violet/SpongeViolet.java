@@ -4,6 +4,7 @@ import org.soraworld.violet.command.CommandArgs;
 import org.soraworld.violet.command.SpongeCommand;
 import org.soraworld.violet.manager.SpongeManager;
 import org.soraworld.violet.plugin.SpongePlugin;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.plugin.Plugin;
 
@@ -30,14 +31,21 @@ public class SpongeViolet extends SpongePlugin {
         return new SpongeManager.Manager(this, path);
     }
 
-    @Nonnull
-    public SpongeCommand registerCommand() {
-        return new SpongeCommand.CommandViolet(null, false, manager, getId());
-    }
-
     @Nullable
     public List<Object> registerListeners() {
         return null;
+    }
+
+    public void registerCommands() {
+        SpongeCommand command = new SpongeCommand.CommandViolet(getId(), null, false, manager);
+        command.addSub(new SpongeCommand("plugins", manager.defAdminPerm(), false, manager) {
+            public void execute(CommandSource sender, CommandArgs args) {
+                if (manager instanceof SpongeManager.Manager) {
+                    ((SpongeManager.Manager) manager).listPlugins(sender);
+                }
+            }
+        });
+        Sponge.getCommandManager().register(this, command, getId());
     }
 
     @Nonnull
@@ -46,13 +54,6 @@ public class SpongeViolet extends SpongePlugin {
     }
 
     public void afterEnable() {
-        command.addSub(new SpongeCommand(manager.defAdminPerm(), false, manager, "plugins") {
-            public void execute(CommandSource sender, CommandArgs args) {
-                if (manager instanceof SpongeManager.Manager) {
-                    ((SpongeManager.Manager) manager).listPlugins(sender);
-                }
-            }
-        });
         if (manager instanceof SpongeManager.Manager) {
             ((SpongeManager.Manager) manager).startBstats();
         }

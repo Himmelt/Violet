@@ -9,7 +9,7 @@ public final class Violet {
     public static final String PLUGIN_ID = "violet";
     public static final String ASSETS_ID = "violet";
     public static final String PLUGIN_NAME = "Violet";
-    public static final String PLUGIN_VERSION = "2.2.7";
+    public static final String PLUGIN_VERSION = "2.2.8";
 
     public static final String KEY_CHAT_HEAD = "chatHead";
     public static final String KEY_GET_VERSION = "getVersion";

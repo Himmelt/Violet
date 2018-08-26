@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 group = 'org.soraworld'
-version = '2.2.7'
+version = '2.2.8'
 
 sourceCompatibility = targetCompatibility = 1.8
 
@@ -63,7 +63,7 @@ subprojects {
             artifact -> from(zipTree(artifact))
         }
     }
-    task release(type: Jar) {
+    task release(type: Jar, dependsOn: build) {
         classifier = 'hocon'
         from sourceSets.main.output, rootProject.sourceSets.main.output
         configurations.hocon.copyRecursive().setTransitive(false).each {

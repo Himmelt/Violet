@@ -111,12 +111,6 @@ public abstract class SpongeManager extends VioletManager<SpongePlugin> {
             return ChatColor.DARK_PURPLE;
         }
 
-        public void beforeLoad() {
-        }
-
-        public void afterLoad() {
-        }
-
         /**
          * 全局翻译.
          *

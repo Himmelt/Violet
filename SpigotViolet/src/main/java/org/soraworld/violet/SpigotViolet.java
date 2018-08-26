@@ -22,14 +22,21 @@ public class SpigotViolet extends SpigotPlugin {
         return new SpigotManager.Manager(this, path);
     }
 
-    @Nonnull
-    public SpigotCommand registerCommand() {
-        return new SpigotCommand.CommandViolet(null, false, manager, getId());
-    }
-
     @Nullable
     public List<Listener> registerListeners() {
         return null;
+    }
+
+    public void registerCommands() {
+        SpigotCommand command = new SpigotCommand.CommandViolet(getId(), manager.defAdminPerm(), false, manager);
+        command.addSub(new SpigotCommand("plugins", manager.defAdminPerm(), false, manager) {
+            public void execute(CommandSender sender, CommandArgs args) {
+                if (manager instanceof SpigotManager.Manager) {
+                    ((SpigotManager.Manager) manager).listPlugins(sender);
+                }
+            }
+        });
+        register(this, command);
     }
 
     @Nonnull
@@ -38,13 +45,6 @@ public class SpigotViolet extends SpigotPlugin {
     }
 
     public void afterEnable() {
-        command.addSub(new SpigotCommand(manager.defAdminPerm(), false, manager, "plugins") {
-            public void execute(CommandSender sender, CommandArgs args) {
-                if (manager instanceof SpigotManager.Manager) {
-                    ((SpigotManager.Manager) manager).listPlugins(sender);
-                }
-            }
-        });
         if (manager instanceof SpigotManager.Manager) {
             ((SpigotManager.Manager) manager).startBstats();
         }
