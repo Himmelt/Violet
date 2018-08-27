@@ -20,7 +20,7 @@ public class Paths {
     }
 
     public Paths(String path) {
-        this(path == null ? null : path.split("."));
+        this(path == null ? null : path.split("\\."));
     }
 
     public boolean empty() {

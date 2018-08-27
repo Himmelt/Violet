@@ -14,20 +14,12 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
-import static org.soraworld.violet.Violet.*;
+import static org.soraworld.violet.Violet.KEY_CMD_USAGE;
 
 /**
  * Spigot 命令.
  */
 public class SpigotCommand extends Command {
-
-    public boolean isOnlyPlayer() {
-        return onlyPlayer;
-    }
-
-    private void setOnlyPlayer(boolean onlyPlayer) {
-        this.onlyPlayer = onlyPlayer;
-    }
 
     /**
      * 只有玩家可以执行.
@@ -40,15 +32,14 @@ public class SpigotCommand extends Command {
 
     protected ArrayList<String> tabs;
 
-    protected Executor executor;
+    protected SpigotExecutor executor;
 
     /**
      * 子命令.
      */
     protected final HashMap<String, SpigotCommand> subs = new LinkedHashMap<>();
-
-    private static final MethodType METHOD_VOID = MethodType.methodType(void.class);
-    private static final MethodType INVOKE_EXEC = MethodType.methodType(Executor.class);
+    private final MethodHandles.Lookup lookup = MethodHandles.lookup();
+    private static final MethodType INVOKE_EXEC = MethodType.methodType(SpigotExecutor.class);
 
     /* 注册的 参数里可以加上方法名，根据方法名查找更快*/
     // 先获取 class 下所有的 @Sub Method
@@ -79,9 +70,10 @@ public class SpigotCommand extends Command {
      * @return 补全列表
      */
     public List<String> tabCompletions(CommandArgs args) {
-        if (tabs != null && !tabs.isEmpty()) return tabs;
         String first = args.first();
-        if (args.size() == 1) return getMatchList(first, subs.keySet());
+        if (args.size() == 1) {
+            return getMatchList(first, tabs != null && !tabs.isEmpty() ? tabs : subs.keySet());
+        }
         if (subs.containsKey(first)) {
             args.next();
             return subs.get(first).tabCompletions(args);
@@ -101,73 +93,69 @@ public class SpigotCommand extends Command {
      * @param sub 子命令
      */
     public void addSub(SpigotCommand sub) {
+        SpigotCommand old = subs.get(sub.getName());
+        if (old != null && old != sub) {
+            old.subs.forEach(sub.subs::putIfAbsent);
+            old.getAliases().forEach(subs::remove);
+        }
         subs.put(sub.getName(), sub);
         for (String alias : sub.getAliases()) {
             subs.putIfAbsent(alias, sub);
         }
     }
 
-    /* TODO 搞一个类 专门注解存储方法 然后 提取那个类 或 其实例*/
-    public void extractSub(Object target) {
-        if (target == null) return;
-        boolean isClass = target instanceof Class;
-        ArrayList<Method> methods = getMethods(isClass ? (Class<?>) target : target.getClass());
+    /* TODO javadoc 搞一个类 专门注解存储方法 然后 提取那个类 或 其实例*/
+    public void extractSub(Class<?> clazz) {
+        if (clazz == null || clazz == Object.class || clazz == Class.class) return;
+        Method[] methods = clazz.getDeclaredMethods();
+        if (methods == null || methods.length == 0) return;
         for (Method method : methods) {
-            boolean isStatic = Modifier.isStatic(method.getModifiers());
-            if (isClass && !isStatic) continue;
+            int modifier = method.getModifiers();
+            if (!Modifier.isPublic(modifier) || !Modifier.isStatic(modifier)) continue;
             Sub sub = method.getAnnotation(Sub.class);
-            MethodHandles.Lookup lookup = MethodHandles.lookup();
+            if (sub == null) continue;
+            Class<?> ret = method.getReturnType();
+            if (!ret.equals(Void.class) && !ret.equals(void.class)) continue;
+            Class<?>[] params = method.getParameterTypes();
+            if (params.length != 3 || params[0] != SpigotManager.class || params[1] != CommandSender.class || params[2] != CommandArgs.class) continue;
+            method.setAccessible(true);
             try {
                 MethodHandle handle = lookup.unreflect(method);
-                //implArity + receiverArity != capturedArity + samArity
-                CallSite site = LambdaMetafactory.metafactory(lookup, "execute", INVOKE_EXEC, METHOD_VOID, handle, METHOD_VOID);
-                Executor executor = isStatic ? (Executor) site.getTarget().invokeExact() : (Executor) site.getTarget().invokeExact(target);
+                CallSite site = LambdaMetafactory.metafactory(
+                        lookup,
+                        "execute",
+                        INVOKE_EXEC,
+                        handle.type(),
+                        handle,
+                        handle.type());
+                SpigotExecutor executor = (SpigotExecutor) site.getTarget().invokeExact();
                 Paths paths = new Paths(sub.paths());
                 String name = paths.empty() ? method.getName().toLowerCase() : paths.first().replace(' ', '_').replace(':', '_');
                 if (paths.empty()) paths = new Paths(name);
                 else paths.set(0, name);
                 String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
-                SpigotCommand command = getOrCreateSub(paths);
+                if ("admin".equals(perm)) perm = manager.defAdminPerm();
+                SpigotCommand command = addOrCreateSub(paths);
                 command.executor = executor;
                 command.setPermission(perm);
                 command.onlyPlayer = sub.onlyPlayer();
                 command.setAliases(new ArrayList<>(Arrays.asList(sub.aliases())));
                 command.setTabCompletions(sub.tabs());
                 command.setUsage(sub.usage());
-                addSub(command);
             } catch (Throwable e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public static ArrayList<Method> getMethods(Class<?> clazz) {
-        if (clazz == null || clazz == Object.class || clazz == Class.class) return new ArrayList<>();
-        ArrayList<Method> list = new ArrayList<>();
-        Method[] methods = clazz.getDeclaredMethods();
-        if (methods != null && methods.length > 0) {
-            for (Method method : methods) {
-                if (!Modifier.isPublic(method.getModifiers())) continue;
-                Sub sub = method.getAnnotation(Sub.class);
-                if (sub == null) continue;
-                Class<?> ret = method.getReturnType();
-                if (!ret.equals(Void.class) && !ret.equals(void.class)) continue;
-                Class<?>[] params = method.getParameterTypes();
-                if (params.length == 2 && params[0] == CommandSender.class && params[1] == CommandArgs.class) {
-                    method.setAccessible(true);
-                    list.add(method);
-                }
-            }
-        }
-        list.addAll(getMethods(clazz.getSuperclass()));
-        return list;
-    }
-
-    public SpigotCommand getOrCreateSub(Paths paths) {
+    public SpigotCommand addOrCreateSub(Paths paths) {
         if (paths.empty()) return this;
         SpigotCommand sub = subs.get(paths.first());
-        if (sub == null) sub = new SpigotCommand(paths.first(), null, false, manager);
-        return sub.getOrCreateSub(paths.next());
+        if (sub == null) {
+            sub = new SpigotCommand(paths.first(), null, false, manager);
+            addSub(sub);
+        }
+        return sub.addOrCreateSub(paths.next());
     }
 
     /**
@@ -177,7 +165,7 @@ public class SpigotCommand extends Command {
      * @param args   参数
      */
     public void execute(CommandSender sender, CommandArgs args) {
-        if (executor != null) executor.execute(sender, args);
+        if (executor != null) executor.execute(manager, sender, args);
         else if (args.notEmpty()) {
             SpigotCommand sub = subs.get(args.first());
             if (sub != null) {
@@ -279,34 +267,7 @@ public class SpigotCommand extends Command {
          */
         public CommandViolet(@Nonnull String name, @Nullable String perm, boolean onlyPlayer, @Nonnull SpigotManager manager, String... aliases) {
             super(name, perm, onlyPlayer, manager, aliases);
-            addSub(new SpigotCommand("lang", manager.defAdminPerm(), false, manager) {
-                public void execute(CommandSender sender, CommandArgs args) {
-                    if (args.notEmpty()) {
-                        if (manager.setLang(args.first())) {
-                            manager.asyncSave();
-                            manager.sendKey(sender, KEY_SET_LANG, manager.getLang());
-                        } else {
-                            manager.sendKey(sender, KEY_SET_LANG_FAILED, args.first());
-                        }
-                    } else manager.sendKey(sender, KEY_GET_LANG, manager.getLang());
-                }
-            });
-            addSub(new SpigotCommand("save", manager.defAdminPerm(), false, manager) {
-                public void execute(CommandSender sender, CommandArgs args) {
-                    manager.sendKey(sender, manager.save() ? KEY_CFG_SAVE : KEY_CFG_SAVE_FAIL);
-                }
-            });
-            addSub(new SpigotCommand("debug", manager.defAdminPerm(), false, manager) {
-                public void execute(CommandSender sender, CommandArgs args) {
-                    manager.setDebug(!manager.isDebug());
-                    manager.sendKey(sender, manager.isDebug() ? KEY_DEBUG_ON : KEY_DEBUG_OFF);
-                }
-            });
-            addSub(new SpigotCommand("reload", manager.defAdminPerm(), false, manager) {
-                public void execute(CommandSender sender, CommandArgs args) {
-                    manager.sendKey(sender, manager.load() ? KEY_CFG_LOAD : KEY_CFG_LOAD_FAIL);
-                }
-            });
+            extractSub(SubCommands.class);
         }
 
         public String getUsage() {
