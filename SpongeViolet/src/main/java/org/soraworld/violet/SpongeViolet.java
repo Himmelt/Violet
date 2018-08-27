@@ -1,11 +1,9 @@
 package org.soraworld.violet;
 
-import org.soraworld.violet.command.CommandArgs;
+import org.soraworld.violet.command.SpongeBaseSubs;
 import org.soraworld.violet.command.SpongeCommand;
 import org.soraworld.violet.manager.SpongeManager;
 import org.soraworld.violet.plugin.SpongePlugin;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.plugin.Plugin;
 
 import javax.annotation.Nonnull;
@@ -37,15 +35,9 @@ public class SpongeViolet extends SpongePlugin {
     }
 
     public void registerCommands() {
-        SpongeCommand command = new SpongeCommand.CommandViolet(getId(), manager.defAdminPerm(), false, manager);
-        command.addSub(new SpongeCommand("plugins", manager.defAdminPerm(), false, manager) {
-            public void execute(CommandSource sender, CommandArgs args) {
-                if (manager instanceof SpongeManager.Manager) {
-                    ((SpongeManager.Manager) manager).listPlugins(sender);
-                }
-            }
-        });
-        Sponge.getCommandManager().register(this, command, getId());
+        SpongeCommand command = new SpongeCommand(getId(), manager.defAdminPerm(), false, manager);
+        command.extractSub(SpongeBaseSubs.class);
+        register(this, command);
     }
 
     @Nonnull

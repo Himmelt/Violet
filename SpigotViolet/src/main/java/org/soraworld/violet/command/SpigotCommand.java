@@ -41,9 +41,6 @@ public class SpigotCommand extends Command {
     private final MethodHandles.Lookup lookup = MethodHandles.lookup();
     private static final MethodType INVOKE_EXEC = MethodType.methodType(SpigotExecutor.class);
 
-    /* 注册的 参数里可以加上方法名，根据方法名查找更快*/
-    // 先获取 class 下所有的 @Sub Method
-
     /**
      * 实例化 Spigot 命令.
      *
@@ -81,7 +78,7 @@ public class SpigotCommand extends Command {
         return new ArrayList<>();
     }
 
-    public void setTabCompletions(String[] tabs) {
+    private void setTabCompletions(String[] tabs) {
         if (tabs != null && tabs.length > 0) {
             this.tabs = new ArrayList<>(Arrays.asList(tabs));
         } else this.tabs = null;
@@ -104,7 +101,15 @@ public class SpigotCommand extends Command {
         }
     }
 
-    /* TODO javadoc 搞一个类 专门注解存储方法 然后 提取那个类 或 其实例*/
+    /**
+     * 从类中提取带有 {@link Sub} 注解的静态公开方法，
+     * 动态编译成实现了{@link SpigotExecutor}接口的 λ 类，
+     * 并封装成{@link SpigotCommand} 注册为子命令.
+     * <p>
+     * 建议: 为提高检索效率，建议把需要转换的静态方法放到一个单独的类中.
+     *
+     * @param clazz 检索目标类
+     */
     public void extractSub(Class<?> clazz) {
         if (clazz == null || clazz == Object.class || clazz == Class.class) return;
         Method[] methods = clazz.getDeclaredMethods();
@@ -112,6 +117,12 @@ public class SpigotCommand extends Command {
         for (Method method : methods) tryAddSub(method);
     }
 
+    /**
+     * 从类中提取带有{@link Sub}注解的，名称为{@code method}的静态公开方法并注册为子命令.
+     *
+     * @param clazz  检索目标类
+     * @param method 目标方法名
+     */
     public void extractSub(Class<?> clazz, String method) {
         if (clazz == null || method == null || method.isEmpty() || clazz == Object.class || clazz == Class.class) return;
         try {
@@ -123,7 +134,7 @@ public class SpigotCommand extends Command {
         }
     }
 
-    private void tryAddSub(Method method) {
+    private void tryAddSub(@Nonnull Method method) {
         int modifier = method.getModifiers();
         if (!Modifier.isPublic(modifier) || !Modifier.isStatic(modifier)) return;
         Sub sub = method.getAnnotation(Sub.class);
@@ -159,11 +170,11 @@ public class SpigotCommand extends Command {
             addSub(command);
         } catch (Throwable e) {
             if (manager.isDebug()) e.printStackTrace();
-            manager.consoleKey("extractReflectError");
+            manager.consoleKey("extractReflectError", method.getName());
         }
     }
 
-    public SpigotCommand getOrCreateSub(Paths paths) {
+    private SpigotCommand getOrCreateSub(Paths paths) {
         if (paths.empty()) return this;
         SpigotCommand sub = subs.get(paths.first());
         if (sub == null) {

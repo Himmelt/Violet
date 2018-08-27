@@ -29,6 +29,9 @@ pluginInfo = "插件信息  id - &a%s&r  version - &e%s"
 
 bStatsFailed = "统计信息发送失败!"
 
+extractNoSuchSub = "&c类 %s 中没有名为 %s 且匹配签名的方法，lambda 提取失败."
+extractReflectError = "&c方法 %s 反射处理异常，请检查代码!"
+
 comment {
   lang = "显示语言"
   debug = "调试模式"

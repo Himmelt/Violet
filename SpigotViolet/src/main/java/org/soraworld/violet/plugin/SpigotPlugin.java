@@ -39,13 +39,6 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
         commandMap = map;
     }
 
-    public static void register(IPlugin plugin, SpigotCommand command) {
-        if (commandMap != null) {
-            if (!commandMap.register(plugin.getId(), command)) {
-                System.out.println("Command " + command.getName() + " in plugin " + plugin.getName() + " register failed !!!");
-            }
-        } else System.out.println("Null commandMap !!!!!!!!!!!!!!!!!!!!");
-    }
 
     /**
      * 主管理器.
@@ -125,5 +118,13 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
         command.extractSub(SpigotBaseSubs.class, "save");
         command.extractSub(SpigotBaseSubs.class, "reload");
         register(this, command);
+    }
+
+    public static void register(SpigotPlugin plugin, SpigotCommand command) {
+        if (commandMap != null) {
+            if (!commandMap.register(plugin.getId(), command)) {
+                System.out.println("Command " + command.getName() + " in plugin " + plugin.getName() + " register failed !!!");
+            }
+        } else System.out.println("Null commandMap !!!!!!!!!!!!!!!!!!!!");
     }
 }

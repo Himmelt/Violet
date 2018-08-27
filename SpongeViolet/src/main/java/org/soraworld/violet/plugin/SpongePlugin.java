@@ -2,9 +2,10 @@ package org.soraworld.violet.plugin;
 
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IPlugin;
+import org.soraworld.violet.command.SpongeBaseSubs;
+import org.soraworld.violet.command.SpongeCommand;
 import org.soraworld.violet.manager.SpongeManager;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
@@ -109,9 +110,18 @@ public abstract class SpongePlugin implements IPlugin {
 
     /**
      * 注册 Sponge 命令.
-     * 使用 {@link CommandManager#register} 注册.
+     * 使用 {@link SpongePlugin#register} 注册
+     * 默认注册了4个子命令，可以通过 override 此方法修改注册的内容。
+     * 建议保留这4个基础子命令 !!
      */
-    protected abstract void registerCommands();
+    protected void registerCommands() {
+        SpongeCommand command = new SpongeCommand(getId(), manager.defAdminPerm(), false, manager);
+        command.extractSub(SpongeBaseSubs.class, "lang");
+        command.extractSub(SpongeBaseSubs.class, "debug");
+        command.extractSub(SpongeBaseSubs.class, "save");
+        command.extractSub(SpongeBaseSubs.class, "reload");
+        register(this, command);
+    }
 
     @Nonnull
     public String getId() {
@@ -130,5 +140,9 @@ public abstract class SpongePlugin implements IPlugin {
 
     public boolean isEnabled() {
         return Sponge.getPluginManager().isLoaded(container.getId());
+    }
+
+    public static void register(SpongePlugin plugin, SpongeCommand command) {
+        Sponge.getCommandManager().register(plugin, command, command.getAliases());
     }
 }
