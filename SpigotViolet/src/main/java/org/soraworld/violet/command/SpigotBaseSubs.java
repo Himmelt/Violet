@@ -5,9 +5,8 @@ import org.soraworld.violet.manager.SpigotManager;
 
 import static org.soraworld.violet.Violet.*;
 
-public final class SubCommands {
-
-    @Sub(paths = {"lang"}, perm = "admin", aliases = {"language"}, tabs = {"zh_cn", "en_us"}, usage = "/violet lang [code]")
+public final class SpigotBaseSubs {
+    @Sub(perm = "admin", aliases = {"language"}, tabs = {"zh_cn", "en_us"})
     public static void lang(SpigotManager manager, CommandSender sender, CommandArgs args) {
         if (args.notEmpty()) {
             if (manager.setLang(args.first())) {
@@ -30,8 +29,15 @@ public final class SubCommands {
         manager.sendKey(sender, manager.isDebug() ? KEY_DEBUG_ON : KEY_DEBUG_OFF);
     }
 
-    @Sub
+    @Sub(perm = "admin")
     public static void reload(SpigotManager manager, CommandSender sender, CommandArgs args) {
         manager.sendKey(sender, manager.load() ? KEY_CFG_LOAD : KEY_CFG_LOAD_FAIL);
+    }
+
+    @Sub(perm = "admin")
+    public static void plugins(SpigotManager manager, CommandSender sender, CommandArgs args) {
+        if (manager instanceof SpigotManager.Manager) {
+            ((SpigotManager.Manager) manager).listPlugins(sender);
+        }
     }
 }

@@ -6,6 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IPlugin;
+import org.soraworld.violet.command.SpigotBaseSubs;
 import org.soraworld.violet.command.SpigotCommand;
 import org.soraworld.violet.manager.SpigotManager;
 
@@ -114,6 +115,15 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
     /**
      * 注册 Spigot 命令.
      * 使用 {@link SpigotPlugin#register} 注册
+     * 默认注册了4个子命令，可以通过 override 此方法修改注册的内容。
+     * 建议保留这4个基础子命令 !!
      */
-    protected abstract void registerCommands();
+    protected void registerCommands() {
+        SpigotCommand command = new SpigotCommand(getId(), manager.defAdminPerm(), false, manager);
+        command.extractSub(SpigotBaseSubs.class, "lang");
+        command.extractSub(SpigotBaseSubs.class, "debug");
+        command.extractSub(SpigotBaseSubs.class, "save");
+        command.extractSub(SpigotBaseSubs.class, "reload");
+        register(this, command);
+    }
 }
