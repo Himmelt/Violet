@@ -4,7 +4,6 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.soraworld.violet.Violet;
 import org.soraworld.violet.manager.SpigotManager;
 
 import javax.annotation.Nonnull;
@@ -14,28 +13,29 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
-import static org.soraworld.violet.Violet.KEY_CMD_USAGE;
-
 /**
  * Spigot 命令.
  */
 public class SpigotCommand extends Command {
 
     /**
-     * 只有玩家可以执行.
+     * 是否仅玩家执行.
      */
     private boolean onlyPlayer;
     /**
      * 管理器.
      */
     protected final SpigotManager manager;
-
-    protected ArrayList<String> tabs;
-
-    protected SpigotExecutor executor;
-
     /**
-     * 子命令.
+     * Tab 补全候选列表.
+     */
+    protected ArrayList<String> tabs;
+    /**
+     * 注解执行器.
+     */
+    protected SpigotExecutor executor;
+    /**
+     * 子命令映射表.
      */
     protected final HashMap<String, SpigotCommand> subs = new LinkedHashMap<>();
     private final MethodHandles.Lookup lookup = MethodHandles.lookup();
@@ -58,30 +58,6 @@ public class SpigotCommand extends Command {
         ArrayList<String> list = new ArrayList<>(Arrays.asList(aliases));
         list.removeIf(s -> s == null || s.isEmpty() || s.contains(" ") || s.contains(":"));
         setAliases(list);
-    }
-
-    /**
-     * 获取tab补全列表.
-     *
-     * @param args 参数
-     * @return 补全列表
-     */
-    public List<String> tabCompletions(CommandArgs args) {
-        String first = args.first();
-        if (args.size() == 1) {
-            return getMatchList(first, tabs != null && !tabs.isEmpty() ? tabs : subs.keySet());
-        }
-        if (subs.containsKey(first)) {
-            args.next();
-            return subs.get(first).tabCompletions(args);
-        }
-        return new ArrayList<>();
-    }
-
-    private void setTabCompletions(String[] tabs) {
-        if (tabs != null && tabs.length > 0) {
-            this.tabs = new ArrayList<>(Arrays.asList(tabs));
-        } else this.tabs = null;
     }
 
     /**
@@ -126,7 +102,7 @@ public class SpigotCommand extends Command {
     public void extractSub(Class<?> clazz, String method) {
         if (clazz == null || method == null || method.isEmpty() || clazz == Object.class || clazz == Class.class) return;
         try {
-            Method theMethod = clazz.getDeclaredMethod(method, SpigotManager.class, CommandSender.class, CommandArgs.class);
+            Method theMethod = clazz.getDeclaredMethod(method, SpigotManager.class, CommandSender.class, Paths.class);
             tryAddSub(theMethod);
         } catch (Throwable e) {
             if (manager.isDebug()) e.printStackTrace();
@@ -142,7 +118,7 @@ public class SpigotCommand extends Command {
         Class<?> ret = method.getReturnType();
         if (!ret.equals(Void.class) && !ret.equals(void.class)) return;
         Class<?>[] params = method.getParameterTypes();
-        if (params.length != 3 || params[0] != SpigotManager.class || params[1] != CommandSender.class || params[2] != CommandArgs.class) return;
+        if (params.length != 3 || params[0] != SpigotManager.class || params[1] != CommandSender.class || params[2] != Paths.class) return;
         method.setAccessible(true);
         try {
             MethodHandle handle = lookup.unreflect(method);
@@ -154,9 +130,9 @@ public class SpigotCommand extends Command {
                     handle,
                     handle.type());
             SpigotExecutor executor = (SpigotExecutor) site.getTarget().invokeExact();
-            Paths paths = new Paths(sub.paths());
+            Paths paths = new Paths(false, sub.paths());
             String name = paths.empty() ? method.getName().toLowerCase() : paths.first().replace(' ', '_').replace(':', '_');
-            if (paths.empty()) paths = new Paths(name);
+            if (paths.empty()) paths = new Paths(false, name);
             else paths.set(0, name);
             String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
             if ("admin".equals(perm)) perm = manager.defAdminPerm();
@@ -190,7 +166,7 @@ public class SpigotCommand extends Command {
      * @param sender 命令发送者
      * @param args   参数
      */
-    public void execute(CommandSender sender, CommandArgs args) {
+    public void execute(CommandSender sender, Paths args) {
         if (executor != null) executor.execute(manager, sender, args);
         else if (args.notEmpty()) {
             SpigotCommand sub = subs.get(args.first());
@@ -199,8 +175,8 @@ public class SpigotCommand extends Command {
                     args.next();
                     if (sender instanceof Player) sub.execute((Player) sender, args);
                     else if (!sub.onlyPlayer) sub.execute(sender, args);
-                    else manager.sendKey(sender, Violet.KEY_ONLY_PLAYER);
-                } else manager.sendKey(sender, Violet.KEY_NO_CMD_PERM, sub.getPermission());
+                    else manager.sendKey(sender, "onlyPlayer");
+                } else manager.sendKey(sender, "noCommandPerm", sub.getPermission());
             } else sendUsage(sender);
         } else sendUsage(sender);
     }
@@ -211,8 +187,17 @@ public class SpigotCommand extends Command {
      * @param player 玩家
      * @param args   参数
      */
-    public void execute(Player player, CommandArgs args) {
+    public void execute(Player player, Paths args) {
         execute((CommandSender) player, args);
+    }
+
+    public final boolean execute(CommandSender sender, String commandLabel, String[] args) {
+        if (testPermission(sender)) {
+            if (sender instanceof Player) execute(((Player) sender), new Paths(true, args));
+            else if (!onlyPlayer) execute(sender, new Paths(true, args));
+            else manager.sendKey(sender, "onlyPlayer");
+        } else manager.sendKey(sender, "noCommandPerm", getPermission());
+        return true;
     }
 
     /**
@@ -223,7 +208,7 @@ public class SpigotCommand extends Command {
     protected void sendUsage(CommandSender sender) {
         String usage = getUsage();
         if (usage != null && !usage.isEmpty()) {
-            manager.sendKey(sender, KEY_CMD_USAGE, usage);
+            manager.sendKey(sender, "cmdUsage", usage);
         }
     }
 
@@ -241,21 +226,36 @@ public class SpigotCommand extends Command {
         return list;
     }
 
-    public final boolean execute(CommandSender sender, String commandLabel, String[] args) {
-        if (testPermission(sender)) {
-            if (sender instanceof Player) execute(((Player) sender), new CommandArgs(args));
-            else if (!onlyPlayer) execute(sender, new CommandArgs(args));
-            else manager.sendKey(sender, Violet.KEY_ONLY_PLAYER);
-        } else manager.sendKey(sender, Violet.KEY_NO_CMD_PERM, getPermission());
-        return true;
+    /**
+     * 获取tab补全列表.
+     *
+     * @param args 参数
+     * @return 补全列表
+     */
+    public List<String> tabCompletions(Paths args) {
+        String first = args.first();
+        if (args.size() == 1) {
+            return getMatchList(first, tabs != null && !tabs.isEmpty() ? tabs : subs.keySet());
+        }
+        if (subs.containsKey(first)) {
+            args.next();
+            return subs.get(first).tabCompletions(args);
+        }
+        return new ArrayList<>();
+    }
+
+    private void setTabCompletions(String[] tabs) {
+        if (tabs != null && tabs.length > 0) {
+            this.tabs = new ArrayList<>(Arrays.asList(tabs));
+        } else this.tabs = null;
     }
 
     public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
-        return tabCompletions(new CommandArgs(args));
+        return tabCompletions(new Paths(true, args));
     }
 
     public List<String> tabComplete(CommandSender sender, String alias, String[] args, Location location) {
-        return tabCompletions(new CommandArgs(args));
+        return tabCompletions(new Paths(true, args));
     }
 
     /**

@@ -1,6 +1,5 @@
 package org.soraworld.violet.command;
 
-import org.soraworld.violet.Violet;
 import org.soraworld.violet.manager.SpongeManager;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandResult;
@@ -17,16 +16,17 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
-import static org.soraworld.violet.Violet.KEY_CMD_USAGE;
-
 /**
  * Sponge 命令.
  */
 public class SpongeCommand implements CommandCallable {
 
+    /**
+     * 命令主名.
+     */
     protected final String name;
     /**
-     * 权限.
+     * 命令权限.
      */
     protected String perm;
     /**
@@ -37,21 +37,28 @@ public class SpongeCommand implements CommandCallable {
      * 管理器.
      */
     protected final SpongeManager manager;
+    /**
+     * Tab 补全候选列表.
+     */
     protected ArrayList<String> tabs;
-
+    /**
+     * 注解执行器.
+     */
     protected SpongeExecutor executor;
-    private final MethodHandles.Lookup lookup = MethodHandles.lookup();
-    private static final MethodType INVOKE_EXEC = MethodType.methodType(SpongeExecutor.class);
-
     /**
      * 别名列表.
      */
     protected List<String> aliases = new ArrayList<>();
     /**
-     * 子命令.
+     * 用法.
+     */
+    protected String usage;
+    /**
+     * 子命令映射表.
      */
     protected final HashMap<String, SpongeCommand> subs = new LinkedHashMap<>();
-    private String usage;
+    private final MethodHandles.Lookup lookup = MethodHandles.lookup();
+    private static final MethodType INVOKE_EXEC = MethodType.methodType(SpongeExecutor.class);
 
     /**
      * 实例化 Sponge 命令.
@@ -70,61 +77,6 @@ public class SpongeCommand implements CommandCallable {
         this.aliases.add(name);
         this.aliases.addAll(Arrays.asList(aliases));
         this.aliases.removeIf(s -> s == null || s.isEmpty() || s.contains(" ") || s.contains(":"));
-    }
-
-    /**
-     * 执行命令.
-     *
-     * @param sender 命令发送者
-     * @param args   参数
-     */
-    public void execute(CommandSource sender, CommandArgs args) {
-        if (executor != null) executor.execute(manager, sender, args);
-        else if (args.notEmpty()) {
-            SpongeCommand sub = subs.get(args.first());
-            if (sub != null) {
-                if (sub.testPermission(sender)) {
-                    args.next();
-                    if (sender instanceof Player) sub.execute((Player) sender, args);
-                    else if (!sub.onlyPlayer) sub.execute(sender, args);
-                    else manager.sendKey(sender, Violet.KEY_ONLY_PLAYER);
-                } else manager.sendKey(sender, Violet.KEY_NO_CMD_PERM, sub.perm);
-            } else sendUsage(sender);
-        } else sendUsage(sender);
-    }
-
-    /**
-     * 执行玩家命令.
-     *
-     * @param player 玩家
-     * @param args   参数
-     */
-    public void execute(Player player, CommandArgs args) {
-        execute((CommandSource) player, args);
-    }
-
-    /**
-     * 获取tab补全列表.
-     *
-     * @param args 参数
-     * @return 补全列表
-     */
-    public List<String> tabCompletions(CommandArgs args) {
-        String first = args.first();
-        if (args.size() == 1) {
-            return getMatchList(first, tabs != null && !tabs.isEmpty() ? tabs : subs.keySet());
-        }
-        if (subs.containsKey(first)) {
-            args.next();
-            return subs.get(first).tabCompletions(args);
-        }
-        return new ArrayList<>();
-    }
-
-    private void setTabCompletions(String[] tabs) {
-        if (tabs != null && tabs.length > 0) {
-            this.tabs = new ArrayList<>(Arrays.asList(tabs));
-        } else this.tabs = null;
     }
 
     /**
@@ -169,7 +121,7 @@ public class SpongeCommand implements CommandCallable {
     public void extractSub(Class<?> clazz, String method) {
         if (clazz == null || method == null || method.isEmpty() || clazz == Object.class || clazz == Class.class) return;
         try {
-            Method theMethod = clazz.getDeclaredMethod(method, SpongeManager.class, CommandSource.class, CommandArgs.class);
+            Method theMethod = clazz.getDeclaredMethod(method, SpongeManager.class, CommandSource.class, Paths.class);
             tryAddSub(theMethod);
         } catch (Throwable e) {
             if (manager.isDebug()) e.printStackTrace();
@@ -185,7 +137,7 @@ public class SpongeCommand implements CommandCallable {
         Class<?> ret = method.getReturnType();
         if (!ret.equals(Void.class) && !ret.equals(void.class)) return;
         Class<?>[] params = method.getParameterTypes();
-        if (params.length != 3 || params[0] != SpongeManager.class || params[1] != CommandSource.class || params[2] != CommandArgs.class) return;
+        if (params.length != 3 || params[0] != SpongeManager.class || params[1] != CommandSource.class || params[2] != Paths.class) return;
         method.setAccessible(true);
         try {
             MethodHandle handle = lookup.unreflect(method);
@@ -197,9 +149,9 @@ public class SpongeCommand implements CommandCallable {
                     handle,
                     handle.type());
             SpongeExecutor executor = (SpongeExecutor) site.getTarget().invokeExact();
-            Paths paths = new Paths(sub.paths());
+            Paths paths = new Paths(false, sub.paths());
             String name = paths.empty() ? method.getName().toLowerCase() : paths.first().replace(' ', '_').replace(':', '_');
-            if (paths.empty()) paths = new Paths(name);
+            if (paths.empty()) paths = new Paths(false, name);
             else paths.set(0, name);
             String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
             if ("admin".equals(perm)) perm = manager.defAdminPerm();
@@ -209,16 +161,12 @@ public class SpongeCommand implements CommandCallable {
             command.onlyPlayer = sub.onlyPlayer();
             command.aliases = new ArrayList<>(Arrays.asList(sub.aliases()));
             command.setTabCompletions(sub.tabs());
-            command.setUsage(sub.usage());
+            command.usage = sub.usage();
             addSub(command);
         } catch (Throwable e) {
             if (manager.isDebug()) e.printStackTrace();
             manager.consoleKey("extractReflectError", method.getName());
         }
-    }
-
-    public void setUsage(String usage) {
-        this.usage = usage;
     }
 
     private SpongeCommand getOrCreateSub(Paths paths) {
@@ -232,14 +180,69 @@ public class SpongeCommand implements CommandCallable {
     }
 
     /**
+     * 执行命令.
+     *
+     * @param sender 命令发送者
+     * @param args   参数
+     */
+    public void execute(CommandSource sender, Paths args) {
+        if (executor != null) executor.execute(manager, sender, args);
+        else if (args.notEmpty()) {
+            SpongeCommand sub = subs.get(args.first());
+            if (sub != null) {
+                if (sub.testPermission(sender)) {
+                    args.next();
+                    if (sender instanceof Player) sub.execute((Player) sender, args);
+                    else if (!sub.onlyPlayer) sub.execute(sender, args);
+                    else manager.sendKey(sender, "onlyPlayer");
+                } else manager.sendKey(sender, "noCommandPerm", sub.perm);
+            } else sendUsage(sender);
+        } else sendUsage(sender);
+    }
+
+    /**
+     * 执行玩家命令.
+     *
+     * @param player 玩家
+     * @param args   参数
+     */
+    public void execute(Player player, Paths args) {
+        execute((CommandSource) player, args);
+    }
+
+    @Nonnull
+    public CommandResult process(@Nonnull CommandSource sender, @Nonnull String args) {
+        if (testPermission(sender)) {
+            if (sender instanceof Player) execute(((Player) sender), new Paths(true, args));
+            else if (!onlyPlayer) execute(sender, new Paths(true, args));
+            else manager.sendKey(sender, "onlyPlayer");
+        } else manager.sendKey(sender, "noCommandPerm", perm);
+        return CommandResult.success();
+    }
+
+    /**
      * 发送使用方法.
      *
      * @param sender 信息接收者
      */
     protected void sendUsage(CommandSource sender) {
         if (usage != null && !usage.isEmpty()) {
-            manager.sendKey(sender, KEY_CMD_USAGE, usage);
+            manager.sendKey(sender, "cmdUsage", usage);
         }
+    }
+
+    @Nonnull
+    public final Text getUsage(@Nonnull CommandSource source) {
+        return Text.of(usage == null ? "" : usage);
+    }
+
+    /**
+     * 设置用法.
+     *
+     * @param usage 用法
+     */
+    public void setUsage(String usage) {
+        this.usage = usage;
     }
 
     /**
@@ -256,19 +259,33 @@ public class SpongeCommand implements CommandCallable {
         return list;
     }
 
-    @Nonnull
-    public CommandResult process(@Nonnull CommandSource sender, @Nonnull String args) {
-        if (testPermission(sender)) {
-            if (sender instanceof Player) execute(((Player) sender), new CommandArgs(args));
-            else if (!onlyPlayer) execute(sender, new CommandArgs(args));
-            else manager.sendKey(sender, Violet.KEY_ONLY_PLAYER);
-        } else manager.sendKey(sender, Violet.KEY_NO_CMD_PERM, perm);
-        return CommandResult.success();
+    /**
+     * 获取tab补全列表.
+     *
+     * @param args 参数
+     * @return 补全列表
+     */
+    public List<String> tabCompletions(Paths args) {
+        String first = args.first();
+        if (args.size() == 1) {
+            return getMatchList(first, tabs != null && !tabs.isEmpty() ? tabs : subs.keySet());
+        }
+        if (subs.containsKey(first)) {
+            args.next();
+            return subs.get(first).tabCompletions(args);
+        }
+        return new ArrayList<>();
+    }
+
+    private void setTabCompletions(String[] tabs) {
+        if (tabs != null && tabs.length > 0) {
+            this.tabs = new ArrayList<>(Arrays.asList(tabs));
+        } else this.tabs = null;
     }
 
     @Nonnull
     public List<String> getSuggestions(@Nonnull CommandSource sender, @Nonnull String args, @Nullable Location<World> location) {
-        return tabCompletions(new CommandArgs(args));
+        return tabCompletions(new Paths(true, args));
     }
 
     /**
@@ -291,11 +308,11 @@ public class SpongeCommand implements CommandCallable {
         return Optional.of(getUsage(source));
     }
 
-    @Nonnull
-    public final Text getUsage(@Nonnull CommandSource source) {
-        return Text.of(usage == null ? "" : usage);
-    }
-
+    /**
+     * 获取命令别名列表.
+     *
+     * @return 命令别名
+     */
     public List<String> getAliases() {
         return aliases;
     }

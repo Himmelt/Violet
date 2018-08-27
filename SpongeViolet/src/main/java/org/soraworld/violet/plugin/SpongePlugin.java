@@ -1,6 +1,5 @@
 package org.soraworld.violet.plugin;
 
-import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.command.SpongeBaseSubs;
 import org.soraworld.violet.command.SpongeCommand;
@@ -39,6 +38,11 @@ public abstract class SpongePlugin implements IPlugin {
     @Inject
     private PluginContainer container;
 
+    /**
+     * 游戏预初始化.
+     *
+     * @param event 事件
+     */
     @Listener
     public void onPreInit(GamePreInitializationEvent event) {
         if (path == null) path = new File("config", getId()).toPath();
@@ -53,9 +57,9 @@ public abstract class SpongePlugin implements IPlugin {
     }
 
     /**
-     * 插件启用时(游戏初始化事件监听).
+     * 游戏初始化.
      *
-     * @param event {@link GameInitializationEvent}
+     * @param event 事件
      */
     @Listener
     public void onInit(GameInitializationEvent event) {
@@ -70,23 +74,28 @@ public abstract class SpongePlugin implements IPlugin {
         }
     }
 
+    /**
+     * 服务器启动中事件.
+     *
+     * @param event 事件
+     */
     @Listener
     public void onStarting(GameStartingServerEvent event) {
         registerCommands();
-        manager.consoleKey(Violet.KEY_PLUGIN_ENABLED, getId());
+        manager.consoleKey("pluginEnabled", getId());
         afterEnable();
     }
 
     /**
-     * 插件禁用时(服务器停止中事件监听).
+     * 服务器停止中事件.
      *
-     * @param event {@link GameStoppingServerEvent}
+     * @param event 事件
      */
     @Listener
     public void onDisable(GameStoppingServerEvent event) {
         beforeDisable();
         if (manager != null) {
-            manager.consoleKey(Violet.KEY_PLUGIN_DISABLED, getId());
+            manager.consoleKey("pluginDisabled", getId());
             manager.save();
         }
     }
@@ -111,7 +120,7 @@ public abstract class SpongePlugin implements IPlugin {
     /**
      * 注册 Sponge 命令.
      * 使用 {@link SpongePlugin#register} 注册
-     * 默认注册了4个子命令，可以通过 override 此方法修改注册的内容。
+     * 默认注册了4个子命令 save|reload|lang|debug ，可以通过 override 此方法修改注册的内容。
      * 建议保留这4个基础子命令 !!
      */
     protected void registerCommands() {
@@ -142,6 +151,12 @@ public abstract class SpongePlugin implements IPlugin {
         return Sponge.getPluginManager().isLoaded(container.getId());
     }
 
+    /**
+     * 向服务器注册命令.
+     *
+     * @param plugin  命令注册到的插件
+     * @param command 命令
+     */
     public static void register(SpongePlugin plugin, SpongeCommand command) {
         Sponge.getCommandManager().register(plugin, command, command.getAliases());
     }

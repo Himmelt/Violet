@@ -9,6 +9,9 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
 import java.util.UUID;
 
+/**
+ * UUID 序列化器.
+ */
 public class UUIDSerializer implements TypeSerializer<UUID> {
     public UUID deserialize(@Nonnull Type type, @Nonnull Node node) {
         if (node instanceof NodeBase) {

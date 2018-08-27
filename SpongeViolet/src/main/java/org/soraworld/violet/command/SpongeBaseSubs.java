@@ -3,39 +3,75 @@ package org.soraworld.violet.command;
 import org.soraworld.violet.manager.SpongeManager;
 import org.spongepowered.api.command.CommandSource;
 
-import static org.soraworld.violet.Violet.*;
-
+/**
+ * Sponge 基础子命令 注解集合.
+ */
 public final class SpongeBaseSubs {
+    /**
+     * 查看/设置 语言.
+     *
+     * @param manager 管理器
+     * @param sender  命令执行者
+     * @param args    参数
+     */
     @Sub(perm = "admin", tabs = {"zh_cn", "en_us"})
-    public static void lang(SpongeManager manager, CommandSource sender, CommandArgs args) {
+    public static void lang(SpongeManager manager, CommandSource sender, Paths args) {
         if (args.notEmpty()) {
             if (manager.setLang(args.first())) {
                 manager.asyncSave();
-                manager.sendKey(sender, KEY_SET_LANG, manager.getLang());
+                manager.sendKey(sender, "setLang", manager.getLang());
             } else {
-                manager.sendKey(sender, KEY_SET_LANG_FAILED, args.first());
+                manager.sendKey(sender, "setLangFailed", args.first());
             }
-        } else manager.sendKey(sender, KEY_GET_LANG, manager.getLang());
+        } else manager.sendKey(sender, "getLang", manager.getLang());
     }
 
+    /**
+     * 保存配置到文件.
+     *
+     * @param manager 管理器
+     * @param sender  命令执行者
+     * @param args    参数
+     */
     @Sub(perm = "admin")
-    public static void save(SpongeManager manager, CommandSource sender, CommandArgs args) {
-        manager.sendKey(sender, manager.save() ? KEY_CFG_SAVE : KEY_CFG_SAVE_FAIL);
+    public static void save(SpongeManager manager, CommandSource sender, Paths args) {
+        manager.sendKey(sender, manager.save() ? "configSaved" : "configSaveFailed");
     }
 
+    /**
+     * 开启/关闭 调试模式.
+     *
+     * @param manager 管理器
+     * @param sender  命令执行者
+     * @param args    参数
+     */
     @Sub(perm = "admin")
-    public static void debug(SpongeManager manager, CommandSource sender, CommandArgs args) {
+    public static void debug(SpongeManager manager, CommandSource sender, Paths args) {
         manager.setDebug(!manager.isDebug());
-        manager.sendKey(sender, manager.isDebug() ? KEY_DEBUG_ON : KEY_DEBUG_OFF);
+        manager.sendKey(sender, manager.isDebug() ? "debugON" : "debugOFF");
     }
 
+    /**
+     * 从文件重载配置.
+     *
+     * @param manager 管理器
+     * @param sender  命令执行者
+     * @param args    参数
+     */
     @Sub(perm = "admin")
-    public static void reload(SpongeManager manager, CommandSource sender, CommandArgs args) {
-        manager.sendKey(sender, manager.load() ? KEY_CFG_LOAD : KEY_CFG_LOAD_FAIL);
+    public static void reload(SpongeManager manager, CommandSource sender, Paths args) {
+        manager.sendKey(sender, manager.load() ? "configLoaded" : "configLoadFailed");
     }
 
+    /**
+     * 列出服务器运行的 Violet 插件.
+     *
+     * @param manager 管理器
+     * @param sender  命令执行者
+     * @param args    参数
+     */
     @Sub(perm = "admin")
-    public static void plugins(SpongeManager manager, CommandSource sender, CommandArgs args) {
+    public static void plugins(SpongeManager manager, CommandSource sender, Paths args) {
         if (manager instanceof SpongeManager.Manager) {
             ((SpongeManager.Manager) manager).listPlugins(sender);
         }

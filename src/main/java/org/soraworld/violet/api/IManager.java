@@ -58,6 +58,11 @@ public interface IManager {
     boolean save();
 
     /**
+     * 异步保存配置.
+     */
+    void asyncSave();
+
+    /**
      * 在配置加载之前执行.
      */
     default void beforeLoad() {

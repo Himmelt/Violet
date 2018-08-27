@@ -3,7 +3,6 @@ package org.soraworld.violet.manager;
 import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.Options;
 import org.soraworld.hocon.node.Setting;
-import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IManager;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.serializers.UUIDSerializer;
@@ -158,11 +157,6 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         }
     }
 
-    /**
-     * 异步保存配置.
-     */
-    public abstract void asyncSave();
-
     public String getLang() {
         return lang;
     }
@@ -172,7 +166,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         if (!temp.isEmpty()) {
             this.lang = lang;
             langMap = temp;
-            String head = langMap.get(Violet.KEY_CHAT_HEAD);
+            String head = langMap.get("chatHead");
             if (head != null && !head.isEmpty()) setHead(head);
             return true;
         } else {
@@ -206,10 +200,21 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         return plugin;
     }
 
+    /**
+     * 服务器运行的 Violet 插件的数量.
+     *
+     * @return 数量
+     */
     public static int pluginsSize() {
         return plugins.size();
     }
 
+    /**
+     * 获取第 index 个 Violet 插件.
+     *
+     * @param index 索引
+     * @return 插件
+     */
     public static IPlugin getPluginAt(int index) {
         if (index >= 0 && index < plugins.size()) return plugins.get(index);
         return null;

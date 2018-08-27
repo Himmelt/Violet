@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.command.SpigotBaseSubs;
 import org.soraworld.violet.command.SpigotCommand;
@@ -39,7 +38,6 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
         commandMap = map;
     }
 
-
     /**
      * 主管理器.
      */
@@ -65,7 +63,7 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
             }
         }
         registerCommands();
-        manager.consoleKey(Violet.KEY_PLUGIN_ENABLED, getId());
+        manager.consoleKey("pluginEnabled", getId());
         afterEnable();
     }
 
@@ -82,7 +80,7 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
     public void onDisable() {
         beforeDisable();
         if (manager != null) {
-            manager.consoleKey(Violet.KEY_PLUGIN_DISABLED, getId());
+            manager.consoleKey("pluginDisabled", getId());
             manager.save();
         }
         super.onDisable();
@@ -108,7 +106,7 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
     /**
      * 注册 Spigot 命令.
      * 使用 {@link SpigotPlugin#register} 注册
-     * 默认注册了4个子命令，可以通过 override 此方法修改注册的内容。
+     * 默认注册了4个子命令 save|reload|lang|debug ，可以通过 override 此方法修改注册的内容。
      * 建议保留这4个基础子命令 !!
      */
     protected void registerCommands() {
@@ -120,6 +118,12 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
         register(this, command);
     }
 
+    /**
+     * 向服务器注册命令.
+     *
+     * @param plugin  命令注册到的插件
+     * @param command 命令
+     */
     public static void register(SpigotPlugin plugin, SpigotCommand command) {
         if (commandMap != null) {
             if (!commandMap.register(plugin.getId(), command)) {

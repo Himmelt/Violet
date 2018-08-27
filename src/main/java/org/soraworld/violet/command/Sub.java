@@ -3,16 +3,20 @@ package org.soraworld.violet.command;
 import java.lang.annotation.*;
 
 /**
- * The interface Sub.
+ * 子命令注解.
+ * 只有注解签名为 {@code public static void (SpigotManager,CommandSender,Paths);}
+ * 和 {@code public static void (SpongeManager,CommandSource,Paths);} 的方法才会被提取.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 @Documented
 public @interface Sub {
     /**
-     * Paths string [ ].
+     * 命令树.
+     * 请不要在命令节中使用 ' ' 和 ':'，即使使用了也会被转换成 '_' .
+     * 大写字母会被转换为小写字母.
      *
-     * @return the string [ ]
+     * @return 命令树
      */
     String[] paths() default {};
 
@@ -25,30 +29,31 @@ public @interface Sub {
     String perm() default "";
 
     /**
-     * Only player boolean.
+     * 是否仅玩家执行.
      *
-     * @return the boolean
+     * @return 是否仅玩家执行
      */
     boolean onlyPlayer() default false;
 
     /**
-     * Aliases string [ ].
+     * 别名数组.
+     * 请不要使用 空格 标点 等字符 ！！！
      *
-     * @return the string [ ]
+     * @return 别名数组
      */
     String[] aliases() default {};
 
     /**
-     * Tabs string [ ].
+     * Tab 补全候选列表.
      *
-     * @return the string [ ]
+     * @return Tab 补全候选列表
      */
     String[] tabs() default {};
 
     /**
-     * Usage string.
+     * 用法.
      *
-     * @return the string
+     * @return 用法
      */
     String usage() default "";
 }
