@@ -73,7 +73,7 @@ public final class SpigotBaseSubs {
     @Sub
     public static void help(SpigotCommand self, CommandSender sender, Paths args) {
         if (args.notEmpty()) {
-            SpigotCommand sub = self.getSub(args.first());
+            SpigotCommand sub = self.getParent().getSub(args.first());
             if (sub != null) sub.sendUsage(sender);
             else self.manager.sendKey(sender, "noSuchSubCmd", args.first());
         } else self.sendUsage(sender);

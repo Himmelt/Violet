@@ -38,6 +38,10 @@ public class SpongeCommand implements CommandCallable {
      */
     public final SpongeManager manager;
     /**
+     * 父命令.
+     */
+    private SpongeCommand parent;
+    /**
      * Tab 补全候选列表.
      */
     protected ArrayList<String> tabs;
@@ -90,6 +94,7 @@ public class SpongeCommand implements CommandCallable {
             subs.entrySet().removeIf(entry -> entry.getValue() == old);
             if (old != sub) old.subs.forEach(sub.subs::putIfAbsent);
         }
+        sub.parent = this;
         subs.put(sub.name, sub);
         for (String alias : sub.aliases) {
             subs.putIfAbsent(alias, sub);
@@ -113,6 +118,15 @@ public class SpongeCommand implements CommandCallable {
      */
     public SpongeCommand getSub(String name) {
         return subs.get(name);
+    }
+
+    /**
+     * 获取父命令
+     *
+     * @return 父命令
+     */
+    public SpongeCommand getParent() {
+        return parent;
     }
 
     /**

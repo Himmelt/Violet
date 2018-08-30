@@ -73,7 +73,7 @@ public final class SpongeBaseSubs {
     @Sub
     public static void help(SpongeCommand self, CommandSource sender, Paths args) {
         if (args.notEmpty()) {
-            SpongeCommand sub = self.getSub(args.first());
+            SpongeCommand sub = self.getParent().getSub(args.first());
             if (sub != null) sub.sendUsage(sender);
             else self.manager.sendKey(sender, "noSuchSubCmd", args.first());
         } else self.sendUsage(sender);
