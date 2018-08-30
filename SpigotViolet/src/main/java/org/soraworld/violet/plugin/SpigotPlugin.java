@@ -115,6 +115,7 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
         command.extractSub(SpigotBaseSubs.class, "debug");
         command.extractSub(SpigotBaseSubs.class, "save");
         command.extractSub(SpigotBaseSubs.class, "reload");
+        command.extractSub(SpigotBaseSubs.class, "help");
         register(this, command);
     }
 

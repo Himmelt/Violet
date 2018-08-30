@@ -36,7 +36,7 @@ public class SpongeCommand implements CommandCallable {
     /**
      * 管理器.
      */
-    protected final SpongeManager manager;
+    public final SpongeManager manager;
     /**
      * Tab 补全候选列表.
      */
@@ -97,6 +97,25 @@ public class SpongeCommand implements CommandCallable {
     }
 
     /**
+     * 获取子命令名列表.
+     *
+     * @return 列表
+     */
+    public List<String> subs() {
+        return new ArrayList<>(subs.keySet());
+    }
+
+    /**
+     * 获取子命令.
+     *
+     * @param name 命令名或别名
+     * @return 子命令
+     */
+    public SpongeCommand getSub(String name) {
+        return subs.get(name);
+    }
+
+    /**
      * 从类中提取带有 {@link Sub} 注解的静态公开方法，
      * 动态编译成实现了{@link SpongeExecutor}接口的 λ 类，
      * 并封装成{@link SpongeCommand} 注册为子命令.
@@ -137,7 +156,7 @@ public class SpongeCommand implements CommandCallable {
         Class<?> ret = method.getReturnType();
         if (!ret.equals(Void.class) && !ret.equals(void.class)) return;
         Class<?>[] params = method.getParameterTypes();
-        if (params.length != 3 || params[0] != SpongeManager.class || params[1] != CommandSource.class || params[2] != Paths.class) return;
+        if (params.length != 3 || params[0] != SpongeCommand.class || params[1] != CommandSource.class || params[2] != Paths.class) return;
         method.setAccessible(true);
         try {
             MethodHandle handle = lookup.unreflect(method);
@@ -186,7 +205,7 @@ public class SpongeCommand implements CommandCallable {
      * @param args   参数
      */
     public void execute(CommandSource sender, Paths args) {
-        if (executor != null) executor.execute(manager, sender, args);
+        if (executor != null) executor.execute(this, sender, args);
         else if (args.notEmpty()) {
             SpongeCommand sub = subs.get(args.first());
             if (sub != null) {

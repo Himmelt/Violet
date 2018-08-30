@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 group = 'org.soraworld'
-version = '2.3.0'
+version = '2.3.1'
 
 sourceCompatibility = targetCompatibility = 1.8
 
@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    compile 'org.soraworld:hocon:1.0.4'
+    compile 'org.soraworld:hocon:1.0.5'
     compile 'com.google.code.findbugs:jsr305:3.0.2'
     testCompile 'junit:junit:4.12'
 }

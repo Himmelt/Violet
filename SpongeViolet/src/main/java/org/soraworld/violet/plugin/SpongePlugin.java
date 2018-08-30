@@ -129,6 +129,7 @@ public abstract class SpongePlugin implements IPlugin {
         command.extractSub(SpongeBaseSubs.class, "debug");
         command.extractSub(SpongeBaseSubs.class, "save");
         command.extractSub(SpongeBaseSubs.class, "reload");
+        command.extractSub(SpongeBaseSubs.class, "help");
         register(this, command);
     }
 

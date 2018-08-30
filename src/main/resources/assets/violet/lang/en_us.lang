@@ -33,6 +33,8 @@ bStatsFailed = "Stats data send failed!"
 extractNoSuchSub = "&cClass %s has no method %s witch matching signature, lambda extract failed."
 extractReflectError = "&cMethod %s reflect exception, please check your code !"
 
+noSuchSubCmd = "No sub command named %s."
+
 comment {
   lang = "Display Language"
   debug = "Debug Mode"
