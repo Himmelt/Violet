@@ -24,7 +24,12 @@ public class SpongeCommand implements CommandCallable {
     /**
      * 命令主名.
      */
-    protected final String name;
+    public final String name;
+    /**
+     * 管理器.
+     */
+    public final SpongeManager manager;
+
     /**
      * 命令权限.
      */
@@ -34,13 +39,9 @@ public class SpongeCommand implements CommandCallable {
      */
     protected boolean onlyPlayer;
     /**
-     * 管理器.
-     */
-    public final SpongeManager manager;
-    /**
      * 父命令.
      */
-    private SpongeCommand parent;
+    protected SpongeCommand parent;
     /**
      * Tab 补全候选列表.
      */
@@ -154,7 +155,7 @@ public class SpongeCommand implements CommandCallable {
     public void extractSub(Class<?> clazz, String method) {
         if (clazz == null || method == null || method.isEmpty() || clazz == Object.class || clazz == Class.class) return;
         try {
-            Method theMethod = clazz.getDeclaredMethod(method, SpongeManager.class, CommandSource.class, Paths.class);
+            Method theMethod = clazz.getDeclaredMethod(method, SpongeCommand.class, CommandSource.class, Paths.class);
             tryAddSub(theMethod);
         } catch (Throwable e) {
             if (manager.isDebug()) e.printStackTrace();
@@ -258,14 +259,14 @@ public class SpongeCommand implements CommandCallable {
      *
      * @param sender 信息接收者
      */
-    protected void sendUsage(CommandSource sender) {
+    public void sendUsage(CommandSource sender) {
         if (usage != null && !usage.isEmpty()) {
             manager.sendKey(sender, "cmdUsage", usage);
         }
     }
 
     @Nonnull
-    public final Text getUsage(@Nonnull CommandSource source) {
+    public Text getUsage(@Nonnull CommandSource source) {
         return Text.of(usage == null ? "" : usage);
     }
 
@@ -310,7 +311,12 @@ public class SpongeCommand implements CommandCallable {
         return new ArrayList<>();
     }
 
-    private void setTabCompletions(String[] tabs) {
+    /**
+     * 设置命令补全.
+     *
+     * @param tabs 补全列表
+     */
+    public void setTabCompletions(String[] tabs) {
         if (tabs != null && tabs.length > 0) {
             this.tabs = new ArrayList<>(Arrays.asList(tabs));
         } else this.tabs = null;
@@ -327,17 +333,17 @@ public class SpongeCommand implements CommandCallable {
      * @param source 命令发送者
      * @return 是否能执行此命令
      */
-    public final boolean testPermission(@Nonnull CommandSource source) {
+    public boolean testPermission(@Nonnull CommandSource source) {
         return perm == null || source.hasPermission(perm);
     }
 
     @Nonnull
-    public final Optional<Text> getShortDescription(@Nonnull CommandSource source) {
+    public Optional<Text> getShortDescription(@Nonnull CommandSource source) {
         return Optional.of(getUsage(source));
     }
 
     @Nonnull
-    public final Optional<Text> getHelp(@Nonnull CommandSource source) {
+    public Optional<Text> getHelp(@Nonnull CommandSource source) {
         return Optional.of(getUsage(source));
     }
 

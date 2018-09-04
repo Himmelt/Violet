@@ -19,17 +19,18 @@ import java.util.*;
 public class SpigotCommand extends Command {
 
     /**
-     * 是否仅玩家执行.
-     */
-    private boolean onlyPlayer;
-    /**
      * 管理器.
      */
     public final SpigotManager manager;
+
+    /**
+     * 是否仅玩家执行.
+     */
+    protected boolean onlyPlayer;
     /**
      * 父命令.
      */
-    private SpigotCommand parent;
+    protected SpigotCommand parent;
     /**
      * Tab 补全候选列表.
      */
@@ -225,7 +226,7 @@ public class SpigotCommand extends Command {
         execute((CommandSender) player, args);
     }
 
-    public final boolean execute(CommandSender sender, String commandLabel, String[] args) {
+    public boolean execute(CommandSender sender, String commandLabel, String[] args) {
         if (testPermission(sender)) {
             if (sender instanceof Player) execute(((Player) sender), new Paths(true, args));
             else if (!onlyPlayer) execute(sender, new Paths(true, args));
@@ -239,7 +240,7 @@ public class SpigotCommand extends Command {
      *
      * @param sender 信息接收者
      */
-    protected void sendUsage(CommandSender sender) {
+    public void sendUsage(CommandSender sender) {
         String usage = getUsage();
         if (usage != null && !usage.isEmpty()) {
             manager.sendKey(sender, "cmdUsage", usage);
@@ -278,7 +279,12 @@ public class SpigotCommand extends Command {
         return new ArrayList<>();
     }
 
-    private void setTabCompletions(String[] tabs) {
+    /**
+     * 设置命令补全.
+     *
+     * @param tabs 补全列表
+     */
+    public void setTabCompletions(String[] tabs) {
         if (tabs != null && tabs.length > 0) {
             this.tabs = new ArrayList<>(Arrays.asList(tabs));
         } else this.tabs = null;
@@ -298,7 +304,7 @@ public class SpigotCommand extends Command {
      * @param target 命令发送者
      * @return 是否能执行此命令
      */
-    public final boolean testPermission(CommandSender target) {
+    public boolean testPermission(CommandSender target) {
         return getPermission() == null || target.hasPermission(getPermission());
     }
 
@@ -308,7 +314,7 @@ public class SpigotCommand extends Command {
      * @param target 命令发送者
      * @return 是否能执行此命令
      */
-    public final boolean testPermissionSilent(CommandSender target) {
+    public boolean testPermissionSilent(CommandSender target) {
         return getPermission() == null || target.hasPermission(getPermission());
     }
 }
