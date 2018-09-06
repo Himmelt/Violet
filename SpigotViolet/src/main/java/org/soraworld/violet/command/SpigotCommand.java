@@ -136,7 +136,7 @@ public class SpigotCommand extends Command {
     public void extractSub(Class<?> clazz, String method) {
         if (clazz == null || method == null || method.isEmpty() || clazz == Object.class || clazz == Class.class) return;
         try {
-            Method theMethod = clazz.getDeclaredMethod(method, SpigotManager.class, CommandSender.class, Paths.class);
+            Method theMethod = clazz.getDeclaredMethod(method, SpigotCommand.class, CommandSender.class, Paths.class);
             tryAddSub(theMethod);
         } catch (Throwable e) {
             if (manager.isDebug()) e.printStackTrace();
