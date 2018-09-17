@@ -40,7 +40,7 @@ subprojects {
     }
     dependencies {
         shadeOnly rootProject
-        hocon 'org.soraworld:hocon:1.0.4'
+        hocon 'org.soraworld:hocon:1.0.5'
         compile 'com.google.code.findbugs:jsr305:3.0.2'
         testCompile 'junit:junit:4.12'
     }
