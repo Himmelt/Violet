@@ -60,7 +60,9 @@ public final class SpigotBaseSubs {
      */
     @Sub(perm = "admin")
     public static void reload(SpigotCommand self, CommandSender sender, Paths args) {
+        self.manager.beforeLoad();
         self.manager.sendKey(sender, self.manager.load() ? "configLoaded" : "configLoadFailed");
+        self.manager.afterLoad();
     }
 
     /**

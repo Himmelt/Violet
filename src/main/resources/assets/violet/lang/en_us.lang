@@ -15,7 +15,6 @@ debugON = "DEBUG mode &aON&r ."
 debugOFF = "DEBUG mode &cOFF&r ."
 onlyPlayer = "Only in-game player can execute this command."
 invalidArg = "Arg is empty or invalid , please enter correct args."
-onlyPlayerOrInvalidArg = "Arg is empty or invalid , add valid arg or execute it in game."
 noCommandPerm = "You need permission <&c%s&r> to execute this command."
 
 cmdUsage = "Usage %s"

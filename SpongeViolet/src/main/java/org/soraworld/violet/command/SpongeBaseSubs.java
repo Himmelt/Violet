@@ -60,7 +60,9 @@ public final class SpongeBaseSubs {
      */
     @Sub(perm = "admin")
     public static void reload(SpongeCommand self, CommandSource sender, Paths args) {
+        self.manager.beforeLoad();
         self.manager.sendKey(sender, self.manager.load() ? "configLoaded" : "configLoadFailed");
+        self.manager.afterLoad();
     }
 
     /**
