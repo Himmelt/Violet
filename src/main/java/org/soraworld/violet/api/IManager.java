@@ -58,6 +58,13 @@ public interface IManager {
     boolean save();
 
     /**
+     * 重新从jar释放文件.
+     *
+     * @return 是否成功
+     */
+    boolean reExtract();
+
+    /**
      * 异步保存配置.
      */
     void asyncSave();

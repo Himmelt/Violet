@@ -9,6 +9,7 @@ import org.soraworld.violet.serializers.UUIDSerializer;
 import org.soraworld.violet.util.ChatColor;
 
 import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -23,6 +24,8 @@ import java.util.Map;
  */
 public abstract class VioletManager<T extends IPlugin> implements IManager {
 
+    @Setting(comment = "comment.version")
+    protected final String version = getPlugin().getVersion();
     /**
      * 语言设置项.
      */
@@ -33,6 +36,8 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
      */
     @Setting(comment = "comment.debug")
     protected boolean debug = false;
+    @Setting(comment = "comment.autoUpLang")
+    protected boolean autoUpLang = true;
 
     /**
      * 纯文本抬头.
@@ -132,9 +137,10 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
             FileNode rootNode = new FileNode(confile.toFile(), options);
             rootNode.load(true);
             rootNode.modify(this);
-            if (!setLang(lang)) {
-                setLang(Locale.CHINA.equals(Locale.getDefault()) ? "zh_cn" : "en_us");
-            }
+            boolean flag;
+            if (autoUpLang && !plugin.getVersion().equalsIgnoreCase(version)) flag = reExtract();
+            else flag = setLang(lang);
+            if (!flag) setLang(Locale.CHINA.equals(Locale.getDefault()) ? "zh_cn" : "en_us");
             options.setDebug(debug);
             return true;
         } catch (Throwable e) {
@@ -153,6 +159,15 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         } catch (Throwable e) {
             console(ChatColor.RED + "Config file save exception !!!");
             if (debug) e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean reExtract() {
+        try {
+            Files.delete(path.resolve("lang"));
+            return setLang(lang);
+        } catch (IOException e) {
             return false;
         }
     }

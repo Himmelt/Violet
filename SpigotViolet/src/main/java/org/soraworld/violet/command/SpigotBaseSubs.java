@@ -66,6 +66,18 @@ public final class SpigotBaseSubs {
     }
 
     /**
+     * 重新从jar释放语言文件.
+     *
+     * @param self   封装命令
+     * @param sender 命令执行者
+     * @param args   参数
+     */
+    @Sub(perm = "admin")
+    public static void rextract(SpigotCommand self, CommandSender sender, Paths args) {
+        self.manager.sendKey(sender, self.manager.reExtract() ? "reExtracted" : "reExtractFailed");
+    }
+
+    /**
      * 查看帮助.
      *
      * @param self   封装命令

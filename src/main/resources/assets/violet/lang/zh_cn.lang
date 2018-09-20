@@ -15,10 +15,13 @@ debugON = "调试模式已 &a开启&r ."
 debugOFF = "调试模式已 &c关闭&r ."
 onlyPlayer = "该命令只能由玩家在游戏内执行."
 noCommandPerm = "你需要权限 <&c%s&r> 才能执行此命令."
+
 cmdUsage = "用法 %s"
 pluginEnabled = "插件 &e%s&r 已 &a启用&r."
 pluginDisabled = "插件 &e%s&r 已 &c禁用&r."
 emptyLangMap = "&c语言文件键值对为空 !!!"
+reExtracted = "&a已重新释放语言文件."
+reExtractFailed = "&c重新释放语言文件失败 !!!"
 
 emptyHand = "手持物为空."
 emptyArgs = "参数为空."
@@ -29,18 +32,17 @@ invalidFloat = "参数不是有效小数."
 invalidDouble = "参数不是有效双精度数."
 
 pluginInfo = "插件信息  id - &a%s&r  version - &e%s"
-
 bStatsFailed = "统计信息发送失败!"
 
 extractNoSuchSub = "&c类 %s 中没有名为 %s 且匹配签名的方法，lambda 提取失败."
 extractReflectError = "&c方法 %s 反射处理异常，请检查代码!"
-
 noSuchSubCmd = "没有名为 %s 的子命令."
 
 comment {
   lang = "显示语言"
   debug = "调试模式"
-  version = "插件版本"
+  version = "插件版本，用于自动任务，请勿修改 !!"
   uuid = "Violet 插件唯一识别标志，用于插件统计."
   enableStats = "启用 Violet 插件统计."
+  autoUpLang = "自动重新释放语言文件(版本变化时)."
 }

@@ -29,7 +29,7 @@ public class SpigotViolet extends SpigotPlugin {
     public void registerCommands() {
         SpigotCommand command = new SpigotCommand(getId(), manager.defAdminPerm(), false, manager);
         command.extractSub(SpigotBaseSubs.class);
-        command.setUsage("/violet lang|debug|save|reload");
+        command.setUsage("/violet lang|debug|save|reload|rextract");
         register(this, command);
     }
 
