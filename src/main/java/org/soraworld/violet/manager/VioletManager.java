@@ -9,7 +9,7 @@ import org.soraworld.violet.serializers.UUIDSerializer;
 import org.soraworld.violet.util.ChatColor;
 
 import javax.annotation.Nonnull;
-import java.io.IOException;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import java.util.Map;
 public abstract class VioletManager<T extends IPlugin> implements IManager {
 
     @Setting(comment = "comment.version")
-    protected final String version = getPlugin().getVersion();
+    protected String version = "0.0.0";
     /**
      * 语言设置项.
      */
@@ -151,6 +151,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
     }
 
     public boolean save() {
+        version = getPlugin().getVersion();
         try {
             FileNode rootNode = new FileNode(confile.toFile(), options);
             rootNode.extract(this);
@@ -164,12 +165,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
     }
 
     public boolean reExtract() {
-        try {
-            Files.delete(path.resolve("lang"));
-            return setLang(lang);
-        } catch (IOException e) {
-            return false;
-        }
+        return deletePath(path.resolve("lang").toFile()) && setLang(lang);
     }
 
     public String getLang() {
@@ -233,5 +229,13 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
     public static IPlugin getPluginAt(int index) {
         if (index >= 0 && index < plugins.size()) return plugins.get(index);
         return null;
+    }
+
+    public static boolean deletePath(File path) {
+        if (path.isFile()) return path.delete();
+        File[] files = path.listFiles();
+        boolean flag = true;
+        if (files != null) for (File file : files) flag = flag && deletePath(file);
+        return flag;
     }
 }
