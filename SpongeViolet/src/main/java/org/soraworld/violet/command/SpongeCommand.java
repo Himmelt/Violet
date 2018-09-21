@@ -84,6 +84,11 @@ public class SpongeCommand implements CommandCallable {
         this.aliases.removeIf(s -> s == null || s.isEmpty() || s.contains(" ") || s.contains(":"));
     }
 
+    private SpongeCommand(String name, SpongeCommand parent, SpongeManager manager) {
+        this(name, null, false, manager);
+        this.parent = parent;
+    }
+
     /**
      * 添加子命令.
      *
@@ -189,28 +194,29 @@ public class SpongeCommand implements CommandCallable {
             else paths.set(0, name);
             String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
             if ("admin".equals(perm)) perm = manager.defAdminPerm();
-            SpongeCommand command = getOrCreateSub(paths);
+            // 此处返回的是最终命令
+            SpongeCommand command = createSub(paths);
             command.executor = executor;
             command.perm = perm;
             command.onlyPlayer = sub.onlyPlayer();
             command.aliases = new ArrayList<>(Arrays.asList(sub.aliases()));
             command.setTabCompletions(sub.tabs());
             command.usage = sub.usage();
-            addSub(command);
         } catch (Throwable e) {
             if (manager.isDebug()) e.printStackTrace();
             manager.consoleKey("extractReflectError", method.getName());
         }
     }
 
-    private SpongeCommand getOrCreateSub(Paths paths) {
-        if (paths.empty()) return this;
-        SpongeCommand sub = subs.get(paths.first());
-        if (sub == null) {
-            sub = new SpongeCommand(paths.first(), null, false, manager);
-            addSub(sub);
+    // 返回的是最终命令
+    private SpongeCommand createSub(Paths paths) {
+        if (paths.empty()) {
+            parent.addSub(this);
+            return this;
         }
-        return sub.getOrCreateSub(paths.next());
+        SpongeCommand sub = subs.get(paths.first());
+        if (sub == null) sub = new SpongeCommand(paths.first(), this, manager);
+        return sub.createSub(paths.next());
     }
 
     /**

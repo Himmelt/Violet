@@ -165,7 +165,11 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
     }
 
     public boolean reExtract() {
-        return deletePath(path.resolve("lang").toFile()) && setLang(lang);
+        if (deletePath(path.resolve("lang").toFile())) {
+            return setLang(lang);
+        }
+        if (debug) console(ChatColor.RED + "deletePath " + path.resolve("lang") + " failed !!");
+        return false;
     }
 
     public String getLang() {
@@ -231,8 +235,12 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         return null;
     }
 
-    public static boolean deletePath(File path) {
-        if (path.isFile()) return path.delete();
+    public boolean deletePath(File path) {
+        if (path.isFile()) {
+            boolean flag = path.delete();
+            if (debug && !flag) console(ChatColor.RED + "File " + path + " delete failed !!");
+            return flag;
+        }
         File[] files = path.listFiles();
         boolean flag = true;
         if (files != null) for (File file : files) flag = flag && deletePath(file);

@@ -102,6 +102,7 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
 
         public boolean setLang(@Nonnull String lang) {
             boolean flag = super.setLang(lang);
+            langMaps.clear();
             langMaps.put(lang, langMap);
             return flag;
         }

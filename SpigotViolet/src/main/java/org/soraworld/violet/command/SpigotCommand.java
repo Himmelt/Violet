@@ -65,6 +65,11 @@ public class SpigotCommand extends Command {
         setAliases(list);
     }
 
+    private SpigotCommand(String name, SpigotCommand parent, SpigotManager manager) {
+        this(name, null, false, manager);
+        this.parent = parent;
+    }
+
     /**
      * 添加子命令.
      *
@@ -170,7 +175,8 @@ public class SpigotCommand extends Command {
             else paths.set(0, name);
             String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
             if ("admin".equals(perm)) perm = manager.defAdminPerm();
-            SpigotCommand command = getOrCreateSub(paths);
+            // 此处返回的是最终命令
+            SpigotCommand command = createSub(paths);
             command.executor = executor;
             command.setPermission(perm);
             command.onlyPlayer = sub.onlyPlayer();
@@ -178,21 +184,21 @@ public class SpigotCommand extends Command {
             command.setTabCompletions(sub.tabs());
             command.usageMessage = sub.usage();
             command.description = sub.usage();
-            addSub(command);
         } catch (Throwable e) {
             if (manager.isDebug()) e.printStackTrace();
             manager.consoleKey("extractReflectError", method.getName());
         }
     }
 
-    private SpigotCommand getOrCreateSub(Paths paths) {
-        if (paths.empty()) return this;
-        SpigotCommand sub = subs.get(paths.first());
-        if (sub == null) {
-            sub = new SpigotCommand(paths.first(), null, false, manager);
-            addSub(sub);
+    // 返回的是最终命令
+    private SpigotCommand createSub(Paths paths) {
+        if (paths.empty()) {
+            parent.addSub(this);
+            return this;
         }
-        return sub.getOrCreateSub(paths.next());
+        SpigotCommand sub = subs.get(paths.first());
+        if (sub == null) sub = new SpigotCommand(paths.first(), this, manager);
+        return sub.createSub(paths.next());
     }
 
     /**

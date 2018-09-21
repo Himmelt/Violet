@@ -103,6 +103,7 @@ public abstract class SpongeManager extends VioletManager<SpongePlugin> {
 
         public boolean setLang(@Nonnull String lang) {
             boolean flag = super.setLang(lang);
+            langMaps.clear();
             langMaps.put(lang, langMap);
             return flag;
         }

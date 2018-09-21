@@ -10,10 +10,8 @@ repositories {
 }
 
 dependencies {
-    compile('org.soraworld:hocon:1.0.5') {
-        transitive = false
-    }
-    compile 'com.google.code.findbugs:jsr305:3.0.2'
+    compile 'org.soraworld:hocon:1.0.6'
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
     testCompile 'junit:junit:4.12'
 }
 
@@ -43,7 +41,7 @@ subprojects {
     dependencies {
         shadeOnly rootProject
         hocon 'org.soraworld:hocon:1.0.5'
-        compile 'com.google.code.findbugs:jsr305:3.0.2'
+        compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
         testCompile 'junit:junit:4.12'
     }
     task sourcesJar(type: Jar) {
