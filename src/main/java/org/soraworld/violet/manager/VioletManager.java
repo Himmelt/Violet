@@ -138,8 +138,10 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
             rootNode.load(true);
             rootNode.modify(this);
             boolean flag;
-            if (autoUpLang && !plugin.getVersion().equalsIgnoreCase(version)) flag = reExtract();
-            else flag = setLang(lang);
+            if (autoUpLang && !plugin.getVersion().equalsIgnoreCase(version)) {
+                consoleKey("versionChanged", version);
+                flag = reExtract();
+            } else flag = setLang(lang);
             if (!flag) setLang(Locale.CHINA.equals(Locale.getDefault()) ? "zh_cn" : "en_us");
             options.setDebug(debug);
             return true;

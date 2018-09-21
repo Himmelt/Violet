@@ -21,6 +21,15 @@ public @interface Sub {
     String[] paths() default {};
 
     /**
+     * 是否为抽象命令.
+     * 抽象命令只是为命令提供基本信息，不具备执行功能。
+     * 要注意顺序，后注册的命令会覆盖前面相同路径的命令。
+     *
+     * @return 是否仅玩家执行
+     */
+    boolean virtual() default false;
+
+    /**
      * 权限.
      * 如果填 "admin" 则 使用 Manager 的 defaultAdmin()
      *
@@ -29,7 +38,7 @@ public @interface Sub {
     String perm() default "";
 
     /**
-     * 是否仅玩家执行.
+     * 是否仅玩家可执行.
      *
      * @return 是否仅玩家执行
      */

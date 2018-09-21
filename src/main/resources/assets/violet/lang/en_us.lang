@@ -20,6 +20,7 @@ cmdUsage = "Usage %s"
 pluginEnabled = "Plugin &e%s&a Enabled&r."
 pluginDisabled = "Plugin &e%s&c Disabled&r."
 emptyLangMap = "&cLang file map is empty !!!"
+versionChanged = "Version %s changed, will re extract lang file."
 reExtracted = "&aRe extracted lang file."
 reExtractFailed = "&cRe extract lang file failed !!!"
 

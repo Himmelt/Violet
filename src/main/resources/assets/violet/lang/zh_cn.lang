@@ -20,6 +20,7 @@ cmdUsage = "用法 %s"
 pluginEnabled = "插件 &e%s&r 已 &a启用&r."
 pluginDisabled = "插件 &e%s&r 已 &c禁用&r."
 emptyLangMap = "&c语言文件键值对为空 !!!"
+versionChanged = "版本 %s 已改变, 将重新释放语言文件."
 reExtracted = "&a已重新释放语言文件."
 reExtractFailed = "&c重新释放语言文件失败 !!!"
 

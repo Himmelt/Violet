@@ -30,7 +30,7 @@ public class SpigotCommand extends Command {
     /**
      * 父命令.
      */
-    protected SpigotCommand parent;
+    protected final SpigotCommand parent;
     /**
      * Tab 补全候选列表.
      */
@@ -56,18 +56,28 @@ public class SpigotCommand extends Command {
      * @param aliases    别名
      */
     public SpigotCommand(@Nonnull String name, @Nullable String perm, boolean onlyPlayer, @Nonnull SpigotManager manager, String... aliases) {
+        this(null, name, perm, onlyPlayer, manager, aliases);
+    }
+
+    /**
+     * 实例化 Spigot 命令.
+     *
+     * @param parent     父命令
+     * @param name       命令主名
+     * @param perm       权限
+     * @param onlyPlayer 是否仅玩家可执行
+     * @param manager    管理器
+     * @param aliases    别名
+     */
+    public SpigotCommand(@Nullable SpigotCommand parent, @Nonnull String name, @Nullable String perm, boolean onlyPlayer, @Nonnull SpigotManager manager, String... aliases) {
         super(name);
         setPermission(perm);
+        this.parent = parent;
         this.manager = manager;
         this.onlyPlayer = onlyPlayer;
         ArrayList<String> list = new ArrayList<>(Arrays.asList(aliases));
         list.removeIf(s -> s == null || s.isEmpty() || s.contains(" ") || s.contains(":"));
         setAliases(list);
-    }
-
-    private SpigotCommand(String name, SpigotCommand parent, SpigotManager manager) {
-        this(name, null, false, manager);
-        this.parent = parent;
     }
 
     /**
@@ -81,7 +91,6 @@ public class SpigotCommand extends Command {
             subs.entrySet().removeIf(entry -> entry.getValue() == old);
             if (old != sub) old.subs.forEach(sub.subs::putIfAbsent);
         }
-        sub.parent = this;
         subs.put(sub.getName(), sub);
         for (String alias : sub.getAliases()) {
             subs.putIfAbsent(alias, sub);
@@ -159,46 +168,55 @@ public class SpigotCommand extends Command {
         Class<?>[] params = method.getParameterTypes();
         if (params.length != 3 || params[0] != SpigotCommand.class || params[1] != CommandSender.class || params[2] != Paths.class) return;
         method.setAccessible(true);
-        try {
-            MethodHandle handle = lookup.unreflect(method);
-            CallSite site = LambdaMetafactory.metafactory(
-                    lookup,
-                    "execute",
-                    INVOKE_EXEC,
-                    handle.type(),
-                    handle,
-                    handle.type());
-            SpigotExecutor executor = (SpigotExecutor) site.getTarget().invokeExact();
-            Paths paths = new Paths(false, sub.paths());
-            String name = paths.empty() ? method.getName().toLowerCase() : paths.first().replace(' ', '_').replace(':', '_');
-            if (paths.empty()) paths = new Paths(false, name);
-            else paths.set(0, name);
-            String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
-            if ("admin".equals(perm)) perm = manager.defAdminPerm();
-            // 此处返回的是最终命令
-            SpigotCommand command = createSub(paths);
-            command.executor = executor;
-            command.setPermission(perm);
-            command.onlyPlayer = sub.onlyPlayer();
-            command.setAliases(new ArrayList<>(Arrays.asList(sub.aliases())));
-            command.setTabCompletions(sub.tabs());
-            command.usageMessage = sub.usage();
-            command.description = sub.usage();
-        } catch (Throwable e) {
-            if (manager.isDebug()) e.printStackTrace();
-            manager.consoleKey("extractReflectError", method.getName());
+        Paths paths = new Paths(false, sub.paths());
+        String name = paths.empty() ? method.getName().toLowerCase() : paths.first().replace(' ', '_').replace(':', '_');
+        if (paths.empty()) paths = new Paths(false, name);
+        else paths.set(0, name);
+        String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
+        if ("admin".equals(perm)) perm = manager.defAdminPerm();
+        // 此处返回的是最终命令
+        SpigotCommand command = createSub(paths);
+        if (!sub.virtual()) {
+            try {
+                MethodHandle handle = lookup.unreflect(method);
+                CallSite site = LambdaMetafactory.metafactory(
+                        lookup,
+                        "execute",
+                        INVOKE_EXEC,
+                        handle.type(),
+                        handle,
+                        handle.type());
+                command.executor = (SpigotExecutor) site.getTarget().invokeExact();
+            } catch (Throwable e) {
+                if (manager.isDebug()) e.printStackTrace();
+                manager.consoleKey("extractReflectError", method.getName());
+            }
         }
+        command.setPermission(perm);
+        command.onlyPlayer = sub.onlyPlayer();
+        command.setAliases(new ArrayList<>(Arrays.asList(sub.aliases())));
+        command.setTabCompletions(sub.tabs());
+        command.usageMessage = sub.usage();
+        command.description = sub.usage();
+        command.update();
     }
 
     // 返回的是最终命令
     private SpigotCommand createSub(Paths paths) {
-        if (paths.empty()) {
-            parent.addSub(this);
-            return this;
-        }
+        if (paths.empty()) return this;
         SpigotCommand sub = subs.get(paths.first());
-        if (sub == null) sub = new SpigotCommand(paths.first(), this, manager);
+        if (sub == null) sub = new SpigotCommand(this, paths.first(), null, false, manager);
         return sub.createSub(paths.next());
+    }
+
+    /**
+     * 更新命令层次.
+     */
+    public void update() {
+        if (parent != null) {
+            parent.addSub(this);
+            parent.update();
+        }
     }
 
     /**
