@@ -13,5 +13,5 @@ public interface SpongeExecutor {
      * @param sender 命令执行者
      * @param args   参数
      */
-    void execute(SpongeCommand self, CommandSource sender, Paths args);
+    void execute(SpongeCommand self, CommandSource sender, Args args);
 }

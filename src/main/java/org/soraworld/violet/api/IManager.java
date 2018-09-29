@@ -2,8 +2,6 @@ package org.soraworld.violet.api;
 
 import org.soraworld.violet.util.ChatColor;
 
-import javax.annotation.Nonnull;
-
 /**
  * 管理器接口.
  * 负责整个插件的主要管理工作.
@@ -18,7 +16,6 @@ public interface IManager {
      *
      * @return 默认抬头
      */
-    @Nonnull
     default String defChatHead() {
         return "[" + getPlugin().getName() + "] ";
     }
@@ -28,7 +25,6 @@ public interface IManager {
      *
      * @return 默认管理权限
      */
-    @Nonnull
     default String defAdminPerm() {
         return getPlugin().getId() + ".admin";
     }
@@ -40,7 +36,6 @@ public interface IManager {
      *
      * @return 默认聊天颜色
      */
-    @Nonnull
     ChatColor defChatColor();
 
     /**
@@ -94,7 +89,7 @@ public interface IManager {
      * @param lang 待设置语言
      * @return 是否成功
      */
-    boolean setLang(@Nonnull String lang);
+    boolean setLang(String lang);
 
     /**
      * 是否处于调试模式.
@@ -117,7 +112,7 @@ public interface IManager {
      * @param args 参数
      * @return 翻译结果
      */
-    String trans(@Nonnull String key, Object... args);
+    String trans(String key, Object... args);
 
     /**
      * 向控制台输出文本.
@@ -125,7 +120,7 @@ public interface IManager {
      *
      * @param text 文本
      */
-    void console(@Nonnull String text);
+    void console(String text);
 
     /**
      * 向控制台输出翻译.
@@ -133,7 +128,7 @@ public interface IManager {
      * @param key  键
      * @param args 参数
      */
-    void consoleKey(@Nonnull String key, Object... args);
+    void consoleKey(String key, Object... args);
 
     /**
      * 广播文本.
@@ -141,7 +136,7 @@ public interface IManager {
      *
      * @param text 文本
      */
-    void broadcast(@Nonnull String text);
+    void broadcast(String text);
 
     /**
      * 广播翻译.
@@ -149,7 +144,7 @@ public interface IManager {
      * @param key  键
      * @param args 参数
      */
-    void broadcastKey(@Nonnull String key, Object... args);
+    void broadcastKey(String key, Object... args);
 
     /**
      * 打印输出文本.
@@ -157,7 +152,7 @@ public interface IManager {
      *
      * @param text 文本
      */
-    void println(@Nonnull String text);
+    void println(String text);
 
     /**
      * 获取插件实例.

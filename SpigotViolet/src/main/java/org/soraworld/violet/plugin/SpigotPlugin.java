@@ -9,8 +9,6 @@ import org.soraworld.violet.command.SpigotBaseSubs;
 import org.soraworld.violet.command.SpigotCommand;
 import org.soraworld.violet.manager.SpigotManager;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -67,12 +65,10 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
         afterEnable();
     }
 
-    @Nonnull
     public String getId() {
         return getName().toLowerCase().replace(' ', '_');
     }
 
-    @Nonnull
     public String getVersion() {
         return getDescription().getVersion();
     }
@@ -92,7 +88,6 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
      * @param path 配置文件路径
      * @return 管理器
      */
-    @Nonnull
     protected abstract SpigotManager registerManager(Path path);
 
     /**
@@ -100,7 +95,6 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
      *
      * @return 监听器列表
      */
-    @Nullable
     protected abstract List<Listener> registerListeners();
 
     /**

@@ -6,8 +6,6 @@ import org.soraworld.violet.command.SpigotCommand;
 import org.soraworld.violet.manager.SpigotManager;
 import org.soraworld.violet.plugin.SpigotPlugin;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -16,12 +14,10 @@ import java.util.List;
  */
 public class SpigotViolet extends SpigotPlugin {
 
-    @Nonnull
     public SpigotManager registerManager(Path path) {
         return new SpigotManager.Manager(this, path);
     }
 
-    @Nullable
     public List<Listener> registerListeners() {
         return null;
     }
@@ -33,7 +29,6 @@ public class SpigotViolet extends SpigotPlugin {
         register(this, command);
     }
 
-    @Nonnull
     public String assetsId() {
         return Violet.ASSETS_ID;
     }

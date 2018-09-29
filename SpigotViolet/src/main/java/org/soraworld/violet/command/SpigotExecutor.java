@@ -13,5 +13,5 @@ public interface SpigotExecutor {
      * @param sender 命令执行者
      * @param args   参数
      */
-    void execute(SpigotCommand self, CommandSender sender, Paths args);
+    void execute(SpigotCommand self, CommandSender sender, Args args);
 }

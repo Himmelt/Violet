@@ -6,8 +6,6 @@ import org.soraworld.violet.manager.SpongeManager;
 import org.soraworld.violet.plugin.SpongePlugin;
 import org.spongepowered.api.plugin.Plugin;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -24,12 +22,10 @@ import java.util.List;
 )
 public class SpongeViolet extends SpongePlugin {
 
-    @Nonnull
     public SpongeManager registerManager(Path path) {
         return new SpongeManager.Manager(this, path);
     }
 
-    @Nullable
     public List<Object> registerListeners() {
         return null;
     }
@@ -41,7 +37,6 @@ public class SpongeViolet extends SpongePlugin {
         register(this, command);
     }
 
-    @Nonnull
     public String assetsId() {
         return Violet.ASSETS_ID;
     }

@@ -5,7 +5,6 @@ import org.soraworld.hocon.node.NodeBase;
 import org.soraworld.hocon.node.Options;
 import org.soraworld.hocon.serializer.TypeSerializer;
 
-import javax.annotation.Nonnull;
 import java.lang.reflect.Type;
 import java.util.UUID;
 
@@ -13,7 +12,7 @@ import java.util.UUID;
  * UUID 序列化器.
  */
 public class UUIDSerializer implements TypeSerializer<UUID> {
-    public UUID deserialize(@Nonnull Type type, @Nonnull Node node) {
+    public UUID deserialize(Type type, Node node) {
         if (node instanceof NodeBase) {
             try {
                 return UUID.fromString(((NodeBase) node).getString());
@@ -23,11 +22,10 @@ public class UUIDSerializer implements TypeSerializer<UUID> {
         return null;
     }
 
-    public Node serialize(@Nonnull Type type, UUID value, @Nonnull Options options) {
+    public Node serialize(Type type, UUID value, Options options) {
         return new NodeBase(options, value, false);
     }
 
-    @Nonnull
     public Type getRegType() {
         return UUID.class;
     }

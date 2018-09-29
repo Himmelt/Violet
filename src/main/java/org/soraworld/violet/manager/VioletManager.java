@@ -8,7 +8,6 @@ import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.serializers.UUIDSerializer;
 import org.soraworld.violet.util.ChatColor;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -82,7 +81,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
      * @param plugin 插件实例
      * @param path   配置文件路径
      */
-    public VioletManager(@Nonnull T plugin, @Nonnull Path path) {
+    public VioletManager(T plugin, Path path) {
         this.path = path;
         this.plugin = plugin;
         this.options.setTranslator(this::trans);
@@ -92,7 +91,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         if (!plugins.contains(plugin)) plugins.add(plugin);
     }
 
-    public void setHead(@Nonnull String head) {
+    public void setHead(String head) {
         this.colorHead = defChatColor() + ChatColor.colorize(head) + ChatColor.RESET;
         this.plainHead = ChatColor.REAL_COLOR.matcher(colorHead).replaceAll("");
     }
@@ -103,7 +102,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
      * @param lang 目标语言
      * @return 翻译映射表
      */
-    final HashMap<String, String> loadLangMap(@Nonnull String lang) {
+    final HashMap<String, String> loadLangMap(String lang) {
         Path langFile = path.resolve("lang").resolve(lang + ".lang");
         boolean extract = false;
         try {
@@ -178,7 +177,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         return lang;
     }
 
-    public boolean setLang(@Nonnull String lang) {
+    public boolean setLang(String lang) {
         HashMap<String, String> temp = loadLangMap(lang);
         if (!temp.isEmpty()) {
             this.lang = lang;
@@ -201,15 +200,15 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         options.setDebug(debug);
     }
 
-    public void broadcastKey(@Nonnull String key, Object... args) {
+    public void broadcastKey(String key, Object... args) {
         broadcast(trans(key, args));
     }
 
-    public void consoleKey(@Nonnull String key, Object... args) {
+    public void consoleKey(String key, Object... args) {
         console(trans(key, args));
     }
 
-    public void println(@Nonnull String text) {
+    public void println(String text) {
         System.out.println(plainHead + text);
     }
 

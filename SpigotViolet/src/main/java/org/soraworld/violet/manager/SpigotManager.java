@@ -8,7 +8,6 @@ import org.soraworld.violet.bstats.SpigotMetrics;
 import org.soraworld.violet.plugin.SpigotPlugin;
 import org.soraworld.violet.util.ChatColor;
 
-import javax.annotation.Nonnull;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.UUID;
@@ -38,7 +37,7 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
         }
     }
 
-    public String trans(@Nonnull String key, Object... args) {
+    public String trans(String key, Object... args) {
         String text = langMap.get(key);
         // fallback to Violet
         if (text == null || text.isEmpty()) text = Manager.trans(lang, key);
@@ -52,7 +51,7 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
      * @param sender  消息接收者
      * @param message 消息内容
      */
-    public void send(@Nonnull CommandSender sender, @Nonnull String message) {
+    public void send(CommandSender sender, String message) {
         sender.sendMessage(colorHead + message);
     }
 
@@ -63,15 +62,15 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
      * @param key    键
      * @param args   参数
      */
-    public void sendKey(@Nonnull CommandSender sender, @Nonnull String key, Object... args) {
+    public void sendKey(CommandSender sender, String key, Object... args) {
         send(sender, trans(key, args));
     }
 
-    public void console(@Nonnull String text) {
+    public void console(String text) {
         Bukkit.getConsoleSender().sendMessage(colorHead + text);
     }
 
-    public void broadcast(@Nonnull String text) {
+    public void broadcast(String text) {
         Bukkit.broadcastMessage(colorHead + text);
     }
 
@@ -100,19 +99,18 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
             manager = this;
         }
 
-        public boolean setLang(@Nonnull String lang) {
+        public boolean setLang(String lang) {
             boolean flag = super.setLang(lang);
             langMaps.clear();
             langMaps.put(lang, langMap);
             return flag;
         }
 
-        public String trans(@Nonnull String key, Object... args) {
+        public String trans(String key, Object... args) {
             String text = langMap.get(key);
             return (text == null || text.isEmpty()) ? key : args.length > 0 ? String.format(text, args) : text;
         }
 
-        @Nonnull
         public ChatColor defChatColor() {
             return ChatColor.DARK_PURPLE;
         }

@@ -12,20 +12,19 @@ import java.lang.annotation.*;
 @Documented
 public @interface Sub {
     /**
-     * 命令树.
-     * 请不要在命令节中使用 ' ' 和 ':'，即使使用了也会被转换成 '_' .
+     * 命令树, 用 . 分隔
      * 大写字母会被转换为小写字母.
      *
      * @return 命令树
      */
-    String[] paths() default {};
+    String path() default "";
 
     /**
      * 是否为抽象命令.
      * 抽象命令只是为命令提供基本信息，不具备执行功能。
      * 要注意顺序，后注册的命令会覆盖前面相同路径的命令。
      *
-     * @return 是否仅玩家执行
+     * @return 是否抽象命令
      */
     boolean virtual() default false;
 

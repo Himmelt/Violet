@@ -3,7 +3,6 @@ package org.soraworld.violet.bstats;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.manager.VioletManager;
 
-import javax.annotation.Nonnull;
 import javax.net.ssl.HttpsURLConnection;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -54,7 +53,7 @@ public abstract class Metrics<T extends VioletManager> {
         }).start();
     }
 
-    private static void sendData(@Nonnull String json, boolean sponge) throws Exception {
+    private static void sendData(String json, boolean sponge) throws Exception {
         HttpsURLConnection https = (HttpsURLConnection) new URL(sponge ? SPONGE_URL : BUKKIT_URL).openConnection();
         // Compress the data to save bandwidth
         byte[] bytes = compress(json);
@@ -76,7 +75,7 @@ public abstract class Metrics<T extends VioletManager> {
         https.getInputStream().close();
     }
 
-    private static byte[] compress(@Nonnull final String text) throws IOException {
+    private static byte[] compress(final String text) throws IOException {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         GZIPOutputStream gzip = new GZIPOutputStream(output);
         gzip.write(text.getBytes(StandardCharsets.UTF_8));

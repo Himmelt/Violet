@@ -1,6 +1,5 @@
 package org.soraworld.violet.util;
 
-import javax.annotation.Nonnull;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -125,7 +124,7 @@ public enum ChatColor {
      * @param text 原始文本
      * @return 处理结果
      */
-    public static String colorize(@Nonnull String text) {
+    public static String colorize(String text) {
         Matcher matcher = COLOR_PATTERN.matcher(text);
         StringBuilder builder = new StringBuilder();
         int head = 0;

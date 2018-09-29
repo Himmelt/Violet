@@ -1,5 +1,6 @@
 package org.soraworld.violet.command;
 
+import org.soraworld.hocon.node.Paths;
 import org.soraworld.violet.manager.SpongeManager;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandResult;
@@ -9,8 +10,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.invoke.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -74,7 +73,7 @@ public class SpongeCommand implements CommandCallable {
      * @param manager    管理器
      * @param aliases    别名
      */
-    public SpongeCommand(@Nonnull String name, @Nullable String perm, boolean onlyPlayer, @Nonnull SpongeManager manager, String... aliases) {
+    public SpongeCommand(String name, String perm, boolean onlyPlayer, SpongeManager manager, String... aliases) {
         this(null, name, perm, onlyPlayer, manager, aliases);
     }
 
@@ -88,7 +87,7 @@ public class SpongeCommand implements CommandCallable {
      * @param manager    管理器
      * @param aliases    别名
      */
-    public SpongeCommand(@Nullable SpongeCommand parent, @Nonnull String name, @Nullable String perm, boolean onlyPlayer, @Nonnull SpongeManager manager, String... aliases) {
+    public SpongeCommand(SpongeCommand parent, String name, String perm, boolean onlyPlayer, SpongeManager manager, String... aliases) {
         this.name = name;
         this.perm = perm;
         this.parent = parent;
@@ -169,7 +168,7 @@ public class SpongeCommand implements CommandCallable {
     public void extractSub(Class<?> clazz, String method) {
         if (clazz == null || method == null || method.isEmpty() || clazz == Object.class || clazz == Class.class) return;
         try {
-            Method theMethod = clazz.getDeclaredMethod(method, SpongeCommand.class, CommandSource.class, Paths.class);
+            Method theMethod = clazz.getDeclaredMethod(method, SpongeCommand.class, CommandSource.class, Args.class);
             tryAddSub(theMethod);
         } catch (Throwable e) {
             if (manager.isDebug()) e.printStackTrace();
@@ -177,7 +176,7 @@ public class SpongeCommand implements CommandCallable {
         }
     }
 
-    private void tryAddSub(@Nonnull Method method) {
+    private void tryAddSub(Method method) {
         int modifier = method.getModifiers();
         if (!Modifier.isPublic(modifier) || !Modifier.isStatic(modifier)) return;
         Sub sub = method.getAnnotation(Sub.class);
@@ -185,11 +184,11 @@ public class SpongeCommand implements CommandCallable {
         Class<?> ret = method.getReturnType();
         if (!ret.equals(Void.class) && !ret.equals(void.class)) return;
         Class<?>[] params = method.getParameterTypes();
-        if (params.length != 3 || params[0] != SpongeCommand.class || params[1] != CommandSource.class || params[2] != Paths.class) return;
+        if (params.length != 3 || params[0] != SpongeCommand.class || params[1] != CommandSource.class || params[2] != Args.class) return;
         method.setAccessible(true);
-        Paths paths = new Paths(false, sub.paths());
+        Paths paths = new Paths(sub.path());
         String name = paths.empty() ? method.getName().toLowerCase() : paths.first().replace(' ', '_').replace(':', '_');
-        if (paths.empty()) paths = new Paths(false, name);
+        if (paths.empty()) paths = new Paths(name);
         else paths.set(0, name);
         String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
         if ("admin".equals(perm)) perm = manager.defAdminPerm();
@@ -243,7 +242,7 @@ public class SpongeCommand implements CommandCallable {
      * @param sender 命令发送者
      * @param args   参数
      */
-    public void execute(CommandSource sender, Paths args) {
+    public void execute(CommandSource sender, Args args) {
         if (executor != null) executor.execute(this, sender, args);
         else if (args.notEmpty()) {
             SpongeCommand sub = subs.get(args.first());
@@ -264,15 +263,14 @@ public class SpongeCommand implements CommandCallable {
      * @param player 玩家
      * @param args   参数
      */
-    public void execute(Player player, Paths args) {
+    public void execute(Player player, Args args) {
         execute((CommandSource) player, args);
     }
 
-    @Nonnull
-    public CommandResult process(@Nonnull CommandSource sender, @Nonnull String args) {
+    public CommandResult process(CommandSource sender, String args) {
         if (testPermission(sender)) {
-            if (sender instanceof Player) execute(((Player) sender), new Paths(true, args));
-            else if (!onlyPlayer) execute(sender, new Paths(true, args));
+            if (sender instanceof Player) execute(((Player) sender), new Args(args));
+            else if (!onlyPlayer) execute(sender, new Args(args));
             else manager.sendKey(sender, "onlyPlayer");
         } else manager.sendKey(sender, "noCommandPerm", perm);
         return CommandResult.success();
@@ -289,8 +287,7 @@ public class SpongeCommand implements CommandCallable {
         }
     }
 
-    @Nonnull
-    public Text getUsage(@Nonnull CommandSource source) {
+    public Text getUsage(CommandSource source) {
         return Text.of(usage == null ? "" : usage);
     }
 
@@ -323,7 +320,7 @@ public class SpongeCommand implements CommandCallable {
      * @param args 参数
      * @return 补全列表
      */
-    public List<String> tabCompletions(Paths args) {
+    public List<String> tabCompletions(Args args) {
         String first = args.first();
         if (args.size() == 1) {
             return getMatchList(first, tabs != null && !tabs.isEmpty() ? tabs : subs.keySet());
@@ -346,9 +343,8 @@ public class SpongeCommand implements CommandCallable {
         } else this.tabs = null;
     }
 
-    @Nonnull
-    public List<String> getSuggestions(@Nonnull CommandSource sender, @Nonnull String args, @Nullable Location<World> location) {
-        return tabCompletions(new Paths(true, args));
+    public List<String> getSuggestions(CommandSource sender, String args, Location<World> location) {
+        return tabCompletions(new Args(args));
     }
 
     /**
@@ -357,17 +353,15 @@ public class SpongeCommand implements CommandCallable {
      * @param source 命令发送者
      * @return 是否能执行此命令
      */
-    public boolean testPermission(@Nonnull CommandSource source) {
+    public boolean testPermission(CommandSource source) {
         return perm == null || source.hasPermission(perm);
     }
 
-    @Nonnull
-    public Optional<Text> getShortDescription(@Nonnull CommandSource source) {
+    public Optional<Text> getShortDescription(CommandSource source) {
         return Optional.of(getUsage(source));
     }
 
-    @Nonnull
-    public Optional<Text> getHelp(@Nonnull CommandSource source) {
+    public Optional<Text> getHelp(CommandSource source) {
         return Optional.of(getUsage(source));
     }
 

@@ -9,7 +9,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
 
-import javax.annotation.Nonnull;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.UUID;
@@ -39,7 +38,7 @@ public abstract class SpongeManager extends VioletManager<SpongePlugin> {
         }
     }
 
-    public String trans(@Nonnull String key, Object... args) {
+    public String trans(String key, Object... args) {
         String text = langMap.get(key);
         // fallback to Violet
         if (text == null || text.isEmpty()) text = Manager.trans(lang, key);
@@ -53,7 +52,7 @@ public abstract class SpongeManager extends VioletManager<SpongePlugin> {
      * @param sender  消息接收者
      * @param message 消息内容
      */
-    public void send(@Nonnull CommandSource sender, @Nonnull String message) {
+    public void send(CommandSource sender, String message) {
         sender.sendMessage(Text.of(colorHead + message));
     }
 
@@ -64,15 +63,15 @@ public abstract class SpongeManager extends VioletManager<SpongePlugin> {
      * @param key    键
      * @param args   参数
      */
-    public void sendKey(@Nonnull CommandSource sender, @Nonnull String key, Object... args) {
+    public void sendKey(CommandSource sender, String key, Object... args) {
         send(sender, trans(key, args));
     }
 
-    public void console(@Nonnull String text) {
+    public void console(String text) {
         Sponge.getServer().getConsole().sendMessage(Text.of(colorHead + text));
     }
 
-    public void broadcast(@Nonnull String text) {
+    public void broadcast(String text) {
         Sponge.getServer().getBroadcastChannel().send(Text.of(colorHead + text));
     }
 
@@ -101,19 +100,18 @@ public abstract class SpongeManager extends VioletManager<SpongePlugin> {
             manager = this;
         }
 
-        public boolean setLang(@Nonnull String lang) {
+        public boolean setLang(String lang) {
             boolean flag = super.setLang(lang);
             langMaps.clear();
             langMaps.put(lang, langMap);
             return flag;
         }
 
-        public String trans(@Nonnull String key, Object... args) {
+        public String trans(String key, Object... args) {
             String text = langMap.get(key);
             return (text == null || text.isEmpty()) ? key : args.length > 0 ? String.format(text, args) : text;
         }
 
-        @Nonnull
         public ChatColor defChatColor() {
             return ChatColor.DARK_PURPLE;
         }

@@ -13,8 +13,6 @@ import org.spongepowered.api.event.game.state.GameStartingServerEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import java.io.File;
 import java.nio.file.Files;
@@ -106,7 +104,6 @@ public abstract class SpongePlugin implements IPlugin {
      * @param path 配置文件路径
      * @return 管理器
      */
-    @Nonnull
     protected abstract SpongeManager registerManager(Path path);
 
     /**
@@ -114,7 +111,6 @@ public abstract class SpongePlugin implements IPlugin {
      *
      * @return 监听器列表
      */
-    @Nullable
     protected abstract List<Object> registerListeners();
 
     /**
@@ -134,17 +130,14 @@ public abstract class SpongePlugin implements IPlugin {
         register(this, command);
     }
 
-    @Nonnull
     public String getId() {
         return container.getId().toLowerCase().replace(' ', '_');
     }
 
-    @Nonnull
     public String getName() {
         return container.getName();
     }
 
-    @Nonnull
     public String getVersion() {
         return container.getVersion().orElse("x.y.z");
     }

@@ -15,7 +15,7 @@ public final class SpigotBaseSubs {
      * @param args   参数
      */
     @Sub(perm = "admin", tabs = {"zh_cn", "en_us"})
-    public static void lang(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void lang(SpigotCommand self, CommandSender sender, Args args) {
         if (args.notEmpty()) {
             if (self.manager.setLang(args.first())) {
                 self.manager.asyncSave();
@@ -34,7 +34,7 @@ public final class SpigotBaseSubs {
      * @param args   参数
      */
     @Sub(perm = "admin")
-    public static void save(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void save(SpigotCommand self, CommandSender sender, Args args) {
         self.manager.sendKey(sender, self.manager.save() ? "configSaved" : "configSaveFailed");
     }
 
@@ -46,7 +46,7 @@ public final class SpigotBaseSubs {
      * @param args   参数
      */
     @Sub(perm = "admin")
-    public static void debug(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void debug(SpigotCommand self, CommandSender sender, Args args) {
         self.manager.setDebug(!self.manager.isDebug());
         self.manager.sendKey(sender, self.manager.isDebug() ? "debugON" : "debugOFF");
     }
@@ -59,7 +59,7 @@ public final class SpigotBaseSubs {
      * @param args   参数
      */
     @Sub(perm = "admin")
-    public static void reload(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void reload(SpigotCommand self, CommandSender sender, Args args) {
         self.manager.beforeLoad();
         self.manager.sendKey(sender, self.manager.load() ? "configLoaded" : "configLoadFailed");
         self.manager.afterLoad();
@@ -73,7 +73,7 @@ public final class SpigotBaseSubs {
      * @param args   参数
      */
     @Sub(perm = "admin")
-    public static void rextract(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void rextract(SpigotCommand self, CommandSender sender, Args args) {
         self.manager.sendKey(sender, self.manager.reExtract() ? "reExtracted" : "reExtractFailed");
     }
 
@@ -85,7 +85,7 @@ public final class SpigotBaseSubs {
      * @param args   参数
      */
     @Sub
-    public static void help(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void help(SpigotCommand self, CommandSender sender, Args args) {
         if (args.notEmpty()) {
             SpigotCommand sub = self.getParent().getSub(args.first());
             if (sub != null) sub.sendUsage(sender);
@@ -101,7 +101,7 @@ public final class SpigotBaseSubs {
      * @param args   参数
      */
     @Sub(perm = "admin")
-    public static void plugins(SpigotCommand self, CommandSender sender, Paths args) {
+    public static void plugins(SpigotCommand self, CommandSender sender, Args args) {
         if (self.manager instanceof SpigotManager.Manager) {
             ((SpigotManager.Manager) self.manager).listPlugins(sender);
         }

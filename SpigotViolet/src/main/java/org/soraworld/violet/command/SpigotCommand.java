@@ -4,10 +4,9 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.soraworld.hocon.node.Paths;
 import org.soraworld.violet.manager.SpigotManager;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.invoke.*;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -55,7 +54,7 @@ public class SpigotCommand extends Command {
      * @param manager    管理器
      * @param aliases    别名
      */
-    public SpigotCommand(@Nonnull String name, @Nullable String perm, boolean onlyPlayer, @Nonnull SpigotManager manager, String... aliases) {
+    public SpigotCommand(String name, String perm, boolean onlyPlayer, SpigotManager manager, String... aliases) {
         this(null, name, perm, onlyPlayer, manager, aliases);
     }
 
@@ -69,7 +68,7 @@ public class SpigotCommand extends Command {
      * @param manager    管理器
      * @param aliases    别名
      */
-    public SpigotCommand(@Nullable SpigotCommand parent, @Nonnull String name, @Nullable String perm, boolean onlyPlayer, @Nonnull SpigotManager manager, String... aliases) {
+    public SpigotCommand(SpigotCommand parent, String name, String perm, boolean onlyPlayer, SpigotManager manager, String... aliases) {
         super(name);
         setPermission(perm);
         this.parent = parent;
@@ -150,7 +149,7 @@ public class SpigotCommand extends Command {
     public void extractSub(Class<?> clazz, String method) {
         if (clazz == null || method == null || method.isEmpty() || clazz == Object.class || clazz == Class.class) return;
         try {
-            Method theMethod = clazz.getDeclaredMethod(method, SpigotCommand.class, CommandSender.class, Paths.class);
+            Method theMethod = clazz.getDeclaredMethod(method, SpigotCommand.class, CommandSender.class, Args.class);
             tryAddSub(theMethod);
         } catch (Throwable e) {
             if (manager.isDebug()) e.printStackTrace();
@@ -158,7 +157,7 @@ public class SpigotCommand extends Command {
         }
     }
 
-    private void tryAddSub(@Nonnull Method method) {
+    private void tryAddSub(Method method) {
         int modifier = method.getModifiers();
         if (!Modifier.isPublic(modifier) || !Modifier.isStatic(modifier)) return;
         Sub sub = method.getAnnotation(Sub.class);
@@ -166,11 +165,11 @@ public class SpigotCommand extends Command {
         Class<?> ret = method.getReturnType();
         if (!ret.equals(Void.class) && !ret.equals(void.class)) return;
         Class<?>[] params = method.getParameterTypes();
-        if (params.length != 3 || params[0] != SpigotCommand.class || params[1] != CommandSender.class || params[2] != Paths.class) return;
+        if (params.length != 3 || params[0] != SpigotCommand.class || params[1] != CommandSender.class || params[2] != Args.class) return;
         method.setAccessible(true);
-        Paths paths = new Paths(false, sub.paths());
+        Paths paths = new Paths(sub.path());
         String name = paths.empty() ? method.getName().toLowerCase() : paths.first().replace(' ', '_').replace(':', '_');
-        if (paths.empty()) paths = new Paths(false, name);
+        if (paths.empty()) paths = new Paths(name);
         else paths.set(0, name);
         String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
         if ("admin".equals(perm)) perm = manager.defAdminPerm();
@@ -225,7 +224,7 @@ public class SpigotCommand extends Command {
      * @param sender 命令发送者
      * @param args   参数
      */
-    public void execute(CommandSender sender, Paths args) {
+    public void execute(CommandSender sender, Args args) {
         if (executor != null) executor.execute(this, sender, args);
         else if (args.notEmpty()) {
             SpigotCommand sub = subs.get(args.first());
@@ -246,14 +245,14 @@ public class SpigotCommand extends Command {
      * @param player 玩家
      * @param args   参数
      */
-    public void execute(Player player, Paths args) {
+    public void execute(Player player, Args args) {
         execute((CommandSender) player, args);
     }
 
     public boolean execute(CommandSender sender, String commandLabel, String[] args) {
         if (testPermission(sender)) {
-            if (sender instanceof Player) execute(((Player) sender), new Paths(true, args));
-            else if (!onlyPlayer) execute(sender, new Paths(true, args));
+            if (sender instanceof Player) execute(((Player) sender), new Args(args));
+            else if (!onlyPlayer) execute(sender, new Args(args));
             else manager.sendKey(sender, "onlyPlayer");
         } else manager.sendKey(sender, "noCommandPerm", getPermission());
         return true;
@@ -291,7 +290,7 @@ public class SpigotCommand extends Command {
      * @param args 参数
      * @return 补全列表
      */
-    public List<String> tabCompletions(Paths args) {
+    public List<String> tabCompletions(Args args) {
         String first = args.first();
         if (args.size() == 1) {
             return getMatchList(first, tabs != null && !tabs.isEmpty() ? tabs : subs.keySet());
@@ -315,11 +314,11 @@ public class SpigotCommand extends Command {
     }
 
     public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
-        return tabCompletions(new Paths(true, args));
+        return tabCompletions(new Args(args));
     }
 
     public List<String> tabComplete(CommandSender sender, String alias, String[] args, Location location) {
-        return tabCompletions(new Paths(true, args));
+        return tabCompletions(new Args(args));
     }
 
     /**

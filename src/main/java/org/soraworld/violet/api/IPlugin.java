@@ -1,6 +1,5 @@
 package org.soraworld.violet.api;
 
-import javax.annotation.Nonnull;
 import java.io.InputStream;
 
 /**
@@ -14,7 +13,6 @@ public interface IPlugin {
      *
      * @return id
      */
-    @Nonnull
     String getId();
 
     /**
@@ -23,7 +21,6 @@ public interface IPlugin {
      *
      * @return 名称
      */
-    @Nonnull
     String getName();
 
     /**
@@ -34,7 +31,6 @@ public interface IPlugin {
      *
      * @return 资源id
      */
-    @Nonnull
     String assetsId();
 
     /**
@@ -43,7 +39,6 @@ public interface IPlugin {
      *
      * @return 版本
      */
-    @Nonnull
     String getVersion();
 
     /**
