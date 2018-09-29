@@ -40,10 +40,4 @@ public class SpongeViolet extends SpongePlugin {
     public String assetsId() {
         return Violet.ASSETS_ID;
     }
-
-    public void afterEnable() {
-        if (manager instanceof SpongeManager.Manager) {
-            ((SpongeManager.Manager) manager).startBstats();
-        }
-    }
 }

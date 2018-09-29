@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.api.IPlugin;
-import org.soraworld.violet.bstats.SpigotMetrics;
 import org.soraworld.violet.plugin.SpigotPlugin;
 import org.soraworld.violet.util.ChatColor;
 
@@ -81,10 +80,7 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
 
         @Setting(comment = "comment.uuid")
         private UUID uuid = UUID.randomUUID();
-        @Setting(comment = "comment.enableStats")
-        private boolean enableStats = true;
 
-        private SpigotMetrics metrics;
         private static Manager manager;
         private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
 
@@ -143,7 +139,7 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
         }
 
         /**
-         * 获取 Violet 插件运行 uuid，用于统计.
+         * 获取 Violet 插件运行 uuid
          *
          * @return the uuid
          */
@@ -153,14 +149,6 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
                 asyncSave();
             }
             return uuid;
-        }
-
-        /**
-         * 如果启用统计，则开始统计计划任务.
-         */
-        public void startBstats() {
-            if (metrics == null) metrics = new SpigotMetrics(this);
-            if (enableStats) metrics.start();
         }
     }
 }

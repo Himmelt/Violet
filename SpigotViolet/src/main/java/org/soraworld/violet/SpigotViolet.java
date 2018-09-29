@@ -32,10 +32,4 @@ public class SpigotViolet extends SpigotPlugin {
     public String assetsId() {
         return Violet.ASSETS_ID;
     }
-
-    public void afterEnable() {
-        if (manager instanceof SpigotManager.Manager) {
-            ((SpigotManager.Manager) manager).startBstats();
-        }
-    }
 }
