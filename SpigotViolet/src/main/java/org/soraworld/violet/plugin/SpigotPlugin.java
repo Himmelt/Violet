@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandMap;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.soraworld.hocon.node.Paths;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.command.SpigotBaseSubs;
 import org.soraworld.violet.command.SpigotCommand;
@@ -77,9 +78,8 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
         beforeDisable();
         if (manager != null) {
             manager.consoleKey("pluginDisabled", getId());
-            manager.save();
+            if (manager.canSaveOnDisable()) manager.save();
         }
-        super.onDisable();
     }
 
     /**
@@ -98,10 +98,13 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
     protected abstract List<Listener> registerListeners();
 
     /**
-     * 注册 Spigot 命令.
-     * 使用 {@link SpigotPlugin#register} 注册
-     * 默认注册了4个子命令 save|reload|lang|debug ，可以通过 override 此方法修改注册的内容。
-     * 建议保留这4个基础子命令 !!
+     * 注册 Spigot 命令.<br>
+     * 使用 {@link SpigotPlugin#register} 注册<br>
+     * 默认注册了6个子命令 save|reload|lang|debug|help|rextract<br>
+     * 可以通过 override 此方法修改注册的内容.<br>
+     * 建议保留这6个基础子命令 !!<br>
+     * 特别建议:<br>
+     * 重写此方法时要参考此模板的写法, 由于综合限制, 暂时没想到自动化解决方案.
      */
     protected void registerCommands() {
         SpigotCommand command = new SpigotCommand(getId(), manager.defAdminPerm(), false, manager);
@@ -111,6 +114,7 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
         command.extractSub(SpigotBaseSubs.class, "reload");
         command.extractSub(SpigotBaseSubs.class, "help");
         command.extractSub(SpigotBaseSubs.class, "rextract");
+        manager.getDisableCmds().forEach(s -> command.removeSub(new Paths(s)));
         register(this, command);
     }
 

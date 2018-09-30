@@ -134,6 +134,13 @@ public class SpongeCommand implements CommandCallable {
         return subs.get(name);
     }
 
+    public void removeSub(Paths paths) {
+        if (paths.hasNext() && subs.containsKey(paths.first())) {
+            subs.get(paths.first()).removeSub(paths.next());
+        }
+        subs.remove(paths.first());
+    }
+
     /**
      * 获取父命令
      *

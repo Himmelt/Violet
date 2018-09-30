@@ -36,7 +36,11 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
     @Setting(comment = "comment.debug")
     protected boolean debug = false;
     @Setting(comment = "comment.autoUpLang")
-    protected boolean autoUpLang = true;
+    protected boolean autoUpLang = false;
+    @Setting(comment = "comment.saveOnDisable")
+    protected boolean saveOnDisable = false;
+    @Setting(comment = "comment.disableCmds")
+    protected ArrayList<String> disableCmds = new ArrayList<>();
 
     /**
      * 纯文本抬头.
@@ -46,10 +50,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
      * 带颜色抬头.
      */
     protected String colorHead;
-    /**
-     * 异步锁.
-     */
-    protected boolean asyncLock = false;
+    protected boolean reloadSuccess = false;
     /**
      * 配置保存路径.
      */
@@ -70,6 +71,10 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
      * 语言翻译映射表.
      */
     protected HashMap<String, String> langMap = new HashMap<>();
+    /**
+     * 异步锁.
+     */
+    protected static boolean asyncLock = false;
     /**
      * 插件统计列表.
      */
@@ -143,15 +148,18 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
             } else flag = setLang(lang);
             if (!flag) setLang(Locale.CHINA.equals(Locale.getDefault()) ? "zh_cn" : "en_us");
             options.setDebug(debug);
+            reloadSuccess = true;
             return true;
         } catch (Throwable e) {
             console(ChatColor.RED + "Config file load exception !!!");
             if (debug) e.printStackTrace();
+            reloadSuccess = false;
             return false;
         }
     }
 
     public boolean save() {
+        reloadSuccess = true;
         version = getPlugin().getVersion();
         try {
             FileNode rootNode = new FileNode(confile.toFile(), options);
@@ -189,6 +197,14 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
             consoleKey("emptyLangMap");
             return false;
         }
+    }
+
+    public boolean canSaveOnDisable() {
+        return saveOnDisable && reloadSuccess;
+    }
+
+    public ArrayList<String> getDisableCmds() {
+        return disableCmds == null ? new ArrayList<>() : disableCmds;
     }
 
     public boolean isDebug() {
