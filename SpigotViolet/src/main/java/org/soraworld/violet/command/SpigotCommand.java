@@ -119,7 +119,9 @@ public class SpigotCommand extends Command {
         if (paths.hasNext() && subs.containsKey(paths.first())) {
             subs.get(paths.first()).removeSub(paths.next());
         }
+        System.out.println(paths.first());
         subs.remove(paths.first());
+        System.out.println(subs());
     }
 
     /**
@@ -256,7 +258,8 @@ public class SpigotCommand extends Command {
         execute((CommandSender) player, args);
     }
 
-    public boolean execute(CommandSender sender, String commandLabel, String[] args) {
+    public boolean execute(CommandSender sender, String label, String[] args) {
+        // TODO get raw text
         if (testPermission(sender)) {
             if (sender instanceof Player) execute(((Player) sender), new Args(args));
             else if (!onlyPlayer) execute(sender, new Args(args));
