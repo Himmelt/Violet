@@ -193,10 +193,8 @@ public class SpongeCommand implements CommandCallable {
         Class<?>[] params = method.getParameterTypes();
         if (params.length != 3 || params[0] != SpongeCommand.class || params[1] != CommandSource.class || params[2] != Args.class) return;
         method.setAccessible(true);
-        Paths paths = new Paths(sub.path());
-        String name = paths.empty() ? method.getName().toLowerCase() : paths.first().replace(' ', '_').replace(':', '_');
-        if (paths.empty()) paths = new Paths(name);
-        else paths.set(0, name);
+        String path = sub.path().isEmpty() ? method.getName().toLowerCase() : sub.path().replace(' ', '_').replace(':', '_');
+        Paths paths = new Paths(path);
         String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
         if ("admin".equals(perm)) perm = manager.defAdminPerm();
         // 此处返回的是最终命令

@@ -38,7 +38,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
     @Setting(comment = "comment.autoUpLang")
     protected boolean autoUpLang = false;
     @Setting(comment = "comment.saveOnDisable")
-    protected boolean saveOnDisable = false;
+    protected boolean saveOnDisable = true;
     @Setting(comment = "comment.disableCmds")
     protected ArrayList<String> disableCmds = new ArrayList<>();
 
