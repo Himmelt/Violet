@@ -119,9 +119,7 @@ public class SpigotCommand extends Command {
         if (paths.hasNext() && subs.containsKey(paths.first())) {
             subs.get(paths.first()).removeSub(paths.next());
         }
-        System.out.println(paths.first());
         subs.remove(paths.first());
-        System.out.println(subs());
     }
 
     /**

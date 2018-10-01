@@ -25,11 +25,9 @@ public class SpigotViolet extends SpigotPlugin {
 
     public void registerCommands() {
         SpigotCommand command = new SpigotCommand(getId(), manager.defAdminPerm(), false, manager);
-        // TODO bug
         command.extractSub(SpigotBaseSubs.class);
         command.setUsage("/violet lang|debug|save|reload|rextract");
         manager.getDisableCmds().forEach(s -> command.removeSub(new Paths(s)));
-        System.out.println(command.subs());
         register(this, command);
     }
 
