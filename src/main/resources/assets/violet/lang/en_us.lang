@@ -47,5 +47,5 @@ comment {
   enableStats = "Enable Violet plugin stats."
   autoUpLang = "Auto re-extract lang file while version changed."
   saveOnDisable = "Save config file on disable plugin, precondition is last load action is success."
-  disableCmds = "Sub commands to disable, using '.' to split command tree."
+  disableCmds = "Sub commands to disable, using '.' to split command tree.(need restart)"
 }

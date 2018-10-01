@@ -47,5 +47,5 @@ comment {
   enableStats = "启用 Violet 插件统计."
   autoUpLang = "自动重新释放语言文件(版本变化时)."
   saveOnDisable = "在停用插件时执行保存配置文件(前提是配置文件最近一次加载成功)."
-  disableCmds = "禁用的子命令, 多层子命令用 '.' 隔开."
+  disableCmds = "禁用的子命令, 多层子命令用 '.' 隔开.(重启生效)"
 }
