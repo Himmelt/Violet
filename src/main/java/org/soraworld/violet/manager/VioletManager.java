@@ -40,7 +40,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
     @Setting(comment = "comment.saveOnDisable")
     protected boolean saveOnDisable = true;
     @Setting(comment = "comment.disableCmds")
-    protected ArrayList<String> disableCmds = new ArrayList<>();
+    protected HashMap<String, ArrayList<String>> disableCmds = new HashMap<>();
 
     /**
      * 纯文本抬头.
@@ -203,8 +203,8 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         return saveOnDisable && reloadSuccess;
     }
 
-    public ArrayList<String> getDisableCmds() {
-        return disableCmds == null ? new ArrayList<>() : disableCmds;
+    public ArrayList<String> getDisableCmds(String name) {
+        return disableCmds == null ? new ArrayList<>() : disableCmds.getOrDefault(name, new ArrayList<>());
     }
 
     public boolean isDebug() {

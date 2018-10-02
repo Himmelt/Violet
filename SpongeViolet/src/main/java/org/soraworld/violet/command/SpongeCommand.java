@@ -378,4 +378,13 @@ public class SpongeCommand implements CommandCallable {
     public List<String> getAliases() {
         return aliases;
     }
+
+    public int hashCode() {
+        return name.hashCode();
+    }
+
+    public boolean equals(Object obj) {
+        if (obj instanceof SpongeCommand) return name.equalsIgnoreCase(((SpongeCommand) obj).name);
+        return false;
+    }
 }

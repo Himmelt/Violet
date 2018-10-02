@@ -38,6 +38,8 @@ bStatsFailed = "Stats data send failed!"
 extractNoSuchSub = "&cClass %s has no method %s witch matching signature, lambda extract failed."
 extractReflectError = "&cMethod %s reflect exception, please check your code !"
 noSuchSubCmd = "No sub command named %s."
+commandRegFailed = "Command %s register to plugin %s failed."
+nullCommandMap = "&cCommandMap reflection failed !!!!!"
 
 comment {
   lang = "Display Language"

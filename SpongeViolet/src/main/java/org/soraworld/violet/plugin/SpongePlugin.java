@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -29,6 +30,10 @@ public abstract class SpongePlugin implements IPlugin {
      * 主管理器.
      */
     protected SpongeManager manager;
+    /**
+     * 插件命令.
+     */
+    protected HashSet<SpongeCommand> commands = new HashSet<>();
 
     @Inject
     @ConfigDir(sharedRoot = false)
@@ -81,8 +86,17 @@ public abstract class SpongePlugin implements IPlugin {
     @Listener
     public void onStarting(GameStartingServerEvent event) {
         registerCommands();
+        disableCommands();
         manager.consoleKey("pluginEnabled", getId());
         afterEnable();
+    }
+
+    private void disableCommands() {
+        for (SpongeCommand command : commands) {
+            for (String name : manager.getDisableCmds(command.name)) {
+                command.removeSub(new Paths(name));
+            }
+        }
     }
 
     /**
@@ -125,13 +139,7 @@ public abstract class SpongePlugin implements IPlugin {
      */
     protected void registerCommands() {
         SpongeCommand command = new SpongeCommand(getId(), manager.defAdminPerm(), false, manager);
-        command.extractSub(SpongeBaseSubs.class, "lang");
-        command.extractSub(SpongeBaseSubs.class, "debug");
-        command.extractSub(SpongeBaseSubs.class, "save");
-        command.extractSub(SpongeBaseSubs.class, "reload");
-        command.extractSub(SpongeBaseSubs.class, "help");
-        command.extractSub(SpongeBaseSubs.class, "rextract");
-        manager.getDisableCmds().forEach(s -> command.removeSub(new Paths(s)));
+        command.extractSub(SpongeBaseSubs.class);
         register(this, command);
     }
 
@@ -157,7 +165,8 @@ public abstract class SpongePlugin implements IPlugin {
      * @param plugin  命令注册到的插件
      * @param command 命令
      */
-    public static void register(SpongePlugin plugin, SpongeCommand command) {
+    public void register(SpongePlugin plugin, SpongeCommand command) {
         Sponge.getCommandManager().register(plugin, command, command.getAliases());
+        commands.add(command);
     }
 }

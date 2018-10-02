@@ -1,7 +1,6 @@
 package org.soraworld.violet;
 
 import org.bukkit.event.Listener;
-import org.soraworld.hocon.node.Paths;
 import org.soraworld.violet.command.SpigotBaseSubs;
 import org.soraworld.violet.command.SpigotCommand;
 import org.soraworld.violet.manager.SpigotManager;
@@ -26,8 +25,8 @@ public class SpigotViolet extends SpigotPlugin {
     public void registerCommands() {
         SpigotCommand command = new SpigotCommand(getId(), manager.defAdminPerm(), false, manager);
         command.extractSub(SpigotBaseSubs.class);
+        command.extractSub(SpigotBaseSubs.VioletBaseSubs.class);
         command.setUsage("/violet lang|debug|save|reload|rextract");
-        manager.getDisableCmds().forEach(s -> command.removeSub(new Paths(s)));
         register(this, command);
     }
 

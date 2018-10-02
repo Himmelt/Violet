@@ -13,6 +13,7 @@ import org.soraworld.violet.manager.SpigotManager;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -41,6 +42,10 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
      * 主管理器.
      */
     protected SpigotManager manager;
+    /**
+     * 插件命令.
+     */
+    protected HashSet<SpigotCommand> commands = new HashSet<>();
 
     public void onEnable() {
         Path path = getDataFolder().toPath();
@@ -62,8 +67,17 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
             }
         }
         registerCommands();
+        disableCommands();
         manager.consoleKey("pluginEnabled", getId());
         afterEnable();
+    }
+
+    private void disableCommands() {
+        for (SpigotCommand command : commands) {
+            for (String name : manager.getDisableCmds(command.getName())) {
+                command.removeSub(new Paths(name));
+            }
+        }
     }
 
     public String getId() {
@@ -104,17 +118,11 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
      * 可以通过 override 此方法修改注册的内容.<br>
      * 建议保留这6个基础子命令 !!<br>
      * 特别建议:<br>
-     * 重写此方法时要参考此模板的写法, 由于综合限制, 暂时没想到自动化解决方案.
+     * 重写此方法时要参考此模板的写法.
      */
     protected void registerCommands() {
         SpigotCommand command = new SpigotCommand(getId(), manager.defAdminPerm(), false, manager);
-        command.extractSub(SpigotBaseSubs.class, "lang");
-        command.extractSub(SpigotBaseSubs.class, "debug");
-        command.extractSub(SpigotBaseSubs.class, "save");
-        command.extractSub(SpigotBaseSubs.class, "reload");
-        command.extractSub(SpigotBaseSubs.class, "help");
-        command.extractSub(SpigotBaseSubs.class, "rextract");
-        manager.getDisableCmds().forEach(s -> command.removeSub(new Paths(s)));
+        command.extractSub(SpigotBaseSubs.class);
         register(this, command);
     }
 
@@ -124,11 +132,11 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
      * @param plugin  命令注册到的插件
      * @param command 命令
      */
-    public static void register(SpigotPlugin plugin, SpigotCommand command) {
+    public void register(SpigotPlugin plugin, SpigotCommand command) {
         if (commandMap != null) {
-            if (!commandMap.register(plugin.getId(), command)) {
-                System.out.println("Command " + command.getName() + " in plugin " + plugin.getName() + " register failed !!!");
-            }
-        } else System.out.println("Null commandMap !!!!!!!!!!!!!!!!!!!!");
+            if (commandMap.register(plugin.getId(), command)) {
+                commands.add(command);
+            } else manager.consoleKey("commandRegFailed", command.getName(), plugin.getName());
+        } else manager.consoleKey("nullCommandMap");
     }
 }

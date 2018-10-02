@@ -1,6 +1,5 @@
 package org.soraworld.violet;
 
-import org.soraworld.hocon.node.Paths;
 import org.soraworld.violet.command.SpongeBaseSubs;
 import org.soraworld.violet.command.SpongeCommand;
 import org.soraworld.violet.manager.SpongeManager;
@@ -34,8 +33,8 @@ public class SpongeViolet extends SpongePlugin {
     public void registerCommands() {
         SpongeCommand command = new SpongeCommand(getId(), manager.defAdminPerm(), false, manager);
         command.extractSub(SpongeBaseSubs.class);
+        command.extractSub(SpongeBaseSubs.VioletBaseSubs.class);
         command.setUsage("/violet lang|debug|save|reload|rextract");
-        manager.getDisableCmds().forEach(s -> command.removeSub(new Paths(s)));
         register(this, command);
     }
 

@@ -346,4 +346,13 @@ public class SpigotCommand extends Command {
     public boolean testPermissionSilent(CommandSender target) {
         return getPermission() == null || target.hasPermission(getPermission());
     }
+
+    public int hashCode() {
+        return getName().hashCode();
+    }
+
+    public boolean equals(Object obj) {
+        if (obj instanceof SpigotCommand) return getName().equalsIgnoreCase(((SpigotCommand) obj).getName());
+        return false;
+    }
 }

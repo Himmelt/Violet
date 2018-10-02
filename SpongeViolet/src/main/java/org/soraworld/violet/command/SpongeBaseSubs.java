@@ -35,7 +35,12 @@ public final class SpongeBaseSubs {
      */
     @Sub(perm = "admin")
     public static void save(SpongeCommand self, CommandSource sender, Args args) {
-        self.manager.sendKey(sender, self.manager.save() ? "configSaved" : "configSaveFailed");
+        if (args.empty()) {
+            self.manager.sendKey(sender, self.manager.save() ? "configSaved" : "configSaveFailed");
+        } else {
+            SpongeCommand sub = self.subs.get(args.first());
+            if (sub != null) sub.execute(sender, args.next());
+        }
     }
 
     /**
@@ -93,17 +98,19 @@ public final class SpongeBaseSubs {
         } else self.sendUsage(sender);
     }
 
-    /**
-     * 列出服务器运行的 Violet 插件.
-     *
-     * @param self   封装命令
-     * @param sender 命令执行者
-     * @param args   参数
-     */
-    @Sub(perm = "admin")
-    public static void plugins(SpongeCommand self, CommandSource sender, Args args) {
-        if (self.manager instanceof SpongeManager.Manager) {
-            ((SpongeManager.Manager) self.manager).listPlugins(sender);
+    public static class VioletBaseSubs {
+        /**
+         * 列出服务器运行的 Violet 插件.
+         *
+         * @param self   封装命令
+         * @param sender 命令执行者
+         * @param args   参数
+         */
+        @Sub(perm = "admin")
+        public static void plugins(SpongeCommand self, CommandSource sender, Args args) {
+            if (self.manager instanceof SpongeManager.Manager) {
+                ((SpongeManager.Manager) self.manager).listPlugins(sender);
+            }
         }
     }
 }
