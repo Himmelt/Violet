@@ -125,6 +125,19 @@ public class Args {
         return origin;
     }
 
+    /**
+     * 获取后续内容.
+     *
+     * @return 后续内容
+     */
+    public String getContent() {
+        String content = "";
+        for(int i = current; i < length; i++) {
+            content = content + paths[i] + " ";
+        }
+        return content.trim();
+    }
+
     public String toString() {
         StringJoiner joiner = new StringJoiner(", ", "{ ", " }");
         for (String arg : paths) joiner.add(arg);
