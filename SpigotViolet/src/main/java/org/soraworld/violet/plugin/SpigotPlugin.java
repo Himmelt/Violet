@@ -92,7 +92,9 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
         beforeDisable();
         if (manager != null) {
             manager.consoleKey("pluginDisabled", getId());
-            if (manager.canSaveOnDisable()) manager.save();
+            if (manager.canSaveOnDisable()) {
+                manager.consoleKey(manager.save() ? "configSaved" : "configSaveFailed");
+            }
         }
     }
 
