@@ -131,11 +131,9 @@ public class Args {
      * @return 后续内容
      */
     public String getContent() {
-        String content = "";
-        for(int i = current; i < length; i++) {
-            content = content + paths[i] + " ";
-        }
-        return content.trim();
+        StringJoiner joiner = new StringJoiner(" ", "", "");
+        for (int i = current; i < length; i++) joiner.add(paths[i]);
+        return joiner.toString();
     }
 
     public String toString() {
