@@ -8,5 +8,5 @@ public final class Violet {
     public static final String PLUGIN_ID = "violet";
     public static final String ASSETS_ID = "violet";
     public static final String PLUGIN_NAME = "Violet";
-    public static final String PLUGIN_VERSION = "2.3.5";
+    public static final String PLUGIN_VERSION = "2.3.6";
 }

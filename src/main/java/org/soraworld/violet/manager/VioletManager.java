@@ -60,6 +60,10 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
      */
     protected final Path confile;
     /**
+     * 配置文件根节点.
+     */
+    protected final FileNode rootNode;
+    /**
      * 插件实例.
      */
     protected final T plugin;
@@ -90,8 +94,9 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         this.path = path;
         this.plugin = plugin;
         this.options.setTranslator(this::trans);
-        options.registerType(new UUIDSerializer());
+        this.options.registerType(new UUIDSerializer());
         this.confile = path.resolve(plugin.getId().replace(' ', '_') + ".conf");
+        this.rootNode = new FileNode(confile.toFile(), options);
         setHead(defChatHead());
         if (!plugins.contains(plugin)) plugins.add(plugin);
     }
@@ -138,7 +143,6 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
             return true;
         }
         try {
-            FileNode rootNode = new FileNode(confile.toFile(), options);
             rootNode.load(true);
             rootNode.modify(this);
             boolean flag;
@@ -162,7 +166,6 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         reloadSuccess = true;
         version = getPlugin().getVersion();
         try {
-            FileNode rootNode = new FileNode(confile.toFile(), options);
             rootNode.extract(this);
             rootNode.save();
             return true;
@@ -174,9 +177,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
     }
 
     public boolean reExtract() {
-        if (deletePath(path.resolve("lang").toFile())) {
-            return setLang(lang);
-        }
+        if (deletePath(path.resolve("lang").toFile())) return setLang(lang);
         if (debug) console(ChatColor.RED + "deletePath " + path.resolve("lang") + " failed !!");
         return false;
     }
@@ -252,6 +253,12 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         return null;
     }
 
+    /**
+     * 删除路径下文件,文件夹及自身.
+     *
+     * @param path 路径
+     * @return 是否全部成功
+     */
     public boolean deletePath(File path) {
         if (path.isFile()) {
             boolean flag = path.delete();
@@ -260,7 +267,11 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         }
         File[] files = path.listFiles();
         boolean flag = true;
-        if (files != null) for (File file : files) flag = flag && deletePath(file);
+        if (files != null && files.length > 0) {
+            for (File file : files) flag = flag && deletePath(file);
+        } else {
+            flag = path.delete();
+        }
         return flag;
     }
 }
