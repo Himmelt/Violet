@@ -37,10 +37,10 @@ public abstract class SpongePlugin implements IPlugin {
 
     @Inject
     @ConfigDir(sharedRoot = false)
-    private Path path;
+    protected Path path;
 
     @Inject
-    private PluginContainer container;
+    protected PluginContainer container;
 
     /**
      * 游戏预初始化.
