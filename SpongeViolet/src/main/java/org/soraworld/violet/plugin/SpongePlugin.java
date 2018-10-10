@@ -91,14 +91,6 @@ public abstract class SpongePlugin implements IPlugin {
         afterEnable();
     }
 
-    private void disableCommands() {
-        for (SpongeCommand command : commands) {
-            for (String name : manager.getDisableCmds(command.name)) {
-                command.removeSub(new Paths(name));
-            }
-        }
-    }
-
     /**
      * 服务器停止中事件.
      *
@@ -159,6 +151,14 @@ public abstract class SpongePlugin implements IPlugin {
 
     public boolean isEnabled() {
         return Sponge.getPluginManager().isLoaded(container.getId());
+    }
+
+    private void disableCommands() {
+        for (SpongeCommand command : commands) {
+            for (String name : manager.getDisableCmds(command.name)) {
+                command.removeSub(new Paths(name));
+            }
+        }
     }
 
     /**
