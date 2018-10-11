@@ -37,8 +37,4 @@ public class SpongeViolet extends SpongePlugin {
         command.setUsage("/violet lang|debug|save|reload|rextract");
         register(this, command);
     }
-
-    public String assetsId() {
-        return Violet.ASSETS_ID;
-    }
 }

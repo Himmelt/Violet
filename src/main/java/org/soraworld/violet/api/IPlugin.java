@@ -31,7 +31,9 @@ public interface IPlugin {
      *
      * @return 资源id
      */
-    String assetsId();
+    default String assetsId() {
+        return getId();
+    }
 
     /**
      * 获取插件版本.

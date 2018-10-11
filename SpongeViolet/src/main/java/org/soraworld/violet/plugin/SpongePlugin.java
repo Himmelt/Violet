@@ -138,7 +138,7 @@ public abstract class SpongePlugin implements IPlugin {
     }
 
     public String getId() {
-        return container.getId().toLowerCase().replace(' ', '_');
+        return container.getId();
     }
 
     public String getName() {
