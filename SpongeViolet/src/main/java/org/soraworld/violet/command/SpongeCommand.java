@@ -349,7 +349,12 @@ public class SpongeCommand implements CommandCallable {
     }
 
     public List<String> getSuggestions(CommandSource sender, String args, Location<World> location) {
-        return tabCompletions(new Args(args));
+        String[] ss = args.trim().split("[ ]+");
+        if (!args.isEmpty() && args.endsWith(" ")) {
+            ss = Arrays.copyOf(ss, ss.length + 1);
+            ss[ss.length - 1] = "";
+        }
+        return tabCompletions(new Args(ss));
     }
 
     /**
