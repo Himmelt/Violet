@@ -31,7 +31,7 @@ public class SpongeViolet extends SpongePlugin {
     }
 
     public void registerCommands() {
-        SpongeCommand command = new SpongeCommand(getId(), manager.defAdminPerm(), false, manager);
+        SpongeCommand command = new SpongeCommand(getId(), null, false, manager);
         command.extractSub(SpongeBaseSubs.class);
         command.extractSub(SpongeBaseSubs.VioletBaseSubs.class);
         command.setUsage("/violet lang|debug|save|reload|rextract");
