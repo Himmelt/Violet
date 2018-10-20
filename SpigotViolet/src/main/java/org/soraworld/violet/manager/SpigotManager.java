@@ -3,6 +3,7 @@ package org.soraworld.violet.manager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.soraworld.hocon.node.Setting;
+import org.soraworld.violet.SpigotViolet;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.plugin.SpigotPlugin;
 import org.soraworld.violet.util.ChatColor;
@@ -90,7 +91,7 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
          * @param plugin 插件实例
          * @param path   配置保存路径
          */
-        public Manager(SpigotPlugin plugin, Path path) {
+        public Manager(SpigotViolet plugin, Path path) {
             super(plugin, path);
             manager = this;
         }
@@ -143,7 +144,7 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
          *
          * @return the uuid
          */
-        public UUID getUuid() {
+        public UUID getUUID() {
             if (uuid == null) {
                 uuid = UUID.randomUUID();
                 asyncSave();

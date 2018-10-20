@@ -23,6 +23,9 @@ import java.util.Map;
  */
 public abstract class VioletManager<T extends IPlugin> implements IManager {
 
+    /**
+     * 插件版本, 用于自动任务.
+     */
     @Setting(comment = "comment.version")
     protected String version = "0.0.0";
     /**
@@ -35,10 +38,19 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
      */
     @Setting(comment = "comment.debug")
     protected boolean debug = false;
+    /**
+     * 是否在版本变化时自动释放更新语言文件.
+     */
     @Setting(comment = "comment.autoUpLang")
     protected boolean autoUpLang = false;
+    /**
+     * 是否在插件停用时保存配置文件.
+     */
     @Setting(comment = "comment.saveOnDisable")
     protected boolean saveOnDisable = true;
+    /**
+     * 被禁用的命令, 键: 主命令名; 值: 被禁用的子命令名列表.
+     */
     @Setting(comment = "comment.disableCmds")
     protected HashMap<String, ArrayList<String>> disableCmds = new HashMap<>();
 
@@ -50,6 +62,9 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
      * 带颜色抬头.
      */
     protected String colorHead;
+    /**
+     * 配置是否加载成功.
+     */
     protected boolean reloadSuccess = false;
     /**
      * 配置保存路径.
@@ -101,6 +116,11 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         if (!plugins.contains(plugin)) plugins.add(plugin);
     }
 
+    /**
+     * 设置聊天前缀.
+     *
+     * @param head 前缀
+     */
     public void setHead(String head) {
         this.colorHead = defChatColor() + ChatColor.colorize(head) + ChatColor.RESET;
         this.plainHead = ChatColor.REAL_COLOR.matcher(colorHead).replaceAll("");
@@ -200,14 +220,6 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         }
     }
 
-    public boolean canSaveOnDisable() {
-        return saveOnDisable && reloadSuccess;
-    }
-
-    public ArrayList<String> getDisableCmds(String name) {
-        return disableCmds == null ? new ArrayList<>() : disableCmds.getOrDefault(name, new ArrayList<>());
-    }
-
     public boolean isDebug() {
         return debug;
     }
@@ -233,24 +245,27 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         return plugin;
     }
 
-    /**
-     * 服务器运行的 Violet 插件的数量.
-     *
-     * @return 数量
-     */
-    public static int pluginsSize() {
-        return plugins.size();
+    public Path getPath() {
+        return path;
     }
 
     /**
-     * 获取第 index 个 Violet 插件.
+     * 在停用插件时是否可以保存配置.
      *
-     * @param index 索引
-     * @return 插件
+     * @return 是否可以保存配置
      */
-    public static IPlugin getPluginAt(int index) {
-        if (index >= 0 && index < plugins.size()) return plugins.get(index);
-        return null;
+    public boolean canSaveOnDisable() {
+        return saveOnDisable && reloadSuccess;
+    }
+
+    /**
+     * 获取主命令下被禁用的子命令名列表.
+     *
+     * @param name 主命令名
+     * @return 被禁用的子命令名列表
+     */
+    public ArrayList<String> getDisableCmds(String name) {
+        return disableCmds == null ? new ArrayList<>() : disableCmds.getOrDefault(name, new ArrayList<>());
     }
 
     /**
@@ -273,5 +288,38 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
             flag = path.delete();
         }
         return flag;
+    }
+
+    /**
+     * 服务器运行的 Violet 插件的数量.
+     *
+     * @return 数量
+     */
+    public static int pluginsSize() {
+        return plugins.size();
+    }
+
+    /**
+     * 获取第 index 个 Violet 插件.
+     *
+     * @param index 索引
+     * @return 插件
+     */
+    public static IPlugin getPluginAt(int index) {
+        if (index >= 0 && index < plugins.size()) return plugins.get(index);
+        return null;
+    }
+
+    /**
+     * 根据 id 获取 Violet 插件.
+     *
+     * @param pluginId 插件id
+     * @return 插件
+     */
+    public static IPlugin getPluginById(String pluginId) {
+        for (IPlugin plugin : plugins) {
+            if (plugin.getId().equalsIgnoreCase(pluginId)) return plugin;
+        }
+        return null;
     }
 }

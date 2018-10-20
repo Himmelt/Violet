@@ -1,6 +1,7 @@
 package org.soraworld.violet.manager;
 
 import org.soraworld.hocon.node.Setting;
+import org.soraworld.violet.SpongeViolet;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.plugin.SpongePlugin;
 import org.soraworld.violet.util.ChatColor;
@@ -91,7 +92,7 @@ public abstract class SpongeManager extends VioletManager<SpongePlugin> {
          * @param plugin 插件实例
          * @param path   配置保存路径
          */
-        public Manager(SpongePlugin plugin, Path path) {
+        public Manager(SpongeViolet plugin, Path path) {
             super(plugin, path);
             manager = this;
         }
@@ -144,7 +145,7 @@ public abstract class SpongeManager extends VioletManager<SpongePlugin> {
          *
          * @return the uuid
          */
-        public UUID getUuid() {
+        public UUID getUUID() {
             if (uuid == null) {
                 uuid = UUID.randomUUID();
                 asyncSave();

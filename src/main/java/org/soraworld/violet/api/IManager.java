@@ -2,6 +2,8 @@ package org.soraworld.violet.api;
 
 import org.soraworld.violet.util.ChatColor;
 
+import java.nio.file.Path;
+
 /**
  * 管理器接口.
  * 负责整个插件的主要管理工作.
@@ -160,4 +162,11 @@ public interface IManager {
      * @return 获取
      */
     IPlugin getPlugin();
+
+    /**
+     * 获取管理器根目录(即配置文件所在目录)
+     *
+     * @return 根目录
+     */
+    Path getPath();
 }
