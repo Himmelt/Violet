@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 group = 'org.soraworld'
-version = '2.3.7'
+version = '2.3.8'
 
 sourceCompatibility = targetCompatibility = 1.8
 
@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    compile 'org.soraworld:hocon:1.0.9'
+    compile 'org.soraworld:hocon:1.1.0'
     testCompile 'junit:junit:4.12'
 }
 
@@ -39,7 +39,7 @@ subprojects {
     }
     dependencies {
         shadeOnly rootProject
-        hocon 'org.soraworld:hocon:1.0.9'
+        hocon 'org.soraworld:hocon:1.1.0'
         testCompile 'junit:junit:4.12'
     }
     task sourcesJar(type: Jar) {
