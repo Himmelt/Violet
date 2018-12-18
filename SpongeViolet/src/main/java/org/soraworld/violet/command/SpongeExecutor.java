@@ -1,17 +1,11 @@
 package org.soraworld.violet.command;
 
+import org.soraworld.violet.manager.SpongeManager;
 import org.spongepowered.api.command.CommandSource;
 
 /**
  * Sponge 命令执行器 接口.
  */
-public interface SpongeExecutor {
-    /**
-     * 执行.
-     *
-     * @param self   封装命令
-     * @param sender 命令执行者
-     * @param args   参数
-     */
-    void execute(SpongeCommand self, CommandSource sender, Args args);
+public interface SpongeExecutor<T extends SpongeManager> extends SubExecutor<SpongeCommand, T, CommandSource> {
+    void execute(SpongeCommand cmd, T manager, CommandSource sender, Args args);
 }

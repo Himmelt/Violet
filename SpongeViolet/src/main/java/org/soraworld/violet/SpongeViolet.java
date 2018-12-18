@@ -2,7 +2,7 @@ package org.soraworld.violet;
 
 import org.soraworld.violet.command.SpongeBaseSubs;
 import org.soraworld.violet.command.SpongeCommand;
-import org.soraworld.violet.manager.SpongeManager;
+import org.soraworld.violet.manager.FSManager;
 import org.soraworld.violet.plugin.SpongePlugin;
 import org.spongepowered.api.plugin.Plugin;
 
@@ -21,7 +21,7 @@ import java.util.UUID;
         url = "https://github.com/Himmelt/Violet",
         description = "Violet Plugin Library."
 )
-public class SpongeViolet extends SpongePlugin {
+public class SpongeViolet extends SpongePlugin<FSManager> {
 
     private static SpongeViolet instance;
 
@@ -29,8 +29,8 @@ public class SpongeViolet extends SpongePlugin {
         instance = this;
     }
 
-    public SpongeManager registerManager(Path path) {
-        return new SpongeManager.Manager(this, path);
+    public FSManager registerManager(Path path) {
+        return new FSManager(this, path);
     }
 
     public List<Object> registerListeners() {
@@ -40,7 +40,7 @@ public class SpongeViolet extends SpongePlugin {
     public void registerCommands() {
         SpongeCommand command = new SpongeCommand(getId(), null, false, manager);
         command.extractSub(SpongeBaseSubs.class);
-        command.extractSub(SpongeBaseSubs.VioletBaseSubs.class);
+        //command.extractSub(SpongeBaseSubs.VioletBaseSubs.class);
         command.setUsage("/violet lang|debug|save|reload|rextract");
         register(this, command);
     }
@@ -51,7 +51,7 @@ public class SpongeViolet extends SpongePlugin {
      * @return the uuid
      */
     public UUID getUUID() {
-        return ((SpongeManager.Manager) manager).getUUID();
+        return manager.getUUID();
     }
 
     /**

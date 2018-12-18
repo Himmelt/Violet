@@ -3,7 +3,7 @@ package org.soraworld.violet;
 import org.bukkit.event.Listener;
 import org.soraworld.violet.command.SpigotBaseSubs;
 import org.soraworld.violet.command.SpigotCommand;
-import org.soraworld.violet.manager.SpigotManager;
+import org.soraworld.violet.manager.FBManager;
 import org.soraworld.violet.plugin.SpigotPlugin;
 
 import java.nio.file.Path;
@@ -13,7 +13,7 @@ import java.util.UUID;
 /**
  * SpigotViolet 插件.
  */
-public class SpigotViolet extends SpigotPlugin {
+public class SpigotViolet extends SpigotPlugin<FBManager> {
 
     private static SpigotViolet instance;
 
@@ -21,8 +21,8 @@ public class SpigotViolet extends SpigotPlugin {
         instance = this;
     }
 
-    public SpigotManager registerManager(Path path) {
-        return new SpigotManager.Manager(this, path);
+    public FBManager registerManager(Path path) {
+        return new FBManager(this, path);
     }
 
     public List<Listener> registerListeners() {
@@ -32,9 +32,13 @@ public class SpigotViolet extends SpigotPlugin {
     public void registerCommands() {
         SpigotCommand command = new SpigotCommand(getId(), null, false, manager);
         command.extractSub(SpigotBaseSubs.class);
-        command.extractSub(SpigotBaseSubs.VioletBaseSubs.class);
+        //command.extractSub(SpigotBaseSubs.VioletBaseSubs.class);
         command.setUsage("/violet lang|debug|save|reload|rextract");
         register(this, command);
+    }
+
+    public FBManager getManager() {
+        return manager;
     }
 
     /**
@@ -43,7 +47,7 @@ public class SpigotViolet extends SpigotPlugin {
      * @return the uuid
      */
     public UUID getUUID() {
-        return ((SpigotManager.Manager) manager).getUUID();
+        return manager.getUUID();
     }
 
     /**

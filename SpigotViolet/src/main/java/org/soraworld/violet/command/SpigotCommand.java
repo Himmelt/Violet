@@ -37,7 +37,7 @@ public class SpigotCommand extends Command {
     /**
      * 注解执行器.
      */
-    protected SpigotExecutor executor;
+    protected SubExecutor executor;
     /**
      * 子命令映射表.
      */
@@ -230,7 +230,7 @@ public class SpigotCommand extends Command {
      * @param args   参数
      */
     public void execute(CommandSender sender, Args args) {
-        if (executor != null) executor.execute(this, sender, args);
+        if (executor != null) executor.execute(this, manager, sender, args);
         else if (args.notEmpty()) {
             SpigotCommand sub = subs.get(args.first());
             if (sub != null) {
@@ -255,7 +255,6 @@ public class SpigotCommand extends Command {
     }
 
     public boolean execute(CommandSender sender, String label, String[] args) {
-        // TODO get raw text
         if (testPermission(sender)) {
             if (sender instanceof Player) execute(((Player) sender), new Args(args));
             else if (!onlyPlayer) execute(sender, new Args(args));

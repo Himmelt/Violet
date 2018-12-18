@@ -8,9 +8,11 @@ import java.lang.annotation.*;
  * 和 {@code public static void (SpongeManager,CommandSource,Paths);} 的方法才会被提取.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
+@Target(ElementType.FIELD)
 @Documented
 public @interface Sub {
+
+    String parent() default "";
     /**
      * 命令树, 用 . 分隔
      * 大写字母会被转换为小写字母.

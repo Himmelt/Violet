@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * Spigot 插件.
  */
-public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
+public abstract class SpigotPlugin<T extends SpigotManager> extends JavaPlugin implements IPlugin {
 
     private static final CommandMap commandMap;
 
@@ -41,7 +41,7 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
     /**
      * 主管理器.
      */
-    protected SpigotManager manager;
+    protected T manager;
     /**
      * 插件命令.
      */
@@ -104,7 +104,11 @@ public abstract class SpigotPlugin extends JavaPlugin implements IPlugin {
      * @param path 配置文件路径
      * @return 管理器
      */
-    protected abstract SpigotManager registerManager(Path path);
+    protected abstract T registerManager(Path path);
+
+    public T getManager() {
+        return manager;
+    }
 
     /**
      * 注册监听器.

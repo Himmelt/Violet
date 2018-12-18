@@ -99,6 +99,11 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
      */
     protected static final ArrayList<IPlugin> plugins = new ArrayList<>();
 
+
+    public static IPlugin getPlugin(String name) {
+        return plugins.stream().filter(p -> p.getId().equals(name)).findFirst().orElse(null);
+    }
+
     /**
      * 实例化管理器.
      *

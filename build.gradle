@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 group = 'org.soraworld'
-version = '2.3.8'
+version = '2.4.0'
 
 sourceCompatibility = targetCompatibility = 1.8
 

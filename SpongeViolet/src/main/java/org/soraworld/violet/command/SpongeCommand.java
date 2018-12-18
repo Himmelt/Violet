@@ -248,7 +248,7 @@ public class SpongeCommand implements CommandCallable {
      * @param args   参数
      */
     public void execute(CommandSource sender, Args args) {
-        if (executor != null) executor.execute(this, sender, args);
+        if (executor != null) executor.execute(this, manager, sender, args);
         else if (args.notEmpty()) {
             SpongeCommand sub = subs.get(args.first());
             if (sub != null) {

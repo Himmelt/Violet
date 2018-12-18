@@ -24,12 +24,12 @@ import java.util.List;
 /**
  * Sponge 插件.
  */
-public abstract class SpongePlugin implements IPlugin {
+public abstract class SpongePlugin<T extends SpongeManager> implements IPlugin {
 
     /**
      * 主管理器.
      */
-    protected SpongeManager manager;
+    protected T manager;
     /**
      * 插件命令.
      */
@@ -113,7 +113,7 @@ public abstract class SpongePlugin implements IPlugin {
      * @param path 配置文件路径
      * @return 管理器
      */
-    protected abstract SpongeManager registerManager(Path path);
+    protected abstract T registerManager(Path path);
 
     /**
      * 注册监听器.
