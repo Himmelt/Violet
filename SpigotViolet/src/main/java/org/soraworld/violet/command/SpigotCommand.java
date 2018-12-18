@@ -1,5 +1,6 @@
 package org.soraworld.violet.command;
 
+import net.jodah.typetools.TypeResolver;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -7,8 +8,7 @@ import org.bukkit.entity.Player;
 import org.soraworld.hocon.node.Paths;
 import org.soraworld.violet.manager.SpigotManager;
 
-import java.lang.invoke.*;
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
@@ -20,8 +20,7 @@ public class SpigotCommand extends Command {
     /**
      * 管理器.
      */
-    public final SpigotManager manager;
-
+    protected final SpigotManager manager;
     /**
      * 是否仅玩家执行.
      */
@@ -42,8 +41,6 @@ public class SpigotCommand extends Command {
      * 子命令映射表.
      */
     protected final HashMap<String, SpigotCommand> subs = new LinkedHashMap<>();
-    private final MethodHandles.Lookup lookup = MethodHandles.lookup();
-    private static final MethodType INVOKE_EXEC = MethodType.methodType(SpigotExecutor.class);
 
     /**
      * 实例化 Spigot 命令.
@@ -141,63 +138,58 @@ public class SpigotCommand extends Command {
      * @param clazz 检索目标类
      */
     public void extractSub(Class<?> clazz) {
-        if (clazz == null || clazz == Object.class || clazz == Class.class) return;
-        Method[] methods = clazz.getDeclaredMethods();
-        if (methods == null || methods.length == 0) return;
-        for (Method method : methods) tryAddSub(method);
+        if (clazz == null) return;
+        Field[] fields = clazz.getDeclaredFields();
+        if (fields == null || fields.length == 0) return;
+        for (Field field : fields) tryAddSub(field);
     }
 
     /**
      * 从类中提取带有{@link Sub}注解的，名称为{@code method}的静态公开方法并注册为子命令.
      *
-     * @param clazz  检索目标类
-     * @param method 目标方法名
+     * @param clazz 检索目标类
+     * @param field 目标方法名
      */
-    public void extractSub(Class<?> clazz, String method) {
-        if (clazz == null || method == null || method.isEmpty() || clazz == Object.class || clazz == Class.class) return;
+    public void extractSub(Class<?> clazz, String field) {
+        if (clazz == null || field == null || field.isEmpty()) return;
         try {
-            Method theMethod = clazz.getDeclaredMethod(method, SpigotCommand.class, CommandSender.class, Args.class);
-            tryAddSub(theMethod);
+            Field theField = clazz.getDeclaredField(field);
+            tryAddSub(theField);
         } catch (Throwable e) {
             if (manager.isDebug()) e.printStackTrace();
-            manager.consoleKey("extractNoSuchSub", clazz.getName(), method);
+            manager.consoleKey("extractNoSuchSub", clazz.getName(), field);
         }
     }
 
-    private void tryAddSub(Method method) {
-        int modifier = method.getModifiers();
-        if (!Modifier.isPublic(modifier) || !Modifier.isStatic(modifier)) return;
-        Sub sub = method.getAnnotation(Sub.class);
+    private void tryAddSub(Field field) {
+        int modifier = field.getModifiers();
+        /* public static final SubExecutor<> field */
+        if (!Modifier.isPublic(modifier) || !Modifier.isStatic(modifier) || !Modifier.isFinal(modifier)) return;
+        Sub sub = field.getAnnotation(Sub.class);
         if (sub == null) return;
-        Class<?> ret = method.getReturnType();
-        if (!ret.equals(Void.class) && !ret.equals(void.class)) return;
-        Class<?>[] params = method.getParameterTypes();
-        if (params.length != 3 || params[0] != SpigotCommand.class || params[1] != CommandSender.class || params[2] != Args.class) return;
-        method.setAccessible(true);
-        String path = sub.path().isEmpty() ? method.getName().toLowerCase() : sub.path().replace(' ', '_').replace(':', '_');
-        Paths paths = new Paths(path);
+        if (!sub.parent().isEmpty() && !sub.parent().equalsIgnoreCase(getName())) return;
+        SubExecutor executor = null;
+        try {
+            executor = (SubExecutor) field.get(null);
+        } catch (Throwable e) {
+            if (manager.isDebug()) e.printStackTrace();
+        }
+        if (executor == null) return;
+
+        Class<?>[] params = TypeResolver.resolveRawArguments(SubExecutor.class, executor.getClass());
+        if (params.length != 3
+                || !SpigotCommand.class.isAssignableFrom(params[0])
+                || !SpigotManager.class.isAssignableFrom(params[1])
+                || !CommandSender.class.isAssignableFrom(params[2])) return;
+
+        Paths paths = new Paths(sub.path().isEmpty() ? field.getName().toLowerCase() : sub.path().replace(' ', '_').replace(':', '_'));
         String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
         if ("admin".equals(perm)) perm = manager.defAdminPerm();
         // 此处返回的是最终命令
         SpigotCommand command = createSub(paths);
-        if (!sub.virtual()) {
-            try {
-                MethodHandle handle = lookup.unreflect(method);
-                CallSite site = LambdaMetafactory.metafactory(
-                        lookup,
-                        "execute",
-                        INVOKE_EXEC,
-                        handle.type(),
-                        handle,
-                        handle.type());
-                command.executor = (SpigotExecutor) site.getTarget().invokeExact();
-            } catch (Throwable e) {
-                if (manager.isDebug()) e.printStackTrace();
-                manager.consoleKey("extractReflectError", method.getName());
-            }
-        }
+        if (!sub.virtual()) command.executor = executor;
         command.setPermission(perm);
-        command.onlyPlayer = sub.onlyPlayer();
+        command.onlyPlayer = sub.onlyPlayer() || Player.class.isAssignableFrom(params[2]);
         command.setAliases(new ArrayList<>(Arrays.asList(sub.aliases())));
         command.setTabCompletions(sub.tabs());
         command.usageMessage = sub.usage();
