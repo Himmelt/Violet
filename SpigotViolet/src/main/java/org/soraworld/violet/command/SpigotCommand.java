@@ -145,7 +145,7 @@ public class SpigotCommand extends Command {
     }
 
     /**
-     * 从类中提取带有{@link Sub}注解的，名称为{@code method}的静态公开方法并注册为子命令.
+     * 从类中提取带有{@link Sub}注解的，名称为{@code field}的静态公开方法并注册为子命令.
      *
      * @param clazz 检索目标类
      * @param field 目标方法名
@@ -179,7 +179,7 @@ public class SpigotCommand extends Command {
         Class<?>[] params = TypeResolver.resolveRawArguments(SubExecutor.class, executor.getClass());
         if (params.length != 3
                 || !SpigotCommand.class.isAssignableFrom(params[0])
-                || !SpigotManager.class.isAssignableFrom(params[1])
+                || !manager.getClass().isAssignableFrom(params[1])
                 || !CommandSender.class.isAssignableFrom(params[2])) return;
 
         Paths paths = new Paths(sub.path().isEmpty() ? field.getName().toLowerCase() : sub.path().replace(' ', '_').replace(':', '_'));
