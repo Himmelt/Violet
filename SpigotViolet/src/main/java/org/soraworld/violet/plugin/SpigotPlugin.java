@@ -6,7 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.soraworld.hocon.node.Paths;
 import org.soraworld.violet.api.IPlugin;
-import org.soraworld.violet.command.SpigotBaseSubs;
+import org.soraworld.violet.command.SpigotBaseCmds;
 import org.soraworld.violet.command.SpigotCommand;
 import org.soraworld.violet.manager.SpigotManager;
 
@@ -128,7 +128,7 @@ public abstract class SpigotPlugin<T extends SpigotManager> extends JavaPlugin i
      */
     protected void registerCommands() {
         SpigotCommand command = new SpigotCommand(getId(), manager.defAdminPerm(), false, manager);
-        command.extractSub(SpigotBaseSubs.class);
+        command.extractSub(SpigotBaseCmds.class);
         register(this, command);
     }
 

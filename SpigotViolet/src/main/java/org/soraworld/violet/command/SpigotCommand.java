@@ -130,7 +130,7 @@ public class SpigotCommand extends Command {
 
     /**
      * 从类中提取带有 {@link Sub} 注解的静态公开方法，
-     * 动态编译成实现了{@link SpigotExecutor}接口的 λ 类，
+     * 动态编译成实现了{@link SpigotSub}接口的 λ 类，
      * 并封装成{@link SpigotCommand} 注册为子命令.
      * <p>
      * 建议: 为提高检索效率，建议把需要转换的静态方法放到一个单独的类中.

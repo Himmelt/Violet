@@ -4,10 +4,12 @@ import org.soraworld.violet.Violet;
 import org.soraworld.violet.manager.FBManager;
 import org.soraworld.violet.manager.SpigotManager;
 
-public final class SpigotBaseSubs {
+import java.util.ArrayList;
+
+public final class SpigotBaseCmds {
 
     @Sub(perm = "admin", tabs = {"zh_cn", "en_us"})
-    public static final SpigotExecutor<SpigotManager> lang = (cmd, manager, sender, args) -> {
+    public static final SpigotSub<SpigotManager> lang = (cmd, manager, sender, args) -> {
         if (args.notEmpty()) {
             if (manager.setLang(args.first())) {
                 manager.asyncSave();
@@ -18,8 +20,13 @@ public final class SpigotBaseSubs {
         } else manager.sendKey(sender, "getLang", manager.getLang());
     };
 
+    @Tab(path = "lang")
+    public static final SpigotTab<SpigotManager> tab_lang = (cmd, manager, sender, args) -> {
+        return new ArrayList<>();
+    };
+
     @Sub(perm = "admin")
-    public static final SpigotExecutor<SpigotManager> save = (cmd, manager, sender, args) -> {
+    public static final SpigotSub<SpigotManager> save = (cmd, manager, sender, args) -> {
         if (args.empty()) {
             manager.sendKey(sender, manager.save() ? "configSaved" : "configSaveFailed");
         } else {
@@ -29,25 +36,25 @@ public final class SpigotBaseSubs {
     };
 
     @Sub(perm = "admin")
-    public static final SpigotExecutor<SpigotManager> debug = (cmd, manager, sender, args) -> {
+    public static final SpigotSub<SpigotManager> debug = (cmd, manager, sender, args) -> {
         manager.setDebug(!manager.isDebug());
         manager.sendKey(sender, manager.isDebug() ? "debugON" : "debugOFF");
     };
 
     @Sub(perm = "admin")
-    public static final SpigotExecutor<SpigotManager> reload = (cmd, manager, sender, args) -> {
+    public static final SpigotSub<SpigotManager> reload = (cmd, manager, sender, args) -> {
         manager.beforeLoad();
         manager.sendKey(sender, manager.load() ? "configLoaded" : "configLoadFailed");
         manager.afterLoad();
     };
 
     @Sub(perm = "admin")
-    public static final SpigotExecutor<SpigotManager> rextract = (cmd, manager, sender, args) -> {
+    public static final SpigotSub<SpigotManager> rextract = (cmd, manager, sender, args) -> {
         manager.sendKey(sender, manager.reExtract() ? "reExtracted" : "reExtractFailed");
     };
 
     @Sub
-    public static final SpigotExecutor<SpigotManager> help = (cmd, manager, sender, args) -> {
+    public static final SpigotSub<SpigotManager> help = (cmd, manager, sender, args) -> {
         if (args.notEmpty()) {
             SpigotCommand sub = cmd.getParent().getSub(args.first());
             if (sub != null) sub.sendUsage(sender);
@@ -56,7 +63,7 @@ public final class SpigotBaseSubs {
     };
 
     @Sub(parent = Violet.PLUGIN_ID, perm = "admin")
-    public static final SpigotExecutor<FBManager> plugins = (cmd, manager, sender, args) -> {
+    public static final SpigotSub<FBManager> plugins = (cmd, manager, sender, args) -> {
         manager.listPlugins(sender);
     };
 }

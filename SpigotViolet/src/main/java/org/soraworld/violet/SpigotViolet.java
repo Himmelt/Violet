@@ -1,7 +1,7 @@
 package org.soraworld.violet;
 
 import org.bukkit.event.Listener;
-import org.soraworld.violet.command.SpigotBaseSubs;
+import org.soraworld.violet.command.SpigotBaseCmds;
 import org.soraworld.violet.command.SpigotCommand;
 import org.soraworld.violet.manager.FBManager;
 import org.soraworld.violet.plugin.SpigotPlugin;
@@ -31,7 +31,7 @@ public class SpigotViolet extends SpigotPlugin<FBManager> {
 
     public void registerCommands() {
         SpigotCommand command = new SpigotCommand(getId(), null, false, manager);
-        command.extractSub(SpigotBaseSubs.class);
+        command.extractSub(SpigotBaseCmds.class);
         //command.extractSub(SpigotBaseSubs.VioletBaseSubs.class);
         command.setUsage("/violet lang|debug|save|reload|rextract");
         register(this, command);

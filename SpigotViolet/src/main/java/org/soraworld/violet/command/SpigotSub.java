@@ -6,7 +6,7 @@ import org.soraworld.violet.manager.SpigotManager;
 /**
  * Spigot 命令执行器 接口.
  */
-public interface SpigotExecutor<T extends SpigotManager> extends SubExecutor<SpigotCommand, T, CommandSender> {
+public interface SpigotSub<T extends SpigotManager> extends SubExecutor<SpigotCommand, T, CommandSender> {
     /**
      * 执行.
      *
