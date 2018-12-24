@@ -25,4 +25,8 @@ public class JsonText {
         this.click = click;
         this.hover = hover;
     }
+
+    public String toString() {
+        return super.toString();
+    }
 }

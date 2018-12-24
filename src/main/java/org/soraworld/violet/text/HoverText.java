@@ -2,8 +2,13 @@ package org.soraworld.violet.text;
 
 public class HoverText {
 
-    private String text;
-    private Action action;
+    private final String value;
+    private final Action action;
+
+    public HoverText(String value, Action action) {
+        this.value = value;
+        this.action = action;
+    }
 
     public String toString() {
         return "\"hoverEvent\":{"

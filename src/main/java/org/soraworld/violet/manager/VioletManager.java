@@ -128,7 +128,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
      */
     public void setHead(String head) {
         this.colorHead = defChatColor() + ChatColor.colorize(head) + ChatColor.RESET;
-        this.plainHead = ChatColor.REAL_COLOR.matcher(colorHead).replaceAll("");
+        this.plainHead = ChatColor.stripColor(colorHead);
     }
 
     /**

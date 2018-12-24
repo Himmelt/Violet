@@ -1,6 +1,7 @@
 package org.soraworld.violet.util;
 
-import java.util.regex.Matcher;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -10,111 +11,127 @@ public enum ChatColor {
     /**
      * 黑色.
      */
-    BLACK('0'),
+    BLACK('0', "black"),
     /**
      * 深蓝.
      */
-    DARK_BLUE('1'),
+    DARK_BLUE('1', "dark_blue"),
     /**
      * 深绿.
      */
-    DARK_GREEN('2'),
+    DARK_GREEN('2', "dark_green"),
     /**
      * 青色.
      */
-    DARK_AQUA('3'),
+    DARK_AQUA('3', "dark_aqua"),
     /**
      * 深红.
      */
-    DARK_RED('4'),
+    DARK_RED('4', "dark_red"),
     /**
      * 紫色.
      */
-    DARK_PURPLE('5'),
+    DARK_PURPLE('5', "dark_purple"),
     /**
      * 金色.
      */
-    GOLD('6'),
+    GOLD('6', "gold"),
     /**
      * 灰色.
      */
-    GRAY('7'),
+    GRAY('7', "gray"),
     /**
      * 深灰.
      */
-    DARK_GRAY('8'),
+    DARK_GRAY('8', "dark_gray"),
     /**
      * 蓝色.
      */
-    BLUE('9'),
+    BLUE('9', "blue"),
     /**
      * 绿色.
      */
-    GREEN('a'),
+    GREEN('a', "green"),
     /**
      * 天蓝.
      */
-    AQUA('b'),
+    AQUA('b', "aqua"),
     /**
      * 鲜红.
      */
-    RED('c'),
+    RED('c', "red"),
     /**
      * 浅紫.
      */
-    LIGHT_PURPLE('d'),
+    LIGHT_PURPLE('d', "light_purple"),
     /**
      * 黄色.
      */
-    YELLOW('e'),
+    YELLOW('e', "yellow"),
     /**
      * 白色.
      */
-    WHITE('f'),
+    WHITE('f', "white"),
     /**
      * 随机.
      */
-    MAGIC('k'),
+    MAGIC('k', "obfuscated"),
     /**
      * 粗体.
      */
-    BOLD('l'),
+    BOLD('l', "bold"),
     /**
      * 删除线.
      */
-    STRIKETHROUGH('m'),
+    STRIKETHROUGH('m', "strikethrough"),
     /**
      * 下划线.
      */
-    UNDERLINE('n'),
+    UNDERLINE('n', "underline"),
     /**
      * 斜体.
      */
-    ITALIC('o'),
+    ITALIC('o', "italic"),
     /**
      * 重置.
      */
-    RESET('r');
+    RESET('r', "reset");
 
+    private final char code;
+    private final String name;
     private final String string;
+
     /**
      * 颜色字符.
      */
     public static final char COLOR_CHAR = '\u00A7';
     /**
-     * 双颜色字符串.
-     */
-    public static final String D_COLOR_CHAR = "" + COLOR_CHAR + COLOR_CHAR;
-    /**
-     * 格式字符正则表达式.
-     */
-    public static final Pattern COLOR_PATTERN = Pattern.compile("(&[&|0-9a-fk-or])+");
-    /**
      * 真实格式字符正则表达式.
      */
-    public static final Pattern REAL_COLOR = Pattern.compile("(\u00A7[0-9a-fk-or])+");
+    public static final Pattern TRUE_COLOR_PATTERN = Pattern.compile("(?i)\u00A7[0-9a-fk-or]");
+    /**
+     * 虚拟格式字符正则表达式.
+     */
+    public static final Pattern FAKE_COLOR_PATTERN = Pattern.compile("(?i)&[0-9a-fk-or]");
+    /**
+     * 虚拟格式字符前导正则表达式.
+     */
+    public static final Pattern COLORIZE_PATTERN = Pattern.compile("(?i)&(?=[0-9a-fk-or])");
+    private static final Map<Integer, ChatColor> BY_ID = new HashMap<>();
+    private static final Map<Character, ChatColor> BY_CHAR = new HashMap<>();
+    private static final Map<String, ChatColor> BY_NAME = new HashMap<>();
 
-    ChatColor(char code) {
+    static {
+        for (ChatColor colour : values()) {
+            BY_ID.put(colour.ordinal(), colour);
+            BY_CHAR.put(colour.code, colour);
+            BY_NAME.put(colour.name, colour);
+        }
+    }
+
+    ChatColor(char code, String name) {
+        this.code = code;
+        this.name = name;
         this.string = new String(new char[]{COLOR_CHAR, code});
     }
 
@@ -124,21 +141,35 @@ public enum ChatColor {
      * @param text 原始文本
      * @return 处理结果
      */
-    public static String colorize(String text) {
-        Matcher matcher = COLOR_PATTERN.matcher(text);
-        StringBuilder builder = new StringBuilder();
-        int head = 0;
-        while (matcher.find()) {
-            String group = matcher.group().replace('&', COLOR_CHAR).replace(D_COLOR_CHAR, "&");
-            int start = matcher.start();
-            builder.append(text, head, start).append(group);
-            head = matcher.end();
-        }
-        builder.append(text, head, text.length());
-        return builder.toString();
+    public static String colorize(final String text) {
+        if (text == null) return null;
+        return COLORIZE_PATTERN.matcher(text).replaceAll(String.valueOf(COLOR_CHAR));
     }
 
     public String toString() {
         return string;
+    }
+
+    /**
+     * Strips the given message of all color codes
+     *
+     * @param text String to strip of color
+     * @return A copy of the input string, without any coloring
+     */
+    public static String stripColor(final String text) {
+        if (text == null) return null;
+        return TRUE_COLOR_PATTERN.matcher(text).replaceAll("");
+    }
+
+    public static ChatColor getById(int id) {
+        return BY_ID.get(id);
+    }
+
+    public static ChatColor getByChar(char code) {
+        return BY_CHAR.get(code);
+    }
+
+    public static ChatColor getByName(String name) {
+        return BY_NAME.get(name);
     }
 }
