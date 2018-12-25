@@ -105,6 +105,8 @@ public enum ChatColor {
      * 颜色字符.
      */
     public static final char COLOR_CHAR = '\u00A7';
+    public static final String COLOR_STRING = "\u00A7";
+
     /**
      * 真实格式字符正则表达式.
      */
@@ -143,7 +145,7 @@ public enum ChatColor {
      */
     public static String colorize(final String text) {
         if (text == null) return null;
-        return COLORIZE_PATTERN.matcher(text).replaceAll(String.valueOf(COLOR_CHAR));
+        return COLORIZE_PATTERN.matcher(text).replaceAll(COLOR_STRING);
     }
 
     public String toString() {

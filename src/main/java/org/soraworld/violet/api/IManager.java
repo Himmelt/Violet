@@ -148,6 +148,14 @@ public interface IManager {
      */
     void broadcastKey(String key, Object... args);
 
+    default void debugKey(String key, Object... args) {
+        if (isDebug()) consoleKey(key, args);
+    }
+
+    default void debug(String text) {
+        if (isDebug()) console(text);
+    }
+
     /**
      * 打印输出文本.
      * 不支持颜色，原生输出.

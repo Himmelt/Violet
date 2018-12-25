@@ -178,8 +178,8 @@ public class SpigotCommand extends Command {
 
         Class<?>[] params = TypeResolver.resolveRawArguments(SubExecutor.class, executor.getClass());
         if (params.length != 3
-                || !SpigotCommand.class.isAssignableFrom(params[0])
-                || !manager.getClass().isAssignableFrom(params[1])
+                || !params[0].isAssignableFrom(getClass()) || !SpigotCommand.class.isAssignableFrom(params[0])
+                || !params[1].isAssignableFrom(manager.getClass()) || !SpigotManager.class.isAssignableFrom(params[1])
                 || !CommandSender.class.isAssignableFrom(params[2])) return;
 
         Paths paths = new Paths(sub.path().isEmpty() ? field.getName().toLowerCase() : sub.path().replace(' ', '_').replace(':', '_'));

@@ -13,7 +13,7 @@ public class HoverText {
     public String toString() {
         return "\"hoverEvent\":{"
                 + "\"action\":\"" + action + "\","
-                + "\"value\":{}"
+                + "\"value\":{\"text\":\"" + value + "\"}"
                 + "}";
     }
 
