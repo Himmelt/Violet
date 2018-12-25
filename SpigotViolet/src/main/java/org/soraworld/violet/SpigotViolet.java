@@ -1,12 +1,16 @@
 package org.soraworld.violet;
 
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.soraworld.violet.command.SpigotBaseCmds;
 import org.soraworld.violet.command.SpigotCommand;
+import org.soraworld.violet.listener.DataListener;
 import org.soraworld.violet.manager.FBManager;
 import org.soraworld.violet.plugin.SpigotPlugin;
 
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,13 +30,12 @@ public class SpigotViolet extends SpigotPlugin<FBManager> {
     }
 
     public List<Listener> registerListeners() {
-        return null;
+        return Collections.singletonList(new DataListener(manager));
     }
 
     public void registerCommands() {
         SpigotCommand command = new SpigotCommand(getId(), null, false, manager);
         command.extractSub(SpigotBaseCmds.class);
-        //command.extractSub(SpigotBaseSubs.VioletBaseSubs.class);
         command.setUsage("/violet lang|debug|save|reload|rextract");
         register(this, command);
     }
@@ -57,5 +60,17 @@ public class SpigotViolet extends SpigotPlugin<FBManager> {
      */
     public static SpigotViolet getViolet() {
         return instance;
+    }
+
+    public void afterEnable() {
+        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+            manager.asyncLoadData(player.getUniqueId());
+        }
+    }
+
+    public void beforeDisable() {
+        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+            manager.saveData(player.getUniqueId(), false);
+        }
     }
 }

@@ -1,14 +1,20 @@
 package org.soraworld.violet.manager;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.SpigotViolet;
 import org.soraworld.violet.api.IPlugin;
+import org.soraworld.violet.data.DataAPI;
 import org.soraworld.violet.util.ChatColor;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Violet 管理器.
@@ -17,9 +23,11 @@ public final class FBManager extends SpigotManager {
 
     @Setting(comment = "comment.uuid")
     private UUID uuid = UUID.randomUUID();
+    private final Path dataPath;
 
     private static FBManager manager;
     private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
+    private static final ConcurrentHashMap<UUID, Boolean> asyncDataLock = new ConcurrentHashMap<>();
 
     /**
      * 实例化管理器.
@@ -30,6 +38,7 @@ public final class FBManager extends SpigotManager {
     public FBManager(SpigotViolet plugin, Path path) {
         super(plugin, path);
         manager = this;
+        dataPath = path.resolve("playerdata");
     }
 
     public boolean setLang(String lang) {
@@ -37,6 +46,60 @@ public final class FBManager extends SpigotManager {
         langMaps.clear();
         langMaps.put(lang, langMap);
         return flag;
+    }
+
+    public void loadData(UUID uuid) {
+        FileNode node = new FileNode(dataPath.resolve(uuid.toString() + ".dat").toFile(), DataAPI.options);
+        try {
+            node.load(false);
+            DataAPI.readStore(uuid, node);
+            debug("UUID:" + uuid + " store data async load success.");
+        } catch (Exception e) {
+            console(ChatColor.RED + "UUID:" + uuid + " store data async load exception.");
+            debug(e);
+        }
+    }
+
+    public void asyncLoadData(UUID uuid) {
+        if (!asyncDataLock.getOrDefault(uuid, false)) {
+            asyncDataLock.put(uuid, true);
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                loadData(uuid);
+                asyncDataLock.put(uuid, false);
+            });
+        }
+    }
+
+    public void saveData(UUID uuid, boolean clear) {
+        Path dataFile = dataPath.resolve(uuid.toString() + ".dat");
+        if (Files.notExists(dataFile)) {
+            try {
+                Files.createDirectories(dataFile.getParent());
+            } catch (IOException e) {
+                debug(e);
+            }
+        }
+        FileNode node = new FileNode(dataFile.toFile(), DataAPI.options);
+        DataAPI.writeStore(uuid, node);
+        try {
+            node.save();
+            if (clear) DataAPI.clearPlayerStore(uuid);
+            debug("UUID:" + uuid + " store data async save success.");
+        } catch (Exception e) {
+            console(ChatColor.RED + "UUID:" + uuid + " store data async save exception.");
+            debug(e);
+        }
+    }
+
+    public void asyncSaveData(UUID uuid, boolean clear) {
+        if (!asyncDataLock.getOrDefault(uuid, false)) {
+            asyncDataLock.put(uuid, true);
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                saveData(uuid, clear);
+                asyncDataLock.put(uuid, false);
+                if (clear) asyncDataLock.remove(uuid);
+            });
+        }
     }
 
     public String trans(String key, Object... args) {

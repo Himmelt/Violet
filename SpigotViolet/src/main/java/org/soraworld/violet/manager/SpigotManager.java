@@ -24,11 +24,11 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
     }
 
     public void asyncSave() {
-        if (!asyncLock) {
-            asyncLock = true;
+        if (!asyncSaveLock) {
+            asyncSaveLock = true;
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 save();
-                asyncLock = false;
+                asyncSaveLock = false;
             });
         }
     }

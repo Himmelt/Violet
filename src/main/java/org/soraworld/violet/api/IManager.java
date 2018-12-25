@@ -156,6 +156,10 @@ public interface IManager {
         if (isDebug()) console(text);
     }
 
+    default void debug(Throwable e) {
+        if (isDebug()) e.printStackTrace();
+    }
+
     /**
      * 打印输出文本.
      * 不支持颜色，原生输出.

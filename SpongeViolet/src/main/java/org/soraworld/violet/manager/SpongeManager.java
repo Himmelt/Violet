@@ -24,11 +24,11 @@ public abstract class SpongeManager extends VioletManager<SpongePlugin> {
     }
 
     public void asyncSave() {
-        if (!asyncLock) {
-            asyncLock = true;
+        if (!asyncSaveLock) {
+            asyncSaveLock = true;
             Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
                 save();
-                asyncLock = false;
+                asyncSaveLock = false;
             });
         }
     }

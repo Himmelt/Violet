@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    compile 'org.soraworld:hocon:1.1.0'
+    compile 'org.soraworld:hocon:1.1.1'
     compile 'net.jodah:typetools:0.5.0'
     testCompile 'junit:junit:4.12'
 }
@@ -40,7 +40,7 @@ subprojects {
     }
     dependencies {
         shadeOnly rootProject
-        shadow 'org.soraworld:hocon:1.1.0'
+        shadow 'org.soraworld:hocon:1.1.1'
         shadow 'net.jodah:typetools:0.5.0'
         testCompile 'junit:junit:4.12'
     }

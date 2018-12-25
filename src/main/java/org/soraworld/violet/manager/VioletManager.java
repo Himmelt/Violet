@@ -93,12 +93,11 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
     /**
      * 异步锁.
      */
-    protected static boolean asyncLock = false;
+    protected static boolean asyncSaveLock = false;
     /**
      * 插件统计列表.
      */
     protected static final ArrayList<IPlugin> plugins = new ArrayList<>();
-
 
     public static IPlugin getPlugin(String name) {
         return plugins.stream().filter(p -> p.getId().equals(name)).findFirst().orElse(null);
@@ -156,7 +155,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         } catch (Throwable e) {
             if (extract) console(ChatColor.RED + "Lang file " + lang + " load exception !!!");
             else console(ChatColor.RED + "Lang file " + lang + " extract exception !!!");
-            if (debug) e.printStackTrace();
+            debug(e);
             return new HashMap<>();
         }
     }
@@ -181,7 +180,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
             return true;
         } catch (Throwable e) {
             console(ChatColor.RED + "Config file load exception !!!");
-            if (debug) e.printStackTrace();
+            debug(e);
             reloadSuccess = false;
             return false;
         }
@@ -196,7 +195,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
             return true;
         } catch (Throwable e) {
             console(ChatColor.RED + "Config file save exception !!!");
-            if (debug) e.printStackTrace();
+            debug(e);
             return false;
         }
     }
