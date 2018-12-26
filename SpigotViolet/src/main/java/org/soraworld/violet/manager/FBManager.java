@@ -38,7 +38,7 @@ public final class FBManager extends SpigotManager {
     public FBManager(SpigotViolet plugin, Path path) {
         super(plugin, path);
         manager = this;
-        dataPath = path.resolve("playerdata");
+        dataPath = path.resolve("storedata");
     }
 
     public boolean setLang(String lang) {
@@ -83,7 +83,7 @@ public final class FBManager extends SpigotManager {
         DataAPI.writeStore(uuid, node);
         try {
             node.save();
-            if (clear) DataAPI.clearPlayerStore(uuid);
+            if (clear) DataAPI.clearStore(uuid);
             debug("UUID:" + uuid + " store data async save success.");
         } catch (Exception e) {
             console(ChatColor.RED + "UUID:" + uuid + " store data async save exception.");

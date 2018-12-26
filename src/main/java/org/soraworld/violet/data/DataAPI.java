@@ -21,55 +21,123 @@ public final class DataAPI {
         options.registerType(new UUIDSerializer());
     }
 
-    public static Object hasPlayerTemp(UUID uuid, String key) {
+    public static boolean hasTemp(UUID uuid, String key, Class<?> clazz) {
         Map<String, Object> data = playerTempData.get(uuid);
-        if (data != null) return data.containsKey(key);
+        if (data != null) {
+            Object obj = data.get(key);
+            return obj != null && clazz.isAssignableFrom(obj.getClass());
+        }
         return false;
     }
 
-    public static Object getPlayerTemp(UUID uuid, String key, Object def) {
+    public static <T> T getTemp(UUID uuid, String key, T def, Class<T> clazz) {
         Map<String, Object> data = playerTempData.get(uuid);
-        if (data != null) return data.getOrDefault(key, def);
+        if (data != null) {
+            Object obj = data.getOrDefault(key, def);
+            if (obj != null && clazz.isAssignableFrom(obj.getClass())) {
+                return (T) obj;
+            }
+        }
         return def;
     }
 
-    public static void setPlayerTemp(UUID uuid, String key, Object value) {
+    public static <T> T getTemp(UUID uuid, String key, Class<T> clazz) {
+        return getTemp(uuid, key, null, clazz);
+    }
+
+    public boolean getTempBool(UUID uuid, String key, boolean def) {
+        return getTemp(uuid, key, def, boolean.class);
+    }
+
+    public boolean getTempBool(UUID uuid, String key) {
+        return getTemp(uuid, key, false, boolean.class);
+    }
+
+    public byte getTempByte(UUID uuid, String key, byte def) {
+        return getTemp(uuid, key, def, byte.class);
+    }
+
+    public byte getTempByte(UUID uuid, String key) {
+        return getTemp(uuid, key, (byte) 0, byte.class);
+    }
+
+    public int getTempInt(UUID uuid, String key, int def) {
+        return getTemp(uuid, key, def, int.class);
+    }
+
+    public int getTempInt(UUID uuid, String key) {
+        return getTemp(uuid, key, 0, int.class);
+    }
+
+    public long getTempLong(UUID uuid, String key, long def) {
+        return getTemp(uuid, key, def, long.class);
+    }
+
+    public long getTempLong(UUID uuid, String key) {
+        return getTemp(uuid, key, 0L, long.class);
+    }
+
+    public float getTempFloat(UUID uuid, String key, float def) {
+        return getTemp(uuid, key, def, float.class);
+    }
+
+    public float getTempFloat(UUID uuid, String key) {
+        return getTemp(uuid, key, 0F, float.class);
+    }
+
+    public double getTempDouble(UUID uuid, String key, double def) {
+        return getTemp(uuid, key, def, double.class);
+    }
+
+    public double getTempDouble(UUID uuid, String key) {
+        return getTemp(uuid, key, 0D, double.class);
+    }
+
+    public String getTempString(UUID uuid, String key, String def) {
+        return getTemp(uuid, key, def, String.class);
+    }
+
+    public String getTempString(UUID uuid, String key) {
+        return getTemp(uuid, key, null, String.class);
+    }
+
+    public static void setTemp(UUID uuid, String key, Object value) {
         playerTempData.computeIfAbsent(uuid, u -> new HashMap<>()).put(key, value);
     }
 
-    public static Object removePlayerTemp(UUID uuid, String key) {
+    public static Object removeTemp(UUID uuid, String key) {
         Map<String, Object> data = playerTempData.get(uuid);
         if (data != null) return data.remove(key);
         return null;
     }
 
-    public static void clearPlayerTemp(UUID uuid) {
+    public static void clearTemp(UUID uuid) {
         playerTempData.remove(uuid);
     }
 
-    public static boolean hasPlayerStore(UUID uuid, String key) {
+    public static boolean hasStore(UUID uuid, String key) {
         NodeMap data = playerStoreData.get(uuid);
         if (data != null) return data.containsKey(key);
         return false;
     }
 
-    public static Node getPlayerStore(UUID uuid, String key, Node def) {
+    public static Node getStore(UUID uuid, String key, Node def) {
         NodeMap data = playerStoreData.get(uuid);
         if (data != null) return data.getOrDefault(key, def);
         return def;
     }
 
-    public static void setPlayerStore(UUID uuid, String key, Node value) {
+    public static void setStore(UUID uuid, String key, Node value) {
         playerStoreData.computeIfAbsent(uuid, u -> new NodeMap(Options.defaults())).set(key, value);
     }
 
-    public static Node removePlayerStore(UUID uuid, String key) {
+    public static Node removeStore(UUID uuid, String key) {
         NodeMap data = playerStoreData.get(uuid);
         if (data != null) return data.remove(key);
         return null;
     }
 
-    public static void clearPlayerStore(UUID uuid) {
+    public static void clearStore(UUID uuid) {
         playerStoreData.remove(uuid);
     }
 

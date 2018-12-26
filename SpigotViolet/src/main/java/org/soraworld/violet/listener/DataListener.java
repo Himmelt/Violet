@@ -27,7 +27,7 @@ public class DataListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
-        DataAPI.clearPlayerTemp(uuid);
+        DataAPI.clearTemp(uuid);
         manager.asyncSaveData(uuid, true);
     }
 }
