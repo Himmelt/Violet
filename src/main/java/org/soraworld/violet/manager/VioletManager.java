@@ -100,6 +100,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
      * 插件统计列表.
      */
     protected static final ArrayList<IPlugin> plugins = new ArrayList<>();
+    protected static final String defLang = Locale.CHINA.equals(Locale.getDefault()) ? "zh_cn" : "en_us";
 
     public static IPlugin getPlugin(String name) {
         return plugins.stream().filter(p -> p.getId().equals(name)).findFirst().orElse(null);
@@ -165,7 +166,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
 
     public boolean load() {
         if (Files.notExists(confile)) {
-            setLang(Locale.CHINA.equals(Locale.getDefault()) ? "zh_cn" : "en_us");
+            setLang(defLang);
             save();
             return true;
         }
@@ -177,7 +178,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
                 consoleKey("versionChanged", version);
                 flag = reExtract();
             } else flag = setLang(lang);
-            if (!flag) setLang(Locale.CHINA.equals(Locale.getDefault()) ? "zh_cn" : "en_us");
+            if (!flag && !defLang.equalsIgnoreCase(lang)) setLang(defLang);
             options.setDebug(debug);
             reloadSuccess = true;
             return true;
@@ -214,6 +215,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
     }
 
     public boolean setLang(String lang) {
+        lang = lang.toLowerCase();
         HashMap<String, String> temp = loadLangMap(lang);
         if (!temp.isEmpty()) {
             this.lang = lang;
