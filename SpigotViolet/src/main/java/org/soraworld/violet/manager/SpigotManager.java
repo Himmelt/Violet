@@ -2,6 +2,7 @@ package org.soraworld.violet.manager;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.soraworld.violet.plugin.SpigotPlugin;
 import org.soraworld.violet.text.JsonText;
 import org.soraworld.violet.util.ChatColor;
@@ -62,8 +63,8 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
         send(sender, trans(key, args));
     }
 
-    public void sendJson(CommandSender sender, JsonText... texts) {
-        String commandLine = "/tellraw " + sender.getName() + " " + ChatColor.colorize(JsonText.toJson(texts));
+    public void sendJson(Player player, JsonText... texts) {
+        String commandLine = "tellraw " + player.getName() + " " + ChatColor.colorize(JsonText.toJson(jsonHead, texts));
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), commandLine);
         debug(commandLine);
     }

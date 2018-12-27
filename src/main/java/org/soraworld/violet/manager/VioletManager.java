@@ -6,6 +6,7 @@ import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.api.IManager;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.serializers.UUIDSerializer;
+import org.soraworld.violet.text.JsonText;
 import org.soraworld.violet.util.ChatColor;
 
 import java.io.File;
@@ -62,6 +63,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
      * 带颜色抬头.
      */
     protected String colorHead;
+    protected JsonText jsonHead;
     /**
      * 配置是否加载成功.
      */
@@ -128,6 +130,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
     public void setHead(String head) {
         this.colorHead = defChatColor() + ChatColor.colorize(head) + ChatColor.RESET;
         this.plainHead = ChatColor.stripColor(colorHead);
+        this.jsonHead = new JsonText(colorHead);
     }
 
     /**
