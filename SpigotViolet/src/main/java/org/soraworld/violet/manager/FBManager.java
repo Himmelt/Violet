@@ -51,7 +51,7 @@ public final class FBManager extends SpigotManager {
     public void loadData(UUID uuid) {
         FileNode node = new FileNode(dataPath.resolve(uuid.toString() + ".dat").toFile(), DataAPI.options);
         try {
-            node.load(false);
+            node.load(false, true);
             DataAPI.readStore(uuid, node);
             debug("UUID:" + uuid + " store data async load success.");
         } catch (Exception e) {

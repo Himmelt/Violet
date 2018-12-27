@@ -167,7 +167,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
             return true;
         }
         try {
-            rootNode.load(true);
+            rootNode.load(true, true);
             rootNode.modify(this);
             boolean flag;
             if (autoUpLang && !plugin.getVersion().equalsIgnoreCase(version)) {
