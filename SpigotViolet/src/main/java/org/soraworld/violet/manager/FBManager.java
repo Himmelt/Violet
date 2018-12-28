@@ -27,7 +27,7 @@ public final class FBManager extends SpigotManager {
 
     private static FBManager manager;
     private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
-    private static final ConcurrentHashMap<UUID, Boolean> asyncDataLock = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<UUID, Object> asyncLock = new ConcurrentHashMap<>();
 
     /**
      * 实例化管理器.
@@ -51,23 +51,19 @@ public final class FBManager extends SpigotManager {
     public void loadData(UUID uuid) {
         FileNode node = new FileNode(dataPath.resolve(uuid.toString() + ".dat").toFile(), DataAPI.options);
         try {
-            node.load(false, true);
-            DataAPI.readStore(uuid, node);
-            debug("UUID:" + uuid + " store data async load success.");
+            synchronized (asyncLock.computeIfAbsent(uuid, u -> new Object())) {
+                node.load(false, true);
+                DataAPI.readStore(uuid, node);
+            }
+            debug("UUID:" + uuid + " store data load success.");
         } catch (Exception e) {
-            console(ChatColor.RED + "UUID:" + uuid + " store data async load exception.");
+            console(ChatColor.RED + "UUID:" + uuid + " store data load exception.");
             debug(e);
         }
     }
 
     public void asyncLoadData(UUID uuid) {
-        if (!asyncDataLock.getOrDefault(uuid, false)) {
-            asyncDataLock.put(uuid, true);
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                loadData(uuid);
-                asyncDataLock.put(uuid, false);
-            });
-        }
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> loadData(uuid));
     }
 
     public void saveData(UUID uuid, boolean clear) {
@@ -80,26 +76,24 @@ public final class FBManager extends SpigotManager {
             }
         }
         FileNode node = new FileNode(dataFile.toFile(), DataAPI.options);
-        DataAPI.writeStore(uuid, node);
         try {
-            node.save();
-            if (clear) DataAPI.clearStore(uuid);
-            debug("UUID:" + uuid + " store data async save success.");
+            synchronized (asyncLock.computeIfAbsent(uuid, u -> new Object())) {
+                DataAPI.writeStore(uuid, node);
+                node.save();
+                if (clear) DataAPI.clearStore(uuid);
+            }
+            debug("UUID:" + uuid + " store data save success.");
         } catch (Exception e) {
-            console(ChatColor.RED + "UUID:" + uuid + " store data async save exception.");
+            console(ChatColor.RED + "UUID:" + uuid + " store data save exception.");
             debug(e);
         }
     }
 
     public void asyncSaveData(UUID uuid, boolean clear) {
-        if (!asyncDataLock.getOrDefault(uuid, false)) {
-            asyncDataLock.put(uuid, true);
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                saveData(uuid, clear);
-                asyncDataLock.put(uuid, false);
-                if (clear) asyncDataLock.remove(uuid);
-            });
-        }
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            saveData(uuid, clear);
+            if (clear) asyncLock.remove(uuid);
+        });
     }
 
     public String trans(String key, Object... args) {
