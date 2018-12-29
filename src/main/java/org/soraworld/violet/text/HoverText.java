@@ -2,8 +2,8 @@ package org.soraworld.violet.text;
 
 public class HoverText {
 
-    private final String value;
-    private final Action action;
+    protected final String value;
+    protected final Action action;
 
     public HoverText(String value) {
         this.value = value == null ? "" : value;
@@ -18,8 +18,8 @@ public class HoverText {
     public String toString() {
         return "\"hoverEvent\":{"
                 + "\"action\":\"" + action + "\","
-                + "\"value\":{\"text\":\"" + value + "\"}"
-                + "}";
+                + "\"value\":\"" + value
+                + "\"}";
     }
 
     public enum Action {

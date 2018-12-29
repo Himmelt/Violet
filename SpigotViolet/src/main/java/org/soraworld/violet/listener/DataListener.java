@@ -18,10 +18,18 @@ public class DataListener implements Listener {
         this.manager = manager;
     }
 
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-    public void onPlayerLogin(PlayerLoginEvent event) {
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+    public void onPlayerLoginPre(PlayerLoginEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
         manager.asyncLoadData(uuid);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPlayerLoginLast(PlayerLoginEvent event) {
+        UUID uuid = event.getPlayer().getUniqueId();
+        if (event.getResult() != PlayerLoginEvent.Result.ALLOWED) {
+            manager.asyncSaveData(uuid, true);
+        }
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
