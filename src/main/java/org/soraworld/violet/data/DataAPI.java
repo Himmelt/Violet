@@ -1,5 +1,7 @@
 package org.soraworld.violet.data;
 
+import org.jetbrains.annotations.NotNull;
+import org.soraworld.hocon.exception.SerializerException;
 import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.Options;
 import org.soraworld.violet.serializers.UUIDSerializer;
@@ -16,12 +18,22 @@ public final class DataAPI {
     private static final ConcurrentHashMap<UUID, HashMap<String, Object>> storeData = new ConcurrentHashMap<>();
 
     static {
-        options.registerType(new UUIDSerializer());
+        try {
+            options.registerType(new UUIDSerializer());
+        } catch (SerializerException e) {
+            System.out.println("TypeSerializer for UUID register failed");
+            e.printStackTrace();
+        }
     }
 
-    /* Temp Data */
-
-    public static boolean hasTemp(UUID uuid, String key) {
+    /**
+     * Has temp boolean.
+     *
+     * @param uuid the uuid
+     * @param key  the key
+     * @return the boolean
+     */
+    public static boolean hasTemp(@NotNull UUID uuid, String key) {
         Map<String, Object> data = tempData.get(uuid);
         return data != null && data.containsKey(key);
     }

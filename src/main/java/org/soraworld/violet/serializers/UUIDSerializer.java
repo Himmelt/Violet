@@ -1,6 +1,8 @@
 package org.soraworld.violet.serializers;
 
-import org.soraworld.hocon.node.Node;
+import org.jetbrains.annotations.NotNull;
+import org.soraworld.hocon.exception.HoconException;
+import org.soraworld.hocon.exception.SerializerException;
 import org.soraworld.hocon.node.NodeBase;
 import org.soraworld.hocon.node.Options;
 import org.soraworld.hocon.serializer.TypeSerializer;
@@ -11,22 +13,22 @@ import java.util.UUID;
 /**
  * UUID 序列化器.
  */
-public class UUIDSerializer implements TypeSerializer<UUID> {
-    public UUID deserialize(Type type, Node node) {
-        if (node instanceof NodeBase) {
-            try {
-                return UUID.fromString(((NodeBase) node).getString());
-            } catch (Throwable ignored) {
-            }
+public class UUIDSerializer extends TypeSerializer<UUID, NodeBase> {
+
+    public UUIDSerializer() throws SerializerException {
+    }
+
+    @NotNull
+    public UUID deserialize(@NotNull Type fieldType, @NotNull NodeBase node) throws HoconException {
+        try {
+            return UUID.fromString(node.getString());
+        } catch (Throwable e) {
+            throw new SerializerException(e);
         }
-        return null;
     }
 
-    public Node serialize(Type type, UUID value, Options options) {
-        return new NodeBase(options, value, false);
-    }
-
-    public Type getRegType() {
-        return UUID.class;
+    @NotNull
+    public NodeBase serialize(@NotNull Type fieldType, @NotNull UUID value, @NotNull Options options) {
+        return new NodeBase(options, value);
     }
 }

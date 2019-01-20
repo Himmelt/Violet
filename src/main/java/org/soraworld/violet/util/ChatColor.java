@@ -1,11 +1,13 @@
 package org.soraworld.violet.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * 颜色枚举.
+ * 颜色枚举 和 处理工具.
  */
 public enum ChatColor {
     /**
@@ -102,23 +104,43 @@ public enum ChatColor {
     private final String string;
 
     /**
-     * 颜色字符.
+     * 真实颜色 字符.
      */
-    public static final char COLOR_CHAR = '\u00A7';
-    public static final String COLOR_STRING = "\u00A7";
+    public static final char TRUE_COLOR_CHAR = '\u00A7';
+    /**
+     * 虚拟颜色 字符.
+     */
+    public static final char FAKE_COLOR_CHAR = '&';
+    /**
+     * 真实颜色 字符串.
+     */
+    public static final String TRUE_COLOR_STRING = "\u00A7";
+    /**
+     * 虚拟颜色 字符串.
+     */
+    public static final String FAKE_COLOR_STRING = "&";
 
     /**
-     * 真实格式字符正则表达式.
+     * 真实格式 字符串 正则表达式.
      */
     public static final Pattern TRUE_COLOR_PATTERN = Pattern.compile("(?i)\u00A7[0-9a-fk-or]");
     /**
-     * 虚拟格式字符正则表达式.
+     * 虚拟格式 字符串 正则表达式.
      */
     public static final Pattern FAKE_COLOR_PATTERN = Pattern.compile("(?i)&[0-9a-fk-or]");
     /**
-     * 虚拟格式字符前导正则表达式.
+     * 虚拟和实际格式 字符串 正则表达式.
      */
-    public static final Pattern COLORIZE_PATTERN = Pattern.compile("(?i)&(?=[0-9a-fk-or])");
+    public static final Pattern ALL_COLOR_PATTERN = Pattern.compile("(?i)[&|\u00A7][0-9a-fk-or]");
+    /**
+     * 虚拟格式 前导字符 正则表达式.
+     */
+    public static final Pattern FAKE_HEAD_PATTERN = Pattern.compile("(?i)&(?=[0-9a-fk-or])");
+    /**
+     * 真实格式 前导字符 正则表达式.
+     */
+    public static final Pattern TRUE_HEAD_PATTERN = Pattern.compile("(?i)\u00A7(?=[0-9a-fk-or])");
+
     private static final Map<Integer, ChatColor> BY_ID = new HashMap<>();
     private static final Map<Character, ChatColor> BY_CHAR = new HashMap<>();
     private static final Map<String, ChatColor> BY_NAME = new HashMap<>();
@@ -134,18 +156,31 @@ public enum ChatColor {
     ChatColor(char code, String name) {
         this.code = code;
         this.name = name;
-        this.string = new String(new char[]{COLOR_CHAR, code});
+        this.string = new String(new char[]{TRUE_COLOR_CHAR, code});
     }
 
     /**
-     * 颜色化字符串.
+     * 真实颜色化字符串.<br>
+     * {@code & -> §}
      *
      * @param text 原始文本
      * @return 处理结果
      */
-    public static String colorize(final String text) {
-        if (text == null) return null;
-        return COLORIZE_PATTERN.matcher(text).replaceAll(COLOR_STRING);
+    @NotNull
+    public static String colorize(@NotNull String text) {
+        return FAKE_HEAD_PATTERN.matcher(text).replaceAll(TRUE_COLOR_STRING);
+    }
+
+    /**
+     * 虚拟颜色化字符串.<br>
+     * {@code § -> &}
+     *
+     * @param text 原始文本
+     * @return 处理结果
+     */
+    @NotNull
+    public static String fakerize(@NotNull String text) {
+        return TRUE_HEAD_PATTERN.matcher(text).replaceAll(FAKE_COLOR_STRING);
     }
 
     public String toString() {
@@ -153,14 +188,36 @@ public enum ChatColor {
     }
 
     /**
-     * Strips the given message of all color codes
+     * 移除字符串中所有的 真实颜色字符.
      *
-     * @param text String to strip of color
-     * @return A copy of the input string, without any coloring
+     * @param text 原始文本
+     * @return 处理结果
      */
-    public static String stripColor(final String text) {
-        if (text == null) return null;
+    @NotNull
+    public static String stripColor(@NotNull String text) {
         return TRUE_COLOR_PATTERN.matcher(text).replaceAll("");
+    }
+
+    /**
+     * 移除字符串中所有的 虚拟颜色字符.
+     *
+     * @param text 原始文本
+     * @return 处理结果
+     */
+    @NotNull
+    public static String stripFakeColor(@NotNull String text) {
+        return FAKE_COLOR_PATTERN.matcher(text).replaceAll("");
+    }
+
+    /**
+     * 移除字符串中所有的 虚拟和真实 颜色字符.
+     *
+     * @param text 原始文本
+     * @return 处理结果
+     */
+    @NotNull
+    public static String stripAllColor(@NotNull String text) {
+        return ALL_COLOR_PATTERN.matcher(text).replaceAll("");
     }
 
     public static ChatColor getById(int id) {

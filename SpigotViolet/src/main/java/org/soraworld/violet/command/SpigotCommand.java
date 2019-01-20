@@ -1,15 +1,16 @@
 package org.soraworld.violet.command;
 
-import net.jodah.typetools.TypeResolver;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.soraworld.hocon.node.Paths;
+import org.soraworld.hocon.util.Reflects;
 import org.soraworld.violet.manager.SpigotManager;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.*;
 
 /**
@@ -176,11 +177,13 @@ public class SpigotCommand extends Command {
         }
         if (executor == null) return;
 
-        Class<?>[] params = TypeResolver.resolveRawArguments(SubExecutor.class, executor.getClass());
-        if (params.length != 3
-                || !params[0].isAssignableFrom(getClass()) || !SpigotCommand.class.isAssignableFrom(params[0])
-                || !params[1].isAssignableFrom(manager.getClass()) || !SpigotManager.class.isAssignableFrom(params[1])
-                || !CommandSender.class.isAssignableFrom(params[2])) return;
+        Type[] params = Reflects.getActualTypes(SubExecutor.class, executor.getClass());
+        if (params == null || params.length != 3
+                || !Reflects.isAssignableFrom(params[0], getClass())
+                || !Reflects.isAssignableFrom(SpigotCommand.class, params[0])
+                || !Reflects.isAssignableFrom(params[1], manager.getClass())
+                || !Reflects.isAssignableFrom(SpigotManager.class, params[1])
+                || !Reflects.isAssignableFrom(CommandSender.class, params[2])) return;
 
         Paths paths = new Paths(sub.path().isEmpty() ? field.getName().toLowerCase() : sub.path().replace(' ', '_').replace(':', '_'));
         String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
@@ -189,7 +192,7 @@ public class SpigotCommand extends Command {
         SpigotCommand command = createSub(paths);
         if (!sub.virtual()) command.executor = executor;
         command.setPermission(perm);
-        command.onlyPlayer = sub.onlyPlayer() || Player.class.isAssignableFrom(params[2]);
+        command.onlyPlayer = sub.onlyPlayer() || Reflects.isAssignableFrom(Player.class, params[2]);
         command.setAliases(new ArrayList<>(Arrays.asList(sub.aliases())));
         command.setTabCompletions(sub.tabs());
         command.usageMessage = sub.usage();

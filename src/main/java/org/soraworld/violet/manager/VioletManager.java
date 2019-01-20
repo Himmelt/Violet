@@ -1,5 +1,6 @@
 package org.soraworld.violet.manager;
 
+import org.soraworld.hocon.exception.SerializerException;
 import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.Options;
 import org.soraworld.hocon.node.Setting;
@@ -115,8 +116,15 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
     public VioletManager(T plugin, Path path) {
         this.path = path;
         this.plugin = plugin;
-        this.options.setTranslator(this::trans);
-        this.options.registerType(new UUIDSerializer());
+        this.options.setTranslator(Options.COMMENT, this::trans);
+        this.options.setTranslator(Options.READ, ChatColor::colorize);
+        this.options.setTranslator(Options.WRITE, ChatColor::fakerize);
+        try {
+            this.options.registerType(new UUIDSerializer());
+        } catch (SerializerException e) {
+            console(ChatColor.RED + "TypeSerializer for UUID register failed");
+            if (debug) e.printStackTrace();
+        }
         this.confile = path.resolve(plugin.getId().replace(' ', '_') + ".conf");
         this.rootNode = new FileNode(confile.toFile(), options);
         setHead(defChatHead());
