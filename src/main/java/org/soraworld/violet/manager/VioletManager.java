@@ -11,6 +11,7 @@ import org.soraworld.violet.text.JsonText;
 import org.soraworld.violet.util.ChatColor;
 
 import java.io.File;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -151,10 +152,11 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
     final HashMap<String, String> loadLangMap(String lang) {
         Path langFile = path.resolve("lang").resolve(lang + ".lang");
         boolean extract = false;
+        URL url = plugin.getAssetURL("lang/" + lang + ".lang");
         try {
             if (Files.notExists(langFile)) {
                 Files.createDirectories(langFile.getParent());
-                Files.copy(plugin.getAsset("lang/" + lang + ".lang"), langFile);
+                Files.copy(url.openStream(), langFile);
             }
             extract = true;
             FileNode langNode = new FileNode(langFile.toFile(), options);
@@ -165,8 +167,8 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
             }
             return map;
         } catch (Throwable e) {
-            if (extract) console(ChatColor.RED + "Lang file " + lang + " load exception !!!");
-            else console(ChatColor.RED + "Lang file " + lang + " extract exception !!!");
+            if (extract) console(ChatColor.RED + "Lang file " + langFile + " load exception !!!");
+            else console(ChatColor.RED + "Lang file " + url + " extract exception !!!");
             debug(e);
             return new HashMap<>();
         }

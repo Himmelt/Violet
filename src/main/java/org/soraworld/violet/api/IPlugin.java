@@ -1,6 +1,7 @@
 package org.soraworld.violet.api;
 
 import java.io.InputStream;
+import java.net.URL;
 
 /**
  * 插件接口.
@@ -56,8 +57,18 @@ public interface IPlugin {
      * @param path assets目录下，插件id之后的路径
      * @return 资源文件的输入流
      */
-    default InputStream getAsset(String path) {
+    default InputStream getAssetStream(String path) {
         return getClass().getResourceAsStream("/assets/" + assetsId() + '/' + path);
+    }
+
+    /**
+     * 从jar获取资源文件的 {@link URL}.
+     *
+     * @param path assets目录下，插件id之后的路径
+     * @return 资源文件的 URL
+     */
+    default URL getAssetURL(String path) {
+        return getClass().getResource("/assets/" + assetsId() + '/' + path);
     }
 
     /**

@@ -87,7 +87,7 @@ public abstract class SpongePlugin<T extends SpongeManager> implements IPlugin {
     public void onStarting(GameStartingServerEvent event) {
         registerCommands();
         disableCommands();
-        manager.consoleKey("pluginEnabled", getId());
+        manager.consoleKey("pluginEnabled", getId() + "-" + getVersion());
         afterEnable();
     }
 
@@ -100,7 +100,7 @@ public abstract class SpongePlugin<T extends SpongeManager> implements IPlugin {
     public void onDisable(GameStoppingServerEvent event) {
         beforeDisable();
         if (manager != null) {
-            manager.consoleKey("pluginDisabled", getId());
+            manager.consoleKey("pluginDisabled", getId() + "-" + getVersion());
             if (manager.canSaveOnDisable()) {
                 manager.consoleKey(manager.save() ? "configSaved" : "configSaveFailed");
             }

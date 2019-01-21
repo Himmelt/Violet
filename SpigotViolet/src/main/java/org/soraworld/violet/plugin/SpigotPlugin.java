@@ -68,7 +68,7 @@ public abstract class SpigotPlugin<T extends SpigotManager> extends JavaPlugin i
         }
         registerCommands();
         disableCommands();
-        manager.consoleKey("pluginEnabled", getId());
+        manager.consoleKey("pluginEnabled", getId() + "-" + getVersion());
         afterEnable();
     }
 
@@ -91,7 +91,7 @@ public abstract class SpigotPlugin<T extends SpigotManager> extends JavaPlugin i
     public void onDisable() {
         beforeDisable();
         if (manager != null) {
-            manager.consoleKey("pluginDisabled", getId());
+            manager.consoleKey("pluginDisabled", getId() + "-" + getVersion());
             if (manager.canSaveOnDisable()) {
                 manager.consoleKey(manager.save() ? "configSaved" : "configSaveFailed");
             }
