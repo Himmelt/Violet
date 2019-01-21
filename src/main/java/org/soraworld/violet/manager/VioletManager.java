@@ -45,7 +45,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
      * 是否在版本变化时自动释放更新语言文件.
      */
     @Setting(comment = "comment.autoUpLang")
-    protected boolean autoUpLang = false;
+    protected boolean autoUpLang = true;
     /**
      * 是否在插件停用时保存配置文件.
      */

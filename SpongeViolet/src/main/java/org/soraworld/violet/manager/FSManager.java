@@ -41,7 +41,15 @@ public final class FSManager extends SpongeManager {
 
     public String trans(String key, Object... args) {
         String text = langMap.get(key);
-        return (text == null || text.isEmpty()) ? key : args.length > 0 ? String.format(text, args) : text;
+        if (text == null || text.isEmpty()) return key;
+        if (args.length > 0) {
+            try {
+                return String.format(text, args);
+            } catch (Throwable e) {
+                console(ChatColor.RED + "Default translation " + key + " -> " + text + " format failed !");
+            }
+        }
+        return text;
     }
 
     public ChatColor defChatColor() {
