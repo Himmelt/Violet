@@ -5,7 +5,7 @@ import org.soraworld.violet.api.ISender;
 /**
  * Spigot 命令执行器 接口.
  */
-public interface SpigotSub extends SubExecutor<SpigotCommand, ISender> {
+public interface SpongeSub extends SubExecutor<SpongeCommand, ISender> {
     /**
      * 执行.
      *
@@ -13,5 +13,5 @@ public interface SpigotSub extends SubExecutor<SpigotCommand, ISender> {
      * @param sender 命令执行者
      * @param args   参数
      */
-    void execute(SpigotCommand cmd, ISender sender, Args args);
+    void execute(SpongeCommand cmd, ISender sender, Args args);
 }

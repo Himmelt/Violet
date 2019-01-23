@@ -6,17 +6,17 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.soraworld.violet.data.DataAPI;
+import org.soraworld.violet.inject.EventListener;
+import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.manager.FBManager;
 
 import java.util.UUID;
 
+@EventListener
 public class DataListener implements Listener {
 
-    private final FBManager manager;
-
-    public DataListener(FBManager manager) {
-        this.manager = manager;
-    }
+    @Inject
+    private FBManager manager;
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     public void onPlayerLoginPre(PlayerLoginEvent event) {

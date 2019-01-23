@@ -2,43 +2,20 @@ package org.soraworld.violet;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
-import org.soraworld.violet.command.SpigotBaseCmds;
-import org.soraworld.violet.command.SpigotCommand;
-import org.soraworld.violet.listener.DataListener;
+import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.manager.FBManager;
 import org.soraworld.violet.plugin.SpigotPlugin;
 
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 /**
  * SpigotViolet 插件.
  */
+@Inject
 public class SpigotViolet extends SpigotPlugin<FBManager> {
 
+    @Inject
     private static SpigotViolet instance;
-
-    {
-        instance = this;
-    }
-
-    public FBManager registerManager(Path path) {
-        return new FBManager(this, path);
-    }
-
-    public List<Listener> registerListeners() {
-        return Collections.singletonList(new DataListener(manager));
-    }
-
-    public void registerCommands() {
-        SpigotCommand command = new SpigotCommand(getId(), null, false, manager);
-        command.extractSub(SpigotBaseCmds.class);
-        command.setUsage("/violet lang|debug|save|reload|rextract");
-        register(this, command);
-    }
 
     public FBManager getManager() {
         return manager;

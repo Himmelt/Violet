@@ -1,7 +1,9 @@
 package org.soraworld.violet.manager;
 
+import org.soraworld.violet.api.ISender;
 import org.soraworld.violet.plugin.SpongePlugin;
 import org.soraworld.violet.util.ChatColor;
+import org.soraworld.violet.wrapper.WrapperSender;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
@@ -33,21 +35,6 @@ public abstract class SpongeManager extends VioletManager<SpongePlugin> {
         }
     }
 
-    public String trans(String key, Object... args) {
-        String text = langMap.get(key);
-        // fallback to Violet
-        if (text == null || text.isEmpty()) text = FSManager.trans(lang, key, args);
-        if (text == null || text.isEmpty()) return key;
-        if (args.length > 0) {
-            try {
-                return String.format(text, args);
-            } catch (Throwable e) {
-                console(ChatColor.RED + "Translation " + key + " -> " + text + " format failed !");
-            }
-        }
-        return text;
-    }
-
     /**
      * 发送消息.
      * 颜色请使用 {@link ChatColor}
@@ -68,6 +55,10 @@ public abstract class SpongeManager extends VioletManager<SpongePlugin> {
      */
     public void sendKey(CommandSource sender, String key, Object... args) {
         send(sender, trans(key, args));
+    }
+
+    public void sendKey(ISender sender, String key, Object... args) {
+        send(((WrapperSender) sender).getSender(), trans(key, args));
     }
 
     public void console(String text) {

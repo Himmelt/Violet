@@ -1,11 +1,14 @@
 package org.soraworld.violet.manager;
 
+import org.jetbrains.annotations.NotNull;
 import org.soraworld.hocon.exception.SerializerException;
 import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.Options;
 import org.soraworld.hocon.node.Setting;
+import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IManager;
 import org.soraworld.violet.api.IPlugin;
+import org.soraworld.violet.api.ISender;
 import org.soraworld.violet.serializers.UUIDSerializer;
 import org.soraworld.violet.text.JsonText;
 import org.soraworld.violet.util.ChatColor;
@@ -103,10 +106,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
      */
     protected static final ArrayList<IPlugin> plugins = new ArrayList<>();
     protected static final String defLang = Locale.CHINA.equals(Locale.getDefault()) ? "zh_cn" : "en_us";
-
-    public static IPlugin getPlugin(String name) {
-        return plugins.stream().filter(p -> p.getId().equals(name)).findFirst().orElse(null);
-    }
+    static Translator translator = null;
 
     /**
      * 实例化管理器.
@@ -248,6 +248,22 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         options.setDebug(debug);
     }
 
+    public String trans(@NotNull String key, Object... args) {
+        String text = langMap.get(key);
+        if ((text == null || text.isEmpty()) && !plugin.getId().equalsIgnoreCase(Violet.PLUGIN_ID) && translator != null) {
+            text = translator.trans(lang, key, args);
+        }
+        if (text == null || text.isEmpty()) return key;
+        if (args.length > 0) {
+            try {
+                return String.format(text, args);
+            } catch (Throwable e) {
+                console(ChatColor.RED + "Translation " + key + " -> " + text + " format failed !");
+            }
+        }
+        return text;
+    }
+
     public void broadcastKey(String key, Object... args) {
         broadcast(trans(key, args));
     }
@@ -309,36 +325,9 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         return flag;
     }
 
-    /**
-     * 服务器运行的 Violet 插件的数量.
-     *
-     * @return 数量
-     */
-    public static int pluginsSize() {
-        return plugins.size();
-    }
-
-    /**
-     * 获取第 index 个 Violet 插件.
-     *
-     * @param index 索引
-     * @return 插件
-     */
-    public static IPlugin getPluginAt(int index) {
-        if (index >= 0 && index < plugins.size()) return plugins.get(index);
-        return null;
-    }
-
-    /**
-     * 根据 id 获取 Violet 插件.
-     *
-     * @param pluginId 插件id
-     * @return 插件
-     */
-    public static IPlugin getPluginById(String pluginId) {
+    public void listPlugins(ISender sender) {
         for (IPlugin plugin : plugins) {
-            if (plugin.getId().equalsIgnoreCase(pluginId)) return plugin;
+            sendKey(sender, "pluginInfo", plugin.getId(), plugin.getVersion());
         }
-        return null;
     }
 }

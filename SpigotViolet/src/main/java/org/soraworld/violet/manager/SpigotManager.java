@@ -3,9 +3,11 @@ package org.soraworld.violet.manager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.soraworld.violet.api.ISender;
 import org.soraworld.violet.plugin.SpigotPlugin;
 import org.soraworld.violet.text.JsonText;
 import org.soraworld.violet.util.ChatColor;
+import org.soraworld.violet.wrapper.WrapperSender;
 
 import java.nio.file.Path;
 
@@ -34,21 +36,6 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
         }
     }
 
-    public String trans(String key, Object... args) {
-        String text = langMap.get(key);
-        // fallback to Violet
-        if (text == null || text.isEmpty()) text = FBManager.trans(lang, key, args);
-        if (text == null || text.isEmpty()) return key;
-        if (args.length > 0) {
-            try {
-                return String.format(text, args);
-            } catch (Throwable e) {
-                console(ChatColor.RED + "Translation " + key + " -> " + text + " format failed !");
-            }
-        }
-        return text;
-    }
-
     /**
      * 发送消息.
      * 颜色请使用 {@link ChatColor}
@@ -69,6 +56,10 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
      */
     public void sendKey(CommandSender sender, String key, Object... args) {
         send(sender, trans(key, args));
+    }
+
+    public void sendKey(ISender sender, String key, Object... args) {
+        send(((WrapperSender) sender).getSender(), trans(key, args));
     }
 
     public void sendJson(Player player, JsonText... texts) {

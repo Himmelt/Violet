@@ -1,13 +1,9 @@
 package org.soraworld.violet;
 
-import org.soraworld.violet.command.SpongeBaseSubs;
-import org.soraworld.violet.command.SpongeCommand;
 import org.soraworld.violet.manager.FSManager;
 import org.soraworld.violet.plugin.SpongePlugin;
 import org.spongepowered.api.plugin.Plugin;
 
-import java.nio.file.Path;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -27,22 +23,6 @@ public class SpongeViolet extends SpongePlugin<FSManager> {
 
     {
         instance = this;
-    }
-
-    public FSManager registerManager(Path path) {
-        return new FSManager(this, path);
-    }
-
-    public List<Object> registerListeners() {
-        return null;
-    }
-
-    public void registerCommands() {
-        SpongeCommand command = new SpongeCommand(getId(), null, false, manager);
-        command.extractSub(SpongeBaseSubs.class);
-        //command.extractSub(SpongeBaseSubs.VioletBaseSubs.class);
-        command.setUsage("/violet lang|debug|save|reload|rextract");
-        register(this, command);
     }
 
     /**

@@ -1,12 +1,11 @@
 package org.soraworld.violet.manager;
 
 import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
 import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.SpigotViolet;
-import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.data.DataAPI;
+import org.soraworld.violet.inject.MainManager;
 import org.soraworld.violet.util.ChatColor;
 
 import java.io.IOException;
@@ -19,13 +18,13 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Violet 管理器.
  */
+@MainManager
 public final class FBManager extends SpigotManager {
 
     @Setting(comment = "comment.uuid")
     private UUID uuid = UUID.randomUUID();
     private final Path dataPath;
 
-    private static FBManager manager;
     private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
     private static final ConcurrentHashMap<UUID, Object> asyncLock = new ConcurrentHashMap<>();
 
@@ -37,7 +36,12 @@ public final class FBManager extends SpigotManager {
      */
     public FBManager(SpigotViolet plugin, Path path) {
         super(plugin, path);
-        manager = this;
+        translator = (lang, key, args) -> {
+            String text = langMaps.computeIfAbsent(lang, this::loadLangMap).get(key);
+            if (text == null || text.isEmpty()) {
+                return trans(key, args);
+            } else return text;
+        };
         dataPath = path.resolve("storedata");
     }
 
@@ -96,48 +100,8 @@ public final class FBManager extends SpigotManager {
         });
     }
 
-    public String trans(String key, Object... args) {
-        String text = langMap.get(key);
-        if (text == null || text.isEmpty()) return key;
-        if (args.length > 0) {
-            try {
-                return String.format(text, args);
-            } catch (Throwable e) {
-                console(ChatColor.RED + "Default translation " + key + " -> " + text + " format failed !");
-            }
-        }
-        return text;
-    }
-
     public ChatColor defChatColor() {
         return ChatColor.DARK_PURPLE;
-    }
-
-    /**
-     * 全局翻译.
-     *
-     * @param lang 翻译语言
-     * @param key  键
-     * @param args 参数
-     * @return 全局翻译结果
-     */
-    public static String trans(String lang, String key, Object... args) {
-        if (manager == null) return key;
-        String text = langMaps.computeIfAbsent(lang, s -> manager.loadLangMap(s)).get(key);
-        if (text == null || text.isEmpty()) {
-            return manager.trans(key, args);
-        } else return text;
-    }
-
-    /**
-     * 向命令发送者显示 violet 插件列表.
-     *
-     * @param sender 命令发送者
-     */
-    public void listPlugins(CommandSender sender) {
-        for (IPlugin plugin : plugins) {
-            sendKey(sender, "pluginInfo", plugin.getId(), plugin.getVersion());
-        }
     }
 
     /**

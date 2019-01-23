@@ -1,5 +1,8 @@
 package org.soraworld.violet.command;
 
-public interface SubExecutor<C, M, S> {
-    void execute(C cmd, M manager, S sender, Args args);
+import org.soraworld.violet.api.ICommand;
+import org.soraworld.violet.api.ISender;
+
+public interface SubExecutor<C extends ICommand, S extends ISender> {
+    void execute(C cmd, S sender, Args args);
 }
