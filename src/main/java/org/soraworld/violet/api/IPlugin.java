@@ -2,8 +2,8 @@ package org.soraworld.violet.api;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.soraworld.hocon.node.Paths;
 import org.soraworld.violet.command.BaseSubCmds;
+import org.soraworld.violet.command.ICommand;
 import org.soraworld.violet.exception.MainManagerException;
 import org.soraworld.violet.inject.*;
 import org.soraworld.violet.util.ClassUtils;
@@ -118,7 +118,6 @@ public interface IPlugin<M extends IManager> {
         manager.afterLoad();
         injectCommands();
         registerCommands();
-        disableCommands();
         injectListeners();
         registerListeners();
         manager.consoleKey("pluginEnabled", getId() + "-" + getVersion());
@@ -269,17 +268,6 @@ public interface IPlugin<M extends IManager> {
      * @return the plugin data
      */
     PluginData getPluginData();
-
-    /**
-     * Disable commands.
-     */
-    default void disableCommands() {
-        for (ICommand command : getPluginData().commands) {
-            for (String name : getManager().getDisableCmds(command.getName())) {
-                command.removeSub(new Paths(name));
-            }
-        }
-    }
 
     /**
      * Inject main manager.

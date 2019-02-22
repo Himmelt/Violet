@@ -6,9 +6,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.soraworld.violet.api.ICommand;
 import org.soraworld.violet.api.IPlugin;
-import org.soraworld.violet.command.SpigotCommand;
+import org.soraworld.violet.command.CommandAdaptor;
+import org.soraworld.violet.command.ICommand;
+import org.soraworld.violet.exception.MainManagerException;
 import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.inject.PluginData;
 import org.soraworld.violet.manager.SpigotManager;
@@ -52,6 +53,22 @@ public class SpigotPlugin<M extends SpigotManager> extends JavaPlugin implements
         return getDescription().getVersion();
     }
 
+    public void onLoad() {
+        try {
+            IPlugin.super.onLoad();
+        } catch (MainManagerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void onDisable() {
+        IPlugin.super.onDisable();
+    }
+
+    public void onEnable() {
+        IPlugin.super.onEnable();
+    }
+
     public M getManager() {
         return manager;
     }
@@ -72,7 +89,7 @@ public class SpigotPlugin<M extends SpigotManager> extends JavaPlugin implements
 
     @Nullable
     public ICommand registerCommand(@NotNull Command cmd) {
-        SpigotCommand command = new SpigotCommand(cmd.name(),
+        CommandAdaptor command = new CommandAdaptor(cmd.name(),
                 cmd.perm().equalsIgnoreCase("admin") ? manager.defAdminPerm() : cmd.perm(),
                 cmd.onlyPlayer(), manager);
         return registerCommand(command) ? command : null;
@@ -85,7 +102,7 @@ public class SpigotPlugin<M extends SpigotManager> extends JavaPlugin implements
      */
     public boolean registerCommand(@NotNull ICommand command) {
         if (commandMap != null) {
-            if (command instanceof SpigotCommand && commandMap.register(getId(), (SpigotCommand) command)) {
+            if (command instanceof CommandAdaptor && commandMap.register(getId(), (CommandAdaptor) command)) {
                 pluginData.commands.add(command);
                 return true;
             } else manager.consoleKey("commandRegFailed", command.getName(), getName());

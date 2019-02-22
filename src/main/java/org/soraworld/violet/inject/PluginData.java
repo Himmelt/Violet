@@ -1,6 +1,6 @@
 package org.soraworld.violet.inject;
 
-import org.soraworld.violet.api.ICommand;
+import org.soraworld.violet.command.ICommand;
 
 import java.util.HashSet;
 

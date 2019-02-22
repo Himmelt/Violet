@@ -294,16 +294,6 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
     }
 
     /**
-     * 获取主命令下被禁用的子命令名列表.
-     *
-     * @param name 主命令名
-     * @return 被禁用的子命令名列表
-     */
-    public ArrayList<String> getDisableCmds(String name) {
-        return disableCmds == null ? new ArrayList<>() : disableCmds.getOrDefault(name, new ArrayList<>());
-    }
-
-    /**
      * 删除路径下文件,文件夹及自身.
      *
      * @param path 路径

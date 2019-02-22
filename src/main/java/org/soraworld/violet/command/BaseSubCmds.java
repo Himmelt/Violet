@@ -1,6 +1,5 @@
 package org.soraworld.violet.command;
 
-import org.soraworld.violet.api.ICommand;
 import org.soraworld.violet.api.IManager;
 
 import java.util.ArrayList;
@@ -64,5 +63,4 @@ public final class BaseSubCmds {
             else manager.sendKey(sender, "noSuchSubCmd", args.first());
         } else cmd.sendUsage(sender);
     };
-
 }

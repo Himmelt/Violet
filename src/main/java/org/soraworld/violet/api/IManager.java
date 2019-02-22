@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import org.soraworld.violet.util.ChatColor;
 
 import java.nio.file.Path;
-import java.util.List;
 
 /**
  * 管理器接口.
@@ -118,7 +117,7 @@ public interface IManager {
      */
     String trans(@NotNull String key, Object... args);
 
-    void sendKey(ISender sender, String key, Object... args);
+    void sendKey(Object sender, String key, Object... args);
 
     /**
      * 向控制台输出文本.
@@ -187,6 +186,4 @@ public interface IManager {
     Path getPath();
 
     boolean canSaveOnDisable();
-
-    List<String> getDisableCmds(String name);
 }

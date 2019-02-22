@@ -1,46 +1,57 @@
-package org.soraworld.violet.api;
+package org.soraworld.violet.command;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.soraworld.hocon.node.Paths;
 import org.soraworld.hocon.util.Reflects;
-import org.soraworld.violet.command.Args;
-import org.soraworld.violet.command.Sub;
-import org.soraworld.violet.command.SubExecutor;
+import org.soraworld.violet.api.IManager;
+import org.soraworld.violet.api.IPlayer;
+import org.soraworld.violet.api.ISender;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
 
-public interface ICommand {
-    @NotNull
-    ICommand build(@Nullable ICommand parent, @NotNull String name, @Nullable String perm, boolean onlyPlayer, @NotNull IManager manager);
+public abstract class ICommand {
 
-    String getName();
+    public final String name;
+    public final String permission;
+    public final ICommand parent;
+    public final IManager manager;
 
-    IManager getManager();
+    protected String usage;
+    protected boolean onlyPlayer;
+    protected SubExecutor subExecutor;
+    protected TabExecutor tabExecutor;
+    protected ICommandAdaptor adaptor;
+    protected List<String> tabs = new ArrayList<>();
+    protected final Map<String, ICommand> subs = new LinkedHashMap<>();
 
-    boolean isOnlyPlayer();
+    protected ICommand(@NotNull String name, @Nullable String permission, @Nullable ICommand parent, @NotNull IManager manager) {
+        this.name = name;
+        this.permission = permission;
+        this.parent = parent;
+        this.manager = manager;
+    }
 
-    void setOnlyPlayer(boolean onlyPlayer);
+    public final String getName() {
+        return name;
+    }
 
-    List<String> getTabs();
+    IManager getManager() {
+        return manager;
+    }
 
-    void setTabs(List<String> tabs);
+    public final boolean isOnlyPlayer() {
+        return onlyPlayer;
+    }
 
-    void setExecutor(SubExecutor<ICommand, ISender> executor);
-
-    SubExecutor<ICommand, ISender> getExecutor();
-
-    Map<String, ICommand> getSubs();
-
-    default void addSub(@NotNull ICommand sub) {
-        Map<String, ICommand> subs = getSubs();
+    public void addSub(@NotNull ICommand sub) {
         ICommand old = subs.get(sub.getName());
         if (old != null) {
             subs.entrySet().removeIf(entry -> entry.getValue() == old);
-            if (old != sub) old.getSubs().forEach(sub.getSubs()::putIfAbsent);
+            if (old != sub) old.subs.forEach(sub.subs::putIfAbsent);
         }
         subs.put(sub.getName(), sub);
         for (String alias : sub.getAliases()) {
@@ -48,13 +59,17 @@ public interface ICommand {
         }
     }
 
-    default void tryAddSub(@NotNull Field field, @NotNull Object instance) {
+    public List<String> getAliases() {
+        return new ArrayList<>();
+    }
+
+    public void tryAddSub(@NotNull Field field, @NotNull Object instance) {
         IManager manager = getManager();
         Sub sub = field.getAnnotation(Sub.class);
         if (sub == null || Modifier.isStatic(field.getModifiers())) return;
         if (!sub.parent().isEmpty() && !sub.parent().equalsIgnoreCase(getName())) return;
 
-        SubExecutor<ICommand, ISender> executor = null;
+        SubExecutor<ICommand, Object> executor = null;
         try {
             executor = (SubExecutor) field.get(instance);
         } catch (Throwable e) {
@@ -72,7 +87,7 @@ public interface ICommand {
         String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
         if ("admin".equals(perm)) perm = manager.defAdminPerm();
         ICommand command = createSub(paths);
-        if (!sub.virtual()) command.setExecutor(executor);
+        if (!sub.virtual()) command.subExecutor = executor;
         command.setPermission(perm);
         command.setOnlyPlayer(sub.onlyPlayer() || Reflects.isAssignableFrom(IPlayer.class, params[1]));
         command.setAliases(new ArrayList<>(Arrays.asList(sub.aliases())));
@@ -82,37 +97,19 @@ public interface ICommand {
         command.update();
     }
 
-    Object setDescription(String description);
-
-    String getUsage();
-
-    Object setUsage(String usage);
-
     /**
      * 发送使用方法.
      *
      * @param sender 信息接收者
      */
-    default void sendUsage(ISender sender) {
+    public void sendUsage(ISender sender) {
         String usage = getUsage();
         if (usage != null && !usage.isEmpty()) {
             getManager().sendKey(sender, "cmdUsage", usage);
         }
     }
 
-    List<String> getAliases();
-
-    Object setAliases(List<String> aliases);
-
-    String getPermission();
-
-    void setPermission(String permission);
-
-    default boolean testPermission(@NotNull ISender sender) {
-        return sender.hasPermission(getPermission());
-    }
-
-    default ICommand createSub(Paths paths) {
+    public ICommand createSub(Paths paths) {
         Map<String, ICommand> subs = getSubs();
         if (paths.empty()) return this;
         ICommand sub = subs.get(paths.first());
@@ -126,7 +123,7 @@ public interface ICommand {
      * @param name 命令名或别名
      * @return 子命令
      */
-    default ICommand getSub(@NotNull String name) {
+    public ICommand getSub(@NotNull String name) {
         return getSubs().get(name);
     }
 
@@ -135,12 +132,14 @@ public interface ICommand {
      *
      * @return 父命令
      */
-    ICommand getParent();
+    ICommand getParent() {
+        return parent;
+    }
 
     /**
      * 更新命令层次.
      */
-    default void update() {
+    public void update() {
         ICommand parent = getParent();
         if (parent != null) {
             parent.addSub(this);
@@ -154,8 +153,8 @@ public interface ICommand {
      * @param sender 命令发送者
      * @param args   参数
      */
-    default void execute(ISender sender, Args args) {
-        SubExecutor<ICommand, ISender> executor = getExecutor();
+    public void execute(Object sender, Args args) {
+        SubExecutor executor = getExecutor();
         Map<String, ICommand> subs = getSubs();
         IManager manager = getManager();
         if (executor != null) executor.execute(this, sender, args);
@@ -164,7 +163,7 @@ public interface ICommand {
             if (sub != null) {
                 if (sub.testPermission(sender)) {
                     args.next();
-                    if (sender instanceof IPlayer) sub.execute((IPlayer) sender, args);
+                    if (sender instanceof IPlayer) sub.execute(sender, args);
                     else if (!sub.isOnlyPlayer()) sub.execute(sender, args);
                     else manager.sendKey(sender, "onlyPlayer");
                 } else manager.sendKey(sender, "noCommandPerm", sub.getPermission());
@@ -172,37 +171,21 @@ public interface ICommand {
         } else sendUsage(sender);
     }
 
-    default void handle(@NotNull ISender source, @NotNull Args args) {
+    public void handle(@NotNull Object source, @NotNull Args args) {
         if (testPermission(source)) {
-            if (source instanceof IPlayer) execute((IPlayer) source, args);
+            if (source instanceof IPlayer) execute(source, args);
             else if (!isOnlyPlayer()) execute(source, args);
             else getManager().sendKey(source, "onlyPlayer");
         } else getManager().sendKey(source, "noCommandPerm", getPermission());
     }
 
-    /**
-     * 执行玩家命令.
-     *
-     * @param player 玩家
-     * @param args   参数
-     */
-    default void execute(IPlayer player, Args args) {
-        execute((ISender) player, args);
-    }
-
-    default void extractSub(@NotNull Object instance) {
+    public void extractSub(@NotNull Object instance) {
         Field[] fields = instance.getClass().getDeclaredFields();
         if (fields == null || fields.length == 0) return;
         for (Field field : fields) tryAddSub(field, instance);
     }
 
-    /**
-     * 从类中提取带有{@link Sub}注解的，名称为{@code field}的静态字段并注册为子命令.
-     *
-     * @param instance 检索目标实例
-     * @param name     目标字段名
-     */
-    default void extractSub(@NotNull Object instance, @NotNull String name) {
+    public void extractSub(@NotNull Object instance, @NotNull String name) {
         if (name.isEmpty()) return;
         try {
             Field field = instance.getClass().getDeclaredField(name);
@@ -214,21 +197,15 @@ public interface ICommand {
         }
     }
 
-    default void removeSub(Paths paths) {
+    public ICommand removeSub(Paths paths) {
         Map<String, ? extends ICommand> subs = getSubs();
         if (paths.hasNext() && subs.containsKey(paths.first())) {
-            subs.get(paths.first()).removeSub(paths.next());
+            return subs.get(paths.first()).removeSub(paths.next());
         }
-        subs.remove(paths.first());
+        return subs.remove(paths.first());
     }
 
-    /**
-     * 获取tab补全列表.
-     *
-     * @param args 参数
-     * @return 补全列表
-     */
-    default List<String> tabCompletions(Args args) {
+    public List<String> tabComplete(Object sender, Args args) {
         String first = args.first();
         List<String> tabs = getTabs();
         Map<String, ? extends ICommand> subs = getSubs();
@@ -237,30 +214,19 @@ public interface ICommand {
         }
         if (subs.containsKey(first)) {
             args.next();
-            return subs.get(first).tabCompletions(args);
+            return subs.get(first).tabComplete(sender, args);
         }
         return new ArrayList<>();
     }
 
-    /**
-     * 设置命令补全.
-     *
-     * @param tabs 补全列表
-     */
-    default void setTabCompletions(@Nullable String[] tabs) {
+    public void setTabCompletions(@Nullable String[] tabs) {
         if (tabs != null && tabs.length > 0) {
             setTabs(new ArrayList<>(Arrays.asList(tabs)));
         } else setTabs(null);
     }
 
-    /**
-     * 获取字符串匹配列表.
-     *
-     * @param text      待匹配文本
-     * @param possibles 待筛选列表
-     * @return 匹配后列表
-     */
-    static List<String> getMatchList(String text, Collection<String> possibles) {
+    @NotNull
+    public static List<String> getMatchList(@NotNull String text, @NotNull Collection<String> possibles) {
         ArrayList<String> list = new ArrayList<>();
         if (text.isEmpty()) list.addAll(possibles);
         else for (String s : possibles) if (s.startsWith(text)) list.add(s);

@@ -3,11 +3,9 @@ package org.soraworld.violet.manager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.soraworld.violet.api.ISender;
 import org.soraworld.violet.plugin.SpigotPlugin;
 import org.soraworld.violet.text.JsonText;
 import org.soraworld.violet.util.ChatColor;
-import org.soraworld.violet.wrapper.WrapperSender;
 
 import java.nio.file.Path;
 
@@ -58,8 +56,8 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
         send(sender, trans(key, args));
     }
 
-    public void sendKey(ISender sender, String key, Object... args) {
-        send(((WrapperSender) sender).getSender(), trans(key, args));
+    public void sendKey(Object sender, String key, Object... args) {
+        send((CommandSender) sender, trans(key, args));
     }
 
     public void sendJson(Player player, JsonText... texts) {
