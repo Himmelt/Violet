@@ -7,7 +7,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.soraworld.violet.api.IPlugin;
-import org.soraworld.violet.command.CommandAdaptor;
 import org.soraworld.violet.command.ICommand;
 import org.soraworld.violet.exception.MainManagerException;
 import org.soraworld.violet.inject.Command;
@@ -89,7 +88,7 @@ public class SpigotPlugin<M extends SpigotManager> extends JavaPlugin implements
 
     @Nullable
     public ICommand registerCommand(@NotNull Command cmd) {
-        CommandAdaptor command = new CommandAdaptor(cmd.name(),
+        ICommand command = new ICommand(cmd.name(),
                 cmd.perm().equalsIgnoreCase("admin") ? manager.defAdminPerm() : cmd.perm(),
                 cmd.onlyPlayer(), manager);
         return registerCommand(command) ? command : null;
@@ -102,8 +101,8 @@ public class SpigotPlugin<M extends SpigotManager> extends JavaPlugin implements
      */
     public boolean registerCommand(@NotNull ICommand command) {
         if (commandMap != null) {
-            if (command instanceof CommandAdaptor && commandMap.register(getId(), (CommandAdaptor) command)) {
-                pluginData.commands.add(command);
+            if (commandMap.register(getId(), command)) {
+                //pluginData.commands.add(command);
                 return true;
             } else manager.consoleKey("commandRegFailed", command.getName(), getName());
         } else manager.consoleKey("nullCommandMap");

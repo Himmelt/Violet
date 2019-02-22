@@ -1,6 +1,8 @@
 package org.soraworld.violet.command;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.soraworld.violet.api.IManager;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -8,30 +10,26 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class CommandAdaptor implements CommandCallable, ICommandAdaptor {
+public class VioletCommand implements CommandCallable {
 
     @NotNull
-    private final ICommand command;
+    public final ICommand command;
 
-    public CommandAdaptor(@NotNull ICommand command) {
-        this.command = command;
-        this.command.adaptor = this;
-    }
-
-    @NotNull
-    public ICommand getCommand() {
-        return command;
+    public VioletCommand(@NotNull String name, @Nullable String permission, @Nullable ICommand parent, @NotNull IManager manager) {
+        this.name = name;
+        this.permission = permission;
+        this.parent = parent;
+        this.manager = manager;
     }
 
     /* execute */
     @NotNull
     public CommandResult process(@NotNull CommandSource sender, @NotNull String args) {
-        command.handle(sender, new Args(args));
+        command.execute(sender, new Args(args));
         return CommandResult.success();
     }
 
@@ -73,11 +71,7 @@ public class CommandAdaptor implements CommandCallable, ICommandAdaptor {
     }
 
     public boolean equals(Object obj) {
-        if (obj instanceof CommandAdaptor) return command.equals(((CommandAdaptor) obj).command);
+        if (obj instanceof VioletCommand) return command.equals(((VioletCommand) obj).command);
         return false;
-    }
-
-    public List<String> getAliases() {
-        return new ArrayList<>();
     }
 }

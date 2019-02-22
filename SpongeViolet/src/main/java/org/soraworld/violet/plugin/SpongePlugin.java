@@ -3,8 +3,8 @@ package org.soraworld.violet.plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.soraworld.violet.api.IPlugin;
-import org.soraworld.violet.command.CommandAdaptor;
 import org.soraworld.violet.command.ICommand;
+import org.soraworld.violet.command.VioletCommand;
 import org.soraworld.violet.exception.MainManagerException;
 import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.inject.PluginData;
@@ -84,7 +84,7 @@ public class SpongePlugin<M extends SpongeManager> implements IPlugin<M> {
     }
 
     public boolean registerCommand(@NotNull ICommand command) {
-        Sponge.getCommandManager().register(this, new CommandAdaptor(command), command.getAliases());
+        Sponge.getCommandManager().register(this, new VioletCommand(command), command.getAliases());
         return true;
     }
 

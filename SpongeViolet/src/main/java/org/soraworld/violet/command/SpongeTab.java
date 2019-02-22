@@ -4,6 +4,6 @@ import org.soraworld.violet.api.ISender;
 
 import java.util.List;
 
-public interface SpongeTab extends TabExecutor<CommandAdaptor, ISender> {
-    List<String> complete(CommandAdaptor cmd, ISender sender, Args args);
+public interface SpongeTab extends TabExecutor<VioletCommand, ISender> {
+    List<String> complete(VioletCommand cmd, ISender sender, Args args);
 }

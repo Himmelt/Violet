@@ -34,6 +34,10 @@ public class SpongeViolet extends SpongePlugin<FSManager> {
         return manager.getUUID();
     }
 
+    public void registerCommands() {
+        registerCommand()
+    }
+
     /**
      * 获取 紫罗兰(id:violet) 插件.
      *
