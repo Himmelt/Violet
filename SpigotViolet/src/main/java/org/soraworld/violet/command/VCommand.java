@@ -208,7 +208,7 @@ public class VCommand extends Command {
         return name;
     }
 
-    public Command setAliases(List<String> aliases) {
+    public VCommand setAliases(List<String> aliases) {
         this.aliases.clear();
         this.aliases.addAll(aliases);
         return this;

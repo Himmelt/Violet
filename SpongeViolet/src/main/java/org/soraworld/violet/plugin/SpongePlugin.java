@@ -28,6 +28,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashSet;
 
 public class SpongePlugin<M extends VManager> implements IPlugin<M> {
@@ -94,10 +95,12 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
                     VCommand command = registerCommand(annotation);
                     if (command != null) {
                         command.extractSub(instance);
-                        if (command.getName().equalsIgnoreCase(getId())) {
+                        command.extractTab(instance);
+                        if (clazz != BaseSubCmds.class && command.getName().equalsIgnoreCase(getId())) {
                             BaseSubCmds baseSubCmds = new BaseSubCmds();
                             injectIntoInstance(baseSubCmds);
                             command.extractSub(baseSubCmds);
+                            command.extractTab(baseSubCmds);
                         }
                     }
                 } catch (Throwable e) {
@@ -246,7 +249,14 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
 
     @Nullable
     public VCommand registerCommand(@NotNull Command annotation) {
-        return null;
+        String perm = annotation.perm();
+        if (perm.isEmpty()) perm = null;
+        else if (perm.equalsIgnoreCase("admin")) perm = manager.defAdminPerm();
+        VCommand command = new VCommand(annotation.name(), perm, annotation.onlyPlayer(), null, manager);
+        command.setAliases(Arrays.asList(annotation.aliases()));
+        command.setTabs(Arrays.asList(annotation.tabs()));
+        command.setUsage(annotation.usage());
+        return registerCommand(command) ? command : null;
     }
 
     public boolean registerCommand(@NotNull VCommand command) {

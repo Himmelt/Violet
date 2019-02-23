@@ -242,9 +242,10 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
 
     @Nullable
     public VCommand registerCommand(@NotNull Command annotation) {
-        VCommand command = new VCommand(annotation.name(),
-                annotation.perm().equalsIgnoreCase("admin") ? manager.defAdminPerm() : annotation.perm(),
-                annotation.onlyPlayer(), null, manager);
+        String perm = annotation.perm();
+        if (perm.isEmpty()) perm = null;
+        else if (perm.equalsIgnoreCase("admin")) perm = manager.defAdminPerm();
+        VCommand command = new VCommand(annotation.name(), perm, annotation.onlyPlayer(), null, manager);
         command.setAliases(Arrays.asList(annotation.aliases()));
         command.setTabs(Arrays.asList(annotation.tabs()));
         command.setUsage(annotation.usage());
