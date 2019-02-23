@@ -101,10 +101,12 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
                     VCommand command = registerCommand(annotation);
                     if (command != null) {
                         command.extractSub(instance);
+                        command.extractTab(instance);
                         if (clazz != BaseSubCmds.class && command.getName().equalsIgnoreCase(getId())) {
                             BaseSubCmds baseSubCmds = new BaseSubCmds();
                             injectIntoInstance(baseSubCmds);
                             command.extractSub(baseSubCmds);
+                            command.extractTab(baseSubCmds);
                         }
                     }
                 } catch (Throwable e) {

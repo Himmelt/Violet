@@ -5,6 +5,7 @@ import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.manager.FManager;
 import org.soraworld.violet.manager.VManager;
+import org.soraworld.violet.util.ListUtils;
 
 @Command(name = Violet.PLUGIN_ID, usage = "/violet lang|save|debug|reload|rextract|help|plugins ")
 public final class BaseSubCmds {
@@ -62,6 +63,9 @@ public final class BaseSubCmds {
             else manager.sendKey(sender, "noSuchSubCmd", args.first());
         } else cmd.parent.sendUsage(sender);
     };
+
+    @Tab(path = "help")
+    public final TabExecutor tab_help = (cmd, sender, args) -> ListUtils.getMatchList(args.first(), cmd.parent.subs.keySet());
 
     @Sub(parent = Violet.PLUGIN_ID, perm = "admin")
     public final SubExecutor plugins = (cmd, sender, args) -> {

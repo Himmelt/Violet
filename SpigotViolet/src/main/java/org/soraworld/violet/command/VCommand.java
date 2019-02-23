@@ -23,8 +23,8 @@ public class VCommand extends Command {
     protected boolean onlyPlayer;
     protected VCommand parent;
     protected VManager manager;
-    protected SubExecutor subExecutor;
-    protected TabExecutor tabExecutor;
+    protected SubExecutor<CommandSender> subExecutor;
+    protected TabExecutor<CommandSender> tabExecutor;
     protected final List<String> tabs = new ArrayList<>();
     protected final List<String> aliases = new ArrayList<>();
     protected final Map<String, VCommand> subs = new LinkedHashMap<>();
@@ -50,35 +50,6 @@ public class VCommand extends Command {
         }
     }
 
-    private void tryAddSub(@NotNull Field field, @NotNull Object instance) {
-        Sub sub = field.getAnnotation(Sub.class);
-        if (sub == null || Modifier.isStatic(field.getModifiers())) return;
-        if (!sub.parent().isEmpty() && !sub.parent().equalsIgnoreCase(getName())) return;
-
-        SubExecutor executor = null;
-        try {
-            executor = (SubExecutor) field.get(instance);
-        } catch (Throwable e) {
-            if (manager.isDebug()) e.printStackTrace();
-        }
-        if (executor == null) return;
-
-        Type[] params = Reflects.getActualTypes(SubExecutor.class, executor.getClass());
-        if (params == null || params.length != 1 || !Reflects.isAssignableFrom(CommandSender.class, params[0])) return;
-
-        Paths paths = new Paths(sub.path().isEmpty() ? field.getName().toLowerCase() : sub.path().replace(' ', '_').replace(':', '_'));
-        String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
-        if ("admin".equals(perm)) perm = manager.defAdminPerm();
-        VCommand command = createSub(paths);
-        if (!sub.virtual()) command.subExecutor = executor;
-        command.permission = perm;
-        command.onlyPlayer = sub.onlyPlayer() || Reflects.isAssignableFrom(Player.class, params[0]);
-        command.tabs.addAll(Arrays.asList(sub.tabs()));
-        command.aliases.addAll(Arrays.asList(sub.aliases()));
-        command.usageMessage = sub.usage();
-        command.update();
-    }
-
     private VCommand createSub(Paths paths) {
         if (paths.empty()) return this;
         VCommand sub = subs.get(paths.first());
@@ -86,7 +57,7 @@ public class VCommand extends Command {
         return sub.createSub(paths.next());
     }
 
-    public void update() {
+    private void update() {
         if (parent != null) {
             parent.addSub(this);
             parent.update();
@@ -110,6 +81,73 @@ public class VCommand extends Command {
         }
     }
 
+    private void tryAddSub(@NotNull Field field, @NotNull Object instance) {
+        Sub sub = field.getAnnotation(Sub.class);
+        if (sub == null || Modifier.isStatic(field.getModifiers())) return;
+        if (!sub.parent().isEmpty() && !sub.parent().equalsIgnoreCase(getName())) return;
+
+        SubExecutor<CommandSender> executor = null;
+        try {
+            executor = (SubExecutor) field.get(instance);
+        } catch (Throwable e) {
+            if (manager.isDebug()) e.printStackTrace();
+        }
+        if (executor == null) return;
+
+        Type[] params = Reflects.getActualTypes(SubExecutor.class, executor.getClass());
+        if (params == null || params.length != 1 || !Reflects.isAssignableFrom(CommandSender.class, params[0])) return;
+
+        Paths paths = new Paths(sub.path().isEmpty() ? field.getName().toLowerCase() : sub.path().replace(' ', '_').replace(':', '_'));
+        String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
+        if ("admin".equals(perm)) perm = manager.defAdminPerm();
+        VCommand command = createSub(paths);
+        if (!sub.virtual()) command.subExecutor = executor;
+        command.permission = perm;
+        command.onlyPlayer = sub.onlyPlayer() || Reflects.isAssignableFrom(Player.class, params[0]);
+        command.tabs.addAll(Arrays.asList(sub.tabs()));
+        command.aliases.addAll(Arrays.asList(sub.aliases()));
+        command.usageMessage = sub.usage();
+        command.update();
+    }
+
+    public void extractTab(@NotNull Object instance) {
+        Field[] fields = instance.getClass().getDeclaredFields();
+        if (fields == null || fields.length == 0) return;
+        for (Field field : fields) tryAddTab(field, instance);
+    }
+
+    public void extractTab(@NotNull Object instance, @NotNull String name) {
+        if (name.isEmpty()) return;
+        try {
+            Field field = instance.getClass().getDeclaredField(name);
+            tryAddTab(field, instance);
+        } catch (Throwable e) {
+            if (manager.isDebug()) e.printStackTrace();
+            manager.consoleKey("extractNoSuchTab", instance.getClass().getName(), name);
+        }
+    }
+
+    private void tryAddTab(@NotNull Field field, @NotNull Object instance) {
+        Tab tab = field.getAnnotation(Tab.class);
+        if (tab == null || Modifier.isStatic(field.getModifiers())) return;
+        if (!tab.parent().isEmpty() && !tab.parent().equalsIgnoreCase(getName())) return;
+
+        TabExecutor<CommandSender> executor = null;
+        try {
+            executor = (TabExecutor) field.get(instance);
+        } catch (Throwable e) {
+            if (manager.isDebug()) e.printStackTrace();
+        }
+        if (executor == null) return;
+
+        Type[] params = Reflects.getActualTypes(TabExecutor.class, executor.getClass());
+        if (params == null || params.length != 1 || !Reflects.isAssignableFrom(CommandSender.class, params[0])) return;
+
+        Paths paths = new Paths(tab.path().isEmpty() ? field.getName().toLowerCase() : tab.path().replace(' ', '_').replace(':', '_'));
+        VCommand command = getSub(paths);
+        if (command != null) command.tabExecutor = executor;
+    }
+
     public void sendUsage(CommandSender sender) {
         if (usageMessage != null && !usageMessage.isEmpty()) {
             manager.sendKey(sender, "cmdUsage", usageMessage);
@@ -118,6 +156,13 @@ public class VCommand extends Command {
 
     public VCommand getSub(String name) {
         return subs.get(name);
+    }
+
+    public VCommand getSub(Paths paths) {
+        if (paths.empty()) return this;
+        VCommand sub = subs.get(paths.first());
+        if (sub != null) return sub.getSub(paths.next());
+        return null;
     }
 
     public VCommand getParent() {
