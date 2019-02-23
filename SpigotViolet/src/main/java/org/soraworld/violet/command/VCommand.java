@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class VCommand extends Command {
 
@@ -99,7 +100,7 @@ public class VCommand extends Command {
 
         Paths paths = new Paths(sub.path().isEmpty() ? field.getName().toLowerCase() : sub.path().replace(' ', '_').replace(':', '_'));
         String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
-        if ("admin".equals(perm)) perm = manager.defAdminPerm();
+        if ("admin".equalsIgnoreCase(perm)) perm = manager.defAdminPerm();
         VCommand command = createSub(paths);
         if (!sub.virtual()) command.subExecutor = executor;
         command.permission = perm;
@@ -177,25 +178,29 @@ public class VCommand extends Command {
     /* ---------------------------------------- modify start -------------------------------------------- */
 
     public void execute(CommandSender sender, Args args) {
-        if (subExecutor == null) {
-            if (args.notEmpty()) {
-                VCommand sub = subs.get(args.first());
-                if (sub != null) {
-                    sub.execute(sender, args.next());
-                    return;
-                }
-            }
-            sendUsage(sender);
-        } else subExecutor.execute(this, sender, args);
+        if (testPermission(sender)) {
+            if (!onlyPlayer || sender instanceof Player) {
+                if (subExecutor == null) {
+                    if (args.notEmpty()) {
+                        VCommand sub = subs.get(args.first());
+                        if (sub != null) {
+                            sub.execute(sender, args.next());
+                            return;
+                        }
+                    }
+                    sendUsage(sender);
+                } else subExecutor.execute(this, sender, args);
+            } else manager.sendKey(sender, "onlyPlayer");
+        } else manager.sendKey(sender, "noCommandPerm", permission);
     }
 
     public List<String> tabComplete(CommandSender sender, Args args) {
         if (tabExecutor != null) return tabExecutor.complete(this, sender, args);
         String first = args.first();
         if (args.size() == 1) {
-            return ListUtils.getMatchList(first, !tabs.isEmpty() ? tabs : subs.keySet());
+            return ListUtils.getMatchList(first, !tabs.isEmpty() ? tabs : subs.keySet().stream().filter(s -> subs.get(s).testPermission(sender)).collect(Collectors.toList()));
         }
-        if (subs.containsKey(first)) {
+        if (subs.containsKey(first) && subs.get(first).testPermission(sender)) {
             args.next();
             return subs.get(first).tabComplete(sender, args);
         }
@@ -219,11 +224,7 @@ public class VCommand extends Command {
     }
 
     public boolean execute(CommandSender sender, String label, String[] args) {
-        if (testPermission(sender)) {
-            if (!onlyPlayer || sender instanceof Player) {
-                execute(sender, new Args(args));
-            } else manager.sendKey(sender, "onlyPlayer");
-        } else manager.sendKey(sender, "noCommandPerm", permission);
+        execute(sender, new Args(args));
         return true;
     }
 
