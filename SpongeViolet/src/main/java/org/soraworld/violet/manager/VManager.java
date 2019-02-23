@@ -1,8 +1,6 @@
 package org.soraworld.violet.manager;
 
-import org.soraworld.violet.api.ISender;
 import org.soraworld.violet.plugin.SpongePlugin;
-import org.soraworld.violet.wrapper.WrapperSender;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
@@ -12,9 +10,9 @@ import java.nio.file.Path;
 /**
  * Sponge 管理器.
  */
-public abstract class SpongeManager extends VioletManager<SpongePlugin> {
+public abstract class VManager extends IManager<SpongePlugin> {
 
-    public SpongeManager(SpongePlugin plugin, Path path) {
+    public VManager(SpongePlugin plugin, Path path) {
         super(plugin, path);
     }
 
@@ -34,10 +32,6 @@ public abstract class SpongeManager extends VioletManager<SpongePlugin> {
 
     public void sendKey(CommandSource sender, String key, Object... args) {
         send(sender, trans(key, args));
-    }
-
-    public void sendKey(ISender sender, String key, Object... args) {
-        send(((WrapperSender) sender).getSender(), trans(key, args));
     }
 
     public void console(String text) {

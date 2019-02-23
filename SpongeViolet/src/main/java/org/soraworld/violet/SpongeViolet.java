@@ -1,14 +1,13 @@
 package org.soraworld.violet;
 
-import org.soraworld.violet.manager.FSManager;
+import org.soraworld.violet.manager.FManager;
 import org.soraworld.violet.plugin.SpongePlugin;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.plugin.Plugin;
 
 import java.util.UUID;
 
-/**
- * SpongeViolet 插件.
- */
 @Plugin(
         id = Violet.PLUGIN_ID,
         name = Violet.PLUGIN_NAME,
@@ -17,7 +16,7 @@ import java.util.UUID;
         url = "https://github.com/Himmelt/Violet",
         description = "Violet Plugin Library."
 )
-public class SpongeViolet extends SpongePlugin<FSManager> {
+public class SpongeViolet extends SpongePlugin<FManager> {
 
     private static SpongeViolet instance;
 
@@ -25,25 +24,23 @@ public class SpongeViolet extends SpongePlugin<FSManager> {
         instance = this;
     }
 
-    /**
-     * 获取 Violet 插件运行 uuid
-     *
-     * @return the uuid
-     */
-    public UUID getUUID() {
-        return manager.getUUID();
+    public FManager getManager() {
+        return manager;
     }
 
-    public void registerCommands() {
-        registerCommand()
+    public void afterEnable() {
+        for (Player player : Sponge.getServer().getOnlinePlayers()) {
+            manager.asyncLoadData(player.getUniqueId());
+        }
     }
 
-    /**
-     * 获取 紫罗兰(id:violet) 插件.
-     *
-     * @return 紫罗兰插件本体
-     */
-    public static SpongeViolet getViolet() {
-        return instance;
+    public void beforeDisable() {
+        for (Player player : Sponge.getServer().getOnlinePlayers()) {
+            manager.saveData(player.getUniqueId(), false);
+        }
+    }
+
+    public static UUID getUUID() {
+        return instance.manager.getUUID();
     }
 }

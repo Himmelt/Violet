@@ -1,16 +1,16 @@
 package org.soraworld.violet.command;
 
-import org.soraworld.violet.api.IManager;
-
-import java.util.ArrayList;
+import org.soraworld.violet.Violet;
+import org.soraworld.violet.inject.Inject;
+import org.soraworld.violet.manager.FManager;
+import org.soraworld.violet.manager.VManager;
 
 public final class BaseSubCmds {
 
-    private IManager manager;
-
-    public BaseSubCmds(IManager manager) {
-        this.manager = manager;
-    }
+    @Inject
+    private VManager manager;
+    @Inject
+    private FManager vManager;
 
     @Sub(perm = "admin", tabs = {"zh_cn", "en_us"})
     public final SubExecutor lang = (cmd, sender, args) -> {
@@ -24,15 +24,12 @@ public final class BaseSubCmds {
         } else manager.sendKey(sender, "getLang", manager.getLang());
     };
 
-    @Tab(path = "lang")
-    public final TabExecutor tab_lang = (cmd, sender, args) -> new ArrayList<>();
-
     @Sub(perm = "admin")
     public final SubExecutor save = (cmd, sender, args) -> {
         if (args.empty()) {
             manager.sendKey(sender, manager.save() ? "configSaved" : "configSaveFailed");
         } else {
-            ICommand sub = cmd.getSub(args.first());
+            VCommand sub = cmd.getSub(args.first());
             if (sub != null) sub.execute(sender, args.next());
         }
     };
@@ -58,9 +55,14 @@ public final class BaseSubCmds {
     @Sub
     public final SubExecutor help = (cmd, sender, args) -> {
         if (args.notEmpty()) {
-            ICommand sub = cmd.getParent().getSub(args.first());
+            VCommand sub = cmd.getParent().getSub(args.first());
             if (sub != null) sub.sendUsage(sender);
             else manager.sendKey(sender, "noSuchSubCmd", args.first());
         } else cmd.sendUsage(sender);
+    };
+
+    @Sub(parent = Violet.PLUGIN_ID, perm = "admin")
+    public final SubExecutor plugins = (cmd, sender, args) -> {
+        vManager.listPlugins(sender);
     };
 }

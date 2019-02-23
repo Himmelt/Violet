@@ -1,11 +1,14 @@
 package org.soraworld.violet.manager;
 
+import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.Setting;
-import org.soraworld.violet.SpongeViolet;
+import org.soraworld.violet.SpigotViolet;
+import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.data.DataAPI;
+import org.soraworld.violet.inject.MainManager;
 import org.soraworld.violet.util.ChatColor;
-import org.spongepowered.api.Sponge;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,25 +17,17 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Violet 管理器.
- */
-public final class FSManager extends SpongeManager {
+@MainManager
+public final class FManager extends VManager {
 
     @Setting(comment = "comment.uuid")
     private UUID uuid = UUID.randomUUID();
     private final Path dataPath;
 
-    private static final ConcurrentHashMap<UUID, Object> asyncLock = new ConcurrentHashMap<>();
     private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
+    private static final ConcurrentHashMap<UUID, Object> asyncLock = new ConcurrentHashMap<>();
 
-    /**
-     * 实例化管理器.
-     *
-     * @param plugin 插件实例
-     * @param path   配置保存路径
-     */
-    public FSManager(SpongeViolet plugin, Path path) {
+    public FManager(SpigotViolet plugin, Path path) {
         super(plugin, path);
         translator = (lang, key, args) -> {
             String text = langMaps.computeIfAbsent(lang, this::loadLangMap).get(key);
@@ -50,10 +45,6 @@ public final class FSManager extends SpongeManager {
         return flag;
     }
 
-    public ChatColor defChatColor() {
-        return ChatColor.DARK_PURPLE;
-    }
-
     public void loadData(UUID uuid) {
         FileNode node = new FileNode(dataPath.resolve(uuid.toString() + ".dat").toFile(), DataAPI.options);
         try {
@@ -69,7 +60,7 @@ public final class FSManager extends SpongeManager {
     }
 
     public void asyncLoadData(UUID uuid) {
-        Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> loadData(uuid));
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> loadData(uuid));
     }
 
     public void saveData(UUID uuid, boolean clear) {
@@ -96,22 +87,27 @@ public final class FSManager extends SpongeManager {
     }
 
     public void asyncSaveData(UUID uuid, boolean clear) {
-        Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             saveData(uuid, clear);
             if (clear) asyncLock.remove(uuid);
         });
     }
 
-    /**
-     * 获取 Violet 插件运行 uuid
-     *
-     * @return the uuid
-     */
+    public ChatColor defChatColor() {
+        return ChatColor.DARK_PURPLE;
+    }
+
     public UUID getUUID() {
         if (uuid == null) {
             uuid = UUID.randomUUID();
             asyncSave();
         }
         return uuid;
+    }
+
+    public void listPlugins(CommandSender sender) {
+        for (IPlugin plugin : plugins) {
+            sendKey(sender, "pluginInfo", plugin.getId(), plugin.getVersion());
+        }
     }
 }

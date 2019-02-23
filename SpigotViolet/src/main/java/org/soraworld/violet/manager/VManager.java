@@ -9,18 +9,9 @@ import org.soraworld.violet.util.ChatColor;
 
 import java.nio.file.Path;
 
-/**
- * Spigot 管理器.
- */
-public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
+public abstract class VManager extends IManager<SpigotPlugin> {
 
-    /**
-     * 实例化管理器.
-     *
-     * @param plugin 插件实例
-     * @param path   配置保存路径
-     */
-    public SpigotManager(SpigotPlugin plugin, Path path) {
+    public VManager(SpigotPlugin plugin, Path path) {
         super(plugin, path);
     }
 
@@ -34,30 +25,12 @@ public abstract class SpigotManager extends VioletManager<SpigotPlugin> {
         }
     }
 
-    /**
-     * 发送消息.
-     * 颜色请使用 {@link ChatColor}
-     *
-     * @param sender  消息接收者
-     * @param message 消息内容
-     */
     public void send(CommandSender sender, String message) {
         sender.sendMessage(colorHead + message);
     }
 
-    /**
-     * 发送消息翻译.
-     *
-     * @param sender 消息接收者
-     * @param key    键
-     * @param args   参数
-     */
     public void sendKey(CommandSender sender, String key, Object... args) {
         send(sender, trans(key, args));
-    }
-
-    public void sendKey(Object sender, String key, Object... args) {
-        send((CommandSender) sender, trans(key, args));
     }
 
     public void sendJson(Player player, JsonText... texts) {

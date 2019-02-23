@@ -3,7 +3,7 @@ package org.soraworld.violet.listener;
 import org.soraworld.violet.data.DataAPI;
 import org.soraworld.violet.inject.EventListener;
 import org.soraworld.violet.inject.Inject;
-import org.soraworld.violet.manager.FSManager;
+import org.soraworld.violet.manager.FManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.IsCancelled;
@@ -17,7 +17,7 @@ import java.util.UUID;
 public class DataListener {
 
     @Inject
-    private FSManager manager;
+    private FManager manager;
 
     @Listener(beforeModifications = true, order = Order.PRE)
     public void onPlayerLoginPre(ClientConnectionEvent.Auth event, @First GameProfile profile) {

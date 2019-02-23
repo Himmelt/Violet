@@ -6,9 +6,7 @@ import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.Options;
 import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.Violet;
-import org.soraworld.violet.api.IManager;
 import org.soraworld.violet.api.IPlugin;
-import org.soraworld.violet.api.ISender;
 import org.soraworld.violet.serializers.UUIDSerializer;
 import org.soraworld.violet.text.JsonText;
 import org.soraworld.violet.util.ChatColor;
@@ -22,12 +20,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * 管理器抽象类.
- *
- * @param <T> 插件类型参数
- */
-public abstract class VioletManager<T extends IPlugin> implements IManager {
+public abstract class IManager<T extends IPlugin> {
 
     /**
      * 插件版本, 用于自动任务.
@@ -114,7 +107,7 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
      * @param plugin 插件实例
      * @param path   配置文件路径
      */
-    public VioletManager(T plugin, Path path) {
+    public IManager(T plugin, Path path) {
         this.path = path;
         this.plugin = plugin;
         this.options.setTranslator(Options.COMMENT, this::trans);
@@ -315,9 +308,37 @@ public abstract class VioletManager<T extends IPlugin> implements IManager {
         return flag;
     }
 
-    public void listPlugins(ISender sender) {
-        for (IPlugin plugin : plugins) {
-            sendKey(sender, "pluginInfo", plugin.getId(), plugin.getVersion());
-        }
+    /*------------------------------------------------*/
+
+    public String defChatHead() {
+        return "[" + getPlugin().getName() + "] ";
     }
+
+    public String defAdminPerm() {
+        return getPlugin().getId() + ".admin";
+    }
+
+    public void debugKey(String key, Object... args) {
+        if (isDebug()) consoleKey(key, args);
+    }
+
+    public void debug(String text) {
+        if (isDebug()) console(text);
+    }
+
+    public void debug(Throwable e) {
+        if (isDebug()) e.printStackTrace();
+    }
+
+    public void beforeLoad() {
+    }
+
+    public void afterLoad() {
+    }
+
+    public abstract ChatColor defChatColor();
+
+    public abstract void console(String text);
+
+    public abstract void broadcast(String message);
 }
