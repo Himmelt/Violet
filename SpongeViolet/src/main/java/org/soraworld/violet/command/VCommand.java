@@ -22,7 +22,7 @@ import java.util.*;
 public class VCommand implements CommandCallable {
 
     protected String name;
-    protected String usage;
+    protected String usageMessage;
     protected String permission;
     protected boolean onlyPlayer;
     protected VCommand parent;
@@ -68,10 +68,7 @@ public class VCommand implements CommandCallable {
         if (executor == null) return;
 
         Type[] params = Reflects.getActualTypes(SubExecutor.class, executor.getClass());
-        if (params == null || params.length != 2
-                || !Reflects.isAssignableFrom(params[0], getClass())
-                || !Reflects.isAssignableFrom(VCommand.class, params[0])
-                || !Reflects.isAssignableFrom(CommandSource.class, params[1])) return;
+        if (params == null || params.length != 1 || !Reflects.isAssignableFrom(CommandSource.class, params[0])) return;
 
         Paths paths = new Paths(sub.path().isEmpty() ? field.getName().toLowerCase() : sub.path().replace(' ', '_').replace(':', '_'));
         String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
@@ -79,10 +76,10 @@ public class VCommand implements CommandCallable {
         VCommand command = createSub(paths);
         if (!sub.virtual()) command.subExecutor = executor;
         command.permission = perm;
-        command.onlyPlayer = sub.onlyPlayer() || Reflects.isAssignableFrom(Player.class, params[1]);
+        command.onlyPlayer = sub.onlyPlayer() || Reflects.isAssignableFrom(Player.class, params[0]);
         command.tabs.addAll(Arrays.asList(sub.tabs()));
         command.aliases.addAll(Arrays.asList(sub.aliases()));
-        command.usage = sub.usage();
+        command.usageMessage = sub.usage();
         command.update();
     }
 
@@ -118,8 +115,8 @@ public class VCommand implements CommandCallable {
     }
 
     public void sendUsage(CommandSource sender) {
-        if (usage != null && !usage.isEmpty()) {
-            manager.sendKey(sender, "cmdUsage", usage);
+        if (usageMessage != null && !usageMessage.isEmpty()) {
+            manager.sendKey(sender, "cmdUsage", usageMessage);
         }
     }
 
@@ -195,7 +192,7 @@ public class VCommand implements CommandCallable {
 
     @NotNull
     public Text getUsage(@NotNull CommandSource sender) {
-        return Text.of(usage);
+        return Text.of(usageMessage);
     }
 
     @NotNull

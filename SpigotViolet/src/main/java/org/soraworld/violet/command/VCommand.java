@@ -19,7 +19,6 @@ import java.util.*;
 public class VCommand extends Command {
 
     protected String name;
-    protected String usage;
     protected String permission;
     protected boolean onlyPlayer;
     protected VCommand parent;
@@ -65,10 +64,7 @@ public class VCommand extends Command {
         if (executor == null) return;
 
         Type[] params = Reflects.getActualTypes(SubExecutor.class, executor.getClass());
-        if (params == null || params.length != 2
-                || !Reflects.isAssignableFrom(params[0], getClass())
-                || !Reflects.isAssignableFrom(VCommand.class, params[0])
-                || !Reflects.isAssignableFrom(CommandSender.class, params[1])) return;
+        if (params == null || params.length != 1 || !Reflects.isAssignableFrom(CommandSender.class, params[0])) return;
 
         Paths paths = new Paths(sub.path().isEmpty() ? field.getName().toLowerCase() : sub.path().replace(' ', '_').replace(':', '_'));
         String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
@@ -76,11 +72,10 @@ public class VCommand extends Command {
         VCommand command = createSub(paths);
         if (!sub.virtual()) command.subExecutor = executor;
         command.permission = perm;
-        command.onlyPlayer = sub.onlyPlayer() || Reflects.isAssignableFrom(Player.class, params[1]);
+        command.onlyPlayer = sub.onlyPlayer() || Reflects.isAssignableFrom(Player.class, params[0]);
         command.tabs.addAll(Arrays.asList(sub.tabs()));
         command.aliases.addAll(Arrays.asList(sub.aliases()));
-        command.usage = sub.usage();
-        command.update();
+        command.usageMessage = sub.usage();
         command.update();
     }
 
@@ -116,8 +111,8 @@ public class VCommand extends Command {
     }
 
     public void sendUsage(CommandSender sender) {
-        if (usage != null && !usage.isEmpty()) {
-            manager.sendKey(sender, "cmdUsage", usage);
+        if (usageMessage != null && !usageMessage.isEmpty()) {
+            manager.sendKey(sender, "cmdUsage", usageMessage);
         }
     }
 
@@ -127,6 +122,11 @@ public class VCommand extends Command {
 
     public VCommand getParent() {
         return parent;
+    }
+
+    public void setTabs(List<String> tabs) {
+        this.tabs.clear();
+        this.tabs.addAll(tabs);
     }
 
     /* ---------------------------------------- modify start -------------------------------------------- */
@@ -161,6 +161,12 @@ public class VCommand extends Command {
 
     public String getName() {
         return name;
+    }
+
+    public Command setAliases(List<String> aliases) {
+        this.aliases.clear();
+        this.aliases.addAll(aliases);
+        return this;
     }
 
     public List<String> getAliases() {
