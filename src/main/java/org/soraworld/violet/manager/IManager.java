@@ -47,11 +47,6 @@ public abstract class IManager<T extends IPlugin> {
      */
     @Setting(comment = "comment.saveOnDisable")
     protected boolean saveOnDisable = true;
-    /**
-     * 被禁用的命令, 键: 主命令名; 值: 被禁用的子命令名列表.
-     */
-    @Setting(comment = "comment.disableCmds")
-    protected HashMap<String, ArrayList<String>> disableCmds = new HashMap<>();
 
     /**
      * 纯文本抬头.

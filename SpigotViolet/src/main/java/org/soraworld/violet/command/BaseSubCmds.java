@@ -6,7 +6,7 @@ import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.manager.FManager;
 import org.soraworld.violet.manager.VManager;
 
-@Command(name = Violet.PLUGIN_ID, perm = "admin", usage = "/violet lang|save|debug|reload|rextract|help|plugins ")
+@Command(name = Violet.PLUGIN_ID, usage = "/violet lang|save|debug|reload|rextract|help|plugins ")
 public final class BaseSubCmds {
 
     @Inject
@@ -57,10 +57,10 @@ public final class BaseSubCmds {
     @Sub
     public final SubExecutor help = (cmd, sender, args) -> {
         if (args.notEmpty()) {
-            VCommand sub = cmd.getParent().getSub(args.first());
+            VCommand sub = cmd.parent.getSub(args.first());
             if (sub != null) sub.sendUsage(sender);
             else manager.sendKey(sender, "noSuchSubCmd", args.first());
-        } else cmd.sendUsage(sender);
+        } else cmd.parent.sendUsage(sender);
     };
 
     @Sub(parent = Violet.PLUGIN_ID, perm = "admin")
