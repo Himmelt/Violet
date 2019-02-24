@@ -36,6 +36,8 @@ public interface IPlugin<M extends IManager> {
 
     void setManager(M manager);
 
+    String updateURL();
+
     default InputStream getAssetStream(String path) {
         return getClass().getResourceAsStream("/assets/" + assetsId() + '/' + path);
     }
@@ -47,6 +49,11 @@ public interface IPlugin<M extends IManager> {
     @Nullable
     default M registerManager(@NotNull Path path) {
         return null;
+    }
+
+    void registerInjectClass(@NotNull Class<?> clazz);
+
+    default void registerInjectClasses() {
     }
 
     default void registerCommands() {

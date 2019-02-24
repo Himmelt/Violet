@@ -8,6 +8,7 @@ import org.soraworld.violet.command.VCommand;
 import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.inject.EventListener;
 import org.soraworld.violet.inject.MainManager;
+import org.soraworld.violet.listener.UpdateListener;
 import org.soraworld.violet.manager.IManager;
 import org.soraworld.violet.manager.VManager;
 import org.soraworld.violet.util.ChatColor;
@@ -28,8 +29,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 public class SpongePlugin<M extends VManager> implements IPlugin<M> {
 
@@ -45,18 +48,18 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
     protected final HashSet<Class<?>> commandClasses = new HashSet<>();
     protected final HashSet<Class<?>> listenerClasses = new HashSet<>();
 
-    {
-        scanJarPackageClasses();
-    }
-
     private void scanJarPackageClasses() {
-        File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getFile());
-        for (Class<?> clazz : ClassUtils.getClasses(jarFile, getClass().getPackage().getName())) {
-            if (clazz.getAnnotation(Command.class) != null) commandClasses.add(clazz);
-            if (clazz.getAnnotation(EventListener.class) != null) listenerClasses.add(clazz);
-            if (clazz.getAnnotation(org.soraworld.violet.inject.Inject.class) != null) injectClasses.add(clazz);
-            if (clazz.getAnnotation(MainManager.class) != null) mainManagerClass = clazz;
-        }
+        container.getSource().ifPresent(path -> {
+            File jarFile = path.toFile();
+            if (jarFile.exists()) {
+                for (Class<?> clazz : ClassUtils.getClasses(jarFile, getClass().getPackage().getName())) {
+                    if (clazz.getAnnotation(Command.class) != null) commandClasses.add(clazz);
+                    if (clazz.getAnnotation(EventListener.class) != null) listenerClasses.add(clazz);
+                    if (clazz.getAnnotation(Inject.class) != null) injectClasses.add(clazz);
+                    if (clazz.getAnnotation(MainManager.class) != null) mainManagerClass = clazz;
+                }
+            } else Sponge.getServer().getConsole().sendMessage(Text.of(ChatColor.RED + "Plugin Jar File NOT exist !!!"));
+        });
     }
 
     private void injectMainManager(@NotNull Path path) {
@@ -176,6 +179,8 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
 
     @Listener
     public void onLoad(GamePreInitializationEvent event) {
+        scanJarPackageClasses();
+        registerInjectClasses();
         Path path = getRootPath();
         if (Files.notExists(path)) {
             try {
@@ -199,6 +204,7 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
             registerListeners();
             manager.consoleKey("pluginEnabled", getId() + "-" + getVersion());
             afterEnable();
+            manager.checkUpdate(Sponge.getServer().getConsole());
         } else Sponge.getServer().getConsole().sendMessage(Text.of(ChatColor.RED + "Plugin " + getId() + " enable failed !!!!"));
     }
 
@@ -244,7 +250,24 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
         this.manager = manager;
     }
 
+    public String updateURL() {
+        String website = container.getUrl().orElse("https://github.com/Himmelt/" + container.getName());
+        if (!website.endsWith("/")) website += "/";
+        return website + "releases/latest";
+    }
+
+    public void registerInjectClass(@NotNull Class<?> clazz) {
+        if (clazz.getAnnotation(Command.class) != null) commandClasses.add(clazz);
+        if (clazz.getAnnotation(EventListener.class) != null) listenerClasses.add(clazz);
+        if (clazz.getAnnotation(Inject.class) != null) injectClasses.add(clazz);
+    }
+
+    public void registerInjectClasses() {
+        registerInjectClass(UpdateListener.class);
+    }
+
     public void registerListener(@NotNull Object listener) {
+        Sponge.getEventManager().registerListeners(this, listener);
     }
 
     @Nullable
@@ -260,7 +283,10 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
     }
 
     public boolean registerCommand(@NotNull VCommand command) {
-        Sponge.getCommandManager().register(this, command, command.getAliases());
+        List<String> aliases = new ArrayList<>();
+        aliases.add(command.getName());
+        aliases.addAll(command.getAliases());
+        Sponge.getCommandManager().register(this, command, aliases);
         return true;
     }
 }

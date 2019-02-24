@@ -13,6 +13,7 @@ import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.inject.EventListener;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.inject.MainManager;
+import org.soraworld.violet.listener.UpdateListener;
 import org.soraworld.violet.manager.IManager;
 import org.soraworld.violet.manager.VManager;
 import org.soraworld.violet.util.ChatColor;
@@ -51,18 +52,22 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
         commandMap = map;
     }
 
-    {
-        scanJarPackageClasses();
+    private void scanJarPackageClasses() {
+        File jarFile = getFile();
+        if (jarFile.exists()) {
+            for (Class<?> clazz : ClassUtils.getClasses(jarFile, getClass().getPackage().getName())) {
+                if (clazz.getAnnotation(Command.class) != null) commandClasses.add(clazz);
+                if (clazz.getAnnotation(EventListener.class) != null) listenerClasses.add(clazz);
+                if (clazz.getAnnotation(Inject.class) != null) injectClasses.add(clazz);
+                if (clazz.getAnnotation(MainManager.class) != null) mainManagerClass = clazz;
+            }
+        } else Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Plugin Jar File NOT exist !!!");
     }
 
-    private void scanJarPackageClasses() {
-        File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getFile());
-        for (Class<?> clazz : ClassUtils.getClasses(jarFile, getClass().getPackage().getName())) {
-            if (clazz.getAnnotation(Command.class) != null) commandClasses.add(clazz);
-            if (clazz.getAnnotation(EventListener.class) != null) listenerClasses.add(clazz);
-            if (clazz.getAnnotation(Inject.class) != null) injectClasses.add(clazz);
-            if (clazz.getAnnotation(MainManager.class) != null) mainManagerClass = clazz;
-        }
+    public void registerInjectClass(@NotNull Class<?> clazz) {
+        if (clazz.getAnnotation(Command.class) != null) commandClasses.add(clazz);
+        if (clazz.getAnnotation(EventListener.class) != null) listenerClasses.add(clazz);
+        if (clazz.getAnnotation(Inject.class) != null) injectClasses.add(clazz);
     }
 
     private void injectMainManager(@NotNull Path path) {
@@ -185,6 +190,8 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
     }
 
     public void onLoad() {
+        scanJarPackageClasses();
+        registerInjectClasses();
         Path path = getRootPath();
         if (Files.notExists(path)) {
             try {
@@ -207,6 +214,7 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
             registerListeners();
             manager.consoleKey("pluginEnabled", getId() + "-" + getVersion());
             afterEnable();
+            manager.checkUpdate(Bukkit.getConsoleSender());
         } else Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Plugin " + getId() + " enable failed !!!!");
     }
 
@@ -228,6 +236,16 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
 
     public void setManager(M manager) {
         this.manager = manager;
+    }
+
+    public String updateURL() {
+        String website = getDescription().getWebsite();
+        if (!website.endsWith("/")) website += "/";
+        return website + "releases/latest";
+    }
+
+    public void registerInjectClasses() {
+        registerInjectClass(UpdateListener.class);
     }
 
     public Path getRootPath() {

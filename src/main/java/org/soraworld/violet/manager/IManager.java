@@ -12,6 +12,7 @@ import org.soraworld.violet.text.JsonText;
 import org.soraworld.violet.util.ChatColor;
 
 import java.io.File;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,6 +43,8 @@ public abstract class IManager<T extends IPlugin> {
      */
     @Setting(comment = "comment.autoUpLang")
     protected boolean autoUpLang = true;
+    @Setting(comment = "comment.checkUpdate")
+    protected boolean checkUpdate = true;
     /**
      * 是否在插件停用时保存配置文件.
      */
@@ -329,6 +332,18 @@ public abstract class IManager<T extends IPlugin> {
     }
 
     public void afterLoad() {
+    }
+
+    public boolean hasUpdate() {
+        try {
+            URL url = new URL(plugin.updateURL());
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setInstanceFollowRedirects(false);
+            String text = conn.getHeaderField("Location");
+            return !text.contains(plugin.getVersion());
+        } catch (Throwable ignored) {
+            return false;
+        }
     }
 
     public abstract ChatColor defChatColor();

@@ -4,6 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.soraworld.violet.plugin.SpigotPlugin;
+import org.soraworld.violet.text.ClickText;
+import org.soraworld.violet.text.HoverText;
 import org.soraworld.violet.text.JsonText;
 import org.soraworld.violet.util.ChatColor;
 
@@ -37,6 +39,25 @@ public abstract class VManager extends IManager<SpigotPlugin> {
         String commandLine = "tellraw " + player.getName() + " " + ChatColor.colorize(JsonText.toJson(jsonHead, texts));
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), commandLine);
         debug(commandLine);
+    }
+
+    public void checkUpdate(CommandSender sender) {
+        if (checkUpdate) {
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                if (hasUpdate()) {
+                    if (sender instanceof Player) {
+                        sendJson((Player) sender, new JsonText(trans("hasUpdate")),
+                                new JsonText(ChatColor.GREEN + plugin.updateURL(),
+                                        new ClickText(plugin.updateURL(), ClickText.Action.OPEN_URL),
+                                        new HoverText(trans("clickUpdate"), HoverText.Action.SHOW_TEXT)
+                                )
+                        );
+                    } else {
+                        sendKey(sender, "hasUpdate" + ChatColor.GREEN + plugin.updateURL());
+                    }
+                }
+            });
+        }
     }
 
     public void console(String text) {

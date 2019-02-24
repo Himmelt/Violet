@@ -13,7 +13,7 @@ public final class BaseSubCmds {
     @Inject
     private VManager manager;
     @Inject
-    private FManager vManager;
+    private FManager fManager;
 
     @Sub(perm = "admin", tabs = {"zh_cn", "en_us"})
     public final SubExecutor lang = (cmd, sender, args) -> {
@@ -69,6 +69,6 @@ public final class BaseSubCmds {
 
     @Sub(parent = Violet.PLUGIN_ID, perm = "admin")
     public final SubExecutor plugins = (cmd, sender, args) -> {
-        vManager.listPlugins(sender);
+        fManager.listPlugins(sender);
     };
 }
