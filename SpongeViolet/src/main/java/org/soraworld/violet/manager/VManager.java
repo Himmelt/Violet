@@ -67,14 +67,16 @@ public abstract class VManager extends IManager<SpongePlugin> {
             Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
                 if (hasUpdate()) {
                     if (sender instanceof Player) {
-                        sendJson((Player) sender, new JsonText(trans("hasUpdate")),
-                                new JsonText(ChatColor.GREEN + plugin.updateURL(),
-                                        new ClickText(plugin.updateURL(), ClickText.Action.OPEN_URL),
-                                        new HoverText(trans("clickUpdate"), HoverText.Action.SHOW_TEXT)
-                                )
-                        );
+                        Sponge.getScheduler().createSyncExecutor(plugin).execute(() -> {
+                            sendJson((Player) sender, new JsonText(trans("hasUpdate")),
+                                    new JsonText(ChatColor.GREEN + plugin.updateURL(),
+                                            new ClickText(plugin.updateURL(), ClickText.Action.OPEN_URL),
+                                            new HoverText(trans("clickUpdate"), HoverText.Action.SHOW_TEXT)
+                                    )
+                            );
+                        });
                     } else {
-                        sendKey(sender, "hasUpdate" + ChatColor.GREEN + plugin.updateURL());
+                        send(sender, trans("hasUpdate") + ChatColor.GREEN + plugin.updateURL());
                     }
                 }
             });
