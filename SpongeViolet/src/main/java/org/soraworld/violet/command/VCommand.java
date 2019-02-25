@@ -154,7 +154,7 @@ public class VCommand implements CommandCallable {
 
     public void sendUsage(CommandSource sender) {
         if (usageMessage != null && !usageMessage.isEmpty()) {
-            manager.sendKey(sender, "cmdUsage", usageMessage);
+            manager.sendKey(sender, "cmdUsage", manager.trans(usageMessage));
         }
     }
 
@@ -252,7 +252,7 @@ public class VCommand implements CommandCallable {
 
     @NotNull
     public Text getUsage(@NotNull CommandSource sender) {
-        return Text.of(usageMessage);
+        return usageMessage == null ? Text.of("") : Text.of(manager.trans(usageMessage));
     }
 
     @NotNull

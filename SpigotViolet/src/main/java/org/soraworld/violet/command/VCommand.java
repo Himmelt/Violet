@@ -151,7 +151,7 @@ public class VCommand extends Command {
 
     public void sendUsage(CommandSender sender) {
         if (usageMessage != null && !usageMessage.isEmpty()) {
-            manager.sendKey(sender, "cmdUsage", usageMessage);
+            manager.sendKey(sender, "cmdUsage", manager.trans(usageMessage));
         }
     }
 
@@ -211,6 +211,14 @@ public class VCommand extends Command {
 
     public String getName() {
         return name;
+    }
+
+    public String getDescription() {
+        return usageMessage == null ? "" : manager.trans(usageMessage);
+    }
+
+    public String getUsage() {
+        return usageMessage == null ? "" : manager.trans(usageMessage);
     }
 
     public VCommand setAliases(List<String> aliases) {
