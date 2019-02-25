@@ -9,6 +9,8 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.chat.ChatTypes;
+import org.spongepowered.api.text.title.Title;
 
 import java.nio.file.Path;
 
@@ -41,8 +43,23 @@ public abstract class VManager extends IManager<SpongePlugin> {
 
     public void sendJson(Player player, JsonText... texts) {
         String commandLine = "tellraw " + player.getName() + " " + ChatColor.colorize(JsonText.toJson(jsonHead, texts));
-        //Sponge.getServer().getConsole(.dispatchCommand(Bukkit.getConsoleSender(), commandLine);
+        Sponge.getCommandManager().process(Sponge.getServer().getConsole(), commandLine);
         debug(commandLine);
+    }
+
+    public void sendActionBar(Player player, String text) {
+        player.sendMessage(ChatTypes.ACTION_BAR, Text.of(text));
+    }
+
+    public void sendActionKey(Player player, String key, Object... args) {
+        player.sendMessage(ChatTypes.ACTION_BAR, Text.of(trans(key, args)));
+    }
+
+    public void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+        player.sendTitle(Title.builder()
+                .title(Text.of(title))
+                .subtitle(Text.of(subtitle))
+                .fadeIn(fadeIn).stay(stay).fadeOut(fadeOut).build());
     }
 
     public void checkUpdate(CommandSource sender) {

@@ -41,6 +41,9 @@ noSuchSubCmd = "没有名为 %s 的子命令."
 commandRegFailed = "命令 %s 向插件 %s 注册失败."
 nullCommandMap = "&cCommandMap 反射失败 !!!!!"
 
+hasUpdate = "插件有更新: "
+clickUpdate = "点击前往下载"
+
 comment {
   lang = "显示语言"
   debug = "调试模式"
@@ -48,6 +51,7 @@ comment {
   uuid = "Violet 插件唯一识别标志，用于插件统计."
   enableStats = "启用 Violet 插件统计."
   autoUpLang = "自动重新释放语言文件(版本变化时)."
+  checkUpdate = "是否检查更新."
   saveOnDisable = "在停用插件时执行保存配置文件(前提是配置文件最近一次加载成功)."
   disableCmds = "禁用的子命令, 每个键对应一个字符串列表, 键为命令主名, 值为对应禁用的子命令.(重启生效)"
 }

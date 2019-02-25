@@ -43,6 +43,9 @@ public abstract class IManager<T extends IPlugin> {
      */
     @Setting(comment = "comment.autoUpLang")
     protected boolean autoUpLang = true;
+    /**
+     * 是否检查更新
+     */
     @Setting(comment = "comment.checkUpdate")
     protected boolean checkUpdate = true;
     /**

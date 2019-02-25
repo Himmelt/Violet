@@ -1,8 +1,11 @@
 package org.soraworld.violet.manager;
 
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.soraworld.violet.nms.Version;
 import org.soraworld.violet.plugin.SpigotPlugin;
 import org.soraworld.violet.text.ClickText;
 import org.soraworld.violet.text.HoverText;
@@ -39,6 +42,19 @@ public abstract class VManager extends IManager<SpigotPlugin> {
         String commandLine = "tellraw " + player.getName() + " " + ChatColor.colorize(JsonText.toJson(jsonHead, texts));
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), commandLine);
         debug(commandLine);
+    }
+
+    public void sendActionBar(Player player, String text) {
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(text));
+    }
+
+    public void sendActionKey(Player player, String key, Object... args) {
+        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(trans(key, args)));
+    }
+
+    public void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+        if (Version.v1_7_R4) send(player, title);
+        else player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
     }
 
     public void checkUpdate(CommandSender sender) {
