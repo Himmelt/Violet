@@ -7,6 +7,8 @@ import org.soraworld.violet.manager.FManager;
 import org.soraworld.violet.manager.VManager;
 import org.soraworld.violet.util.ListUtils;
 
+import java.util.LinkedHashSet;
+
 @Command(name = Violet.PLUGIN_ID, usage = "/violet lang|save|debug|reload|rextract|help|plugins ")
 public final class BaseSubCmds {
 
@@ -15,7 +17,7 @@ public final class BaseSubCmds {
     @Inject
     private FManager fManager;
 
-    @Sub(perm = "admin", tabs = {"zh_cn", "en_us"})
+    @Sub(perm = "admin", tabs = {"zh_cn", "en_us"}, usage = "/violet lang [lang]  Get/Set Language")
     public final SubExecutor lang = (cmd, sender, args) -> {
         if (args.notEmpty()) {
             if (manager.setLang(args.first())) {
@@ -27,7 +29,7 @@ public final class BaseSubCmds {
         } else manager.sendKey(sender, "getLang", manager.getLang());
     };
 
-    @Sub(perm = "admin")
+    @Sub(perm = "admin", usage = "Save Config")
     public final SubExecutor save = (cmd, sender, args) -> {
         if (args.empty()) {
             manager.sendKey(sender, manager.save() ? "configSaved" : "configSaveFailed");
@@ -37,20 +39,20 @@ public final class BaseSubCmds {
         }
     };
 
-    @Sub(perm = "admin")
+    @Sub(perm = "admin", usage = "Switch DEBUG mode")
     public final SubExecutor debug = (cmd, sender, args) -> {
         manager.setDebug(!manager.isDebug());
         manager.sendKey(sender, manager.isDebug() ? "debugON" : "debugOFF");
     };
 
-    @Sub(perm = "admin")
+    @Sub(perm = "admin", usage = "Reload Config")
     public final SubExecutor reload = (cmd, sender, args) -> {
         manager.beforeLoad();
         manager.sendKey(sender, manager.load() ? "configLoaded" : "configLoadFailed");
         manager.afterLoad();
     };
 
-    @Sub(perm = "admin")
+    @Sub(perm = "admin", usage = "Re-Extract lang file from jar")
     public final SubExecutor rextract = (cmd, sender, args) -> {
         manager.sendKey(sender, manager.reExtract() ? "reExtracted" : "reExtractFailed");
     };
@@ -61,13 +63,17 @@ public final class BaseSubCmds {
             VCommand sub = cmd.parent.getSub(args.first());
             if (sub != null) sub.sendUsage(sender);
             else manager.sendKey(sender, "noSuchSubCmd", args.first());
-        } else cmd.parent.sendUsage(sender);
+        } else {
+            LinkedHashSet<VCommand> subs = new LinkedHashSet<>(cmd.parent.subs.values());
+            subs.remove(cmd);
+            for (VCommand sub : subs) sub.sendUsage(sender);
+        }
     };
 
     @Tab(path = "help")
     public final TabExecutor tab_help = (cmd, sender, args) -> ListUtils.getMatchList(args.first(), cmd.parent.subs.keySet());
 
-    @Sub(parent = Violet.PLUGIN_ID, perm = "admin")
+    @Sub(parent = Violet.PLUGIN_ID, perm = "admin", usage = "Show the list of violet-plugins")
     public final SubExecutor plugins = (cmd, sender, args) -> {
         fManager.listPlugins(sender);
     };
