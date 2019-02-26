@@ -17,19 +17,20 @@ public final class BaseSubCmds {
     @Inject
     private FManager fManager;
 
-    @Sub(perm = "admin", tabs = {"zh_cn", "en_us"}, usage = "/violet lang [lang]  Get/Set Language")
+    @Sub(perm = "admin", tabs = {"zh_cn", "en_us"}, usage = "usage.lang")
     public final SubExecutor lang = (cmd, sender, args) -> {
         if (args.notEmpty()) {
+            String oldLang = manager.getLang();
             if (manager.setLang(args.first())) {
                 manager.sendKey(sender, "setLang", manager.getLang());
-                manager.asyncSave(null);
+                if (!manager.getLang().equalsIgnoreCase(oldLang)) manager.asyncSave(null);
             } else {
                 manager.sendKey(sender, "setLangFailed", args.first());
             }
         } else manager.sendKey(sender, "getLang", manager.getLang());
     };
 
-    @Sub(perm = "admin", usage = "Save Config")
+    @Sub(perm = "admin", usage = "usage.save")
     public final SubExecutor save = (cmd, sender, args) -> {
         if (args.notEmpty()) {
             VCommand sub = cmd.getSub(args.first());
@@ -37,23 +38,28 @@ public final class BaseSubCmds {
         } else manager.asyncSave(sender);
     };
 
-    @Sub(perm = "admin", usage = "Switch DEBUG mode")
+    @Sub(perm = "admin", usage = "usage.debug")
     public final SubExecutor debug = (cmd, sender, args) -> {
         manager.setDebug(!manager.isDebug());
         manager.sendKey(sender, manager.isDebug() ? "debugON" : "debugOFF");
     };
 
-    @Sub(perm = "admin", usage = "Reload Config")
+    @Sub(perm = "admin", usage = "usage.reload", tabs = {"lang"})
     public final SubExecutor reload = (cmd, sender, args) -> {
-        manager.beforeLoad();
-        manager.sendKey(sender, manager.load() ? "configLoaded" : "configLoadFailed");
-        manager.afterLoad();
+        if (args.first().equalsIgnoreCase("lang")) {
+            manager.setLang(manager.getLang());
+            manager.sendKey(sender, "reloadLang");
+        } else {
+            manager.beforeLoad();
+            manager.sendKey(sender, manager.load() ? "configLoaded" : "configLoadFailed");
+            manager.afterLoad();
+        }
     };
 
-    @Sub(perm = "admin", usage = "Re-Extract lang file from jar")
+    @Sub(perm = "admin", usage = "usage.rextract")
     public final SubExecutor rextract = (cmd, sender, args) -> manager.sendKey(sender, manager.reExtract() ? "reExtracted" : "reExtractFailed");
 
-    @Sub(perm = "admin", usage = "Backup all configs")
+    @Sub(perm = "admin", usage = "usage.backup")
     public final SubExecutor backup = (cmd, sender, args) -> manager.asyncBackUp(sender);
 
     @Sub
@@ -72,7 +78,7 @@ public final class BaseSubCmds {
     @Tab(path = "help")
     public final TabExecutor tab_help = (cmd, sender, args) -> ListUtils.getMatchList(args.first(), cmd.parent.subs.keySet());
 
-    @Sub(parent = Violet.PLUGIN_ID, perm = "admin", usage = "Show the list of violet-plugins")
+    @Sub(parent = Violet.PLUGIN_ID, perm = "admin", usage = "usage.plugins")
     public final SubExecutor plugins = (cmd, sender, args) -> {
         fManager.listPlugins(sender);
     };

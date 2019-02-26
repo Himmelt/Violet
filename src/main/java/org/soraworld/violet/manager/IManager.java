@@ -184,14 +184,14 @@ public abstract class IManager<T extends IPlugin> {
         try {
             rootNode.load(true, true);
             rootNode.modify(this);
-            if (!plugin.getVersion().equalsIgnoreCase(version)) {
-                consoleKey("versionChanged", version, plugin.getVersion());
-                if (autoBackUp) consoleKey(doBackUp() ? "backUpSuccess" : "backUpFailed");
-                if (autoUpLang) consoleKey(reExtract() ? "rextractSuccess" : "rextractFailed");
-            }
             if (!setLang(lang) && !defLang.equalsIgnoreCase(lang)) setLang(defLang);
             options.setDebug(debug);
             reloadSuccess = true;
+            if (!plugin.getVersion().equalsIgnoreCase(version)) {
+                consoleKey("versionChanged", version, plugin.getVersion());
+                if (autoBackUp) consoleKey(doBackUp() ? "backUpSuccess" : "backUpFailed");
+                if (autoUpLang) consoleKey(reExtract() ? "reExtracted" : "reExtractFailed");
+            }
             return true;
         } catch (Throwable e) {
             console(ChatColor.RED + "Config file load exception !!!");

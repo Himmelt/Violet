@@ -6,6 +6,7 @@ chatHead = "[紫罗兰] "
 getVersion = "当前插件版本 &a%s"
 getLang = "当前语言为 &e%s&r ."
 setLang = "当前语言设置为 &e%s&r ."
+reloadLang = "当前语言文件已重载."
 setLangFailed = "&c语言 %s 设置失败 !!!"
 configSaved = "&a配置文件已保存."
 configSaveFailed = "&c配置文件保存失败 !!!"
@@ -20,7 +21,7 @@ cmdUsage = "用法 %s"
 pluginEnabled = "插件 &e%s&r 已 &a启用&r."
 pluginDisabled = "插件 &e%s&r 已 &c禁用&r."
 emptyLangMap = "&c语言文件键值对为空 !!!"
-versionChanged = "版本 %s 已改变, 将重新释放语言文件."
+versionChanged = "配置文件版本已改变, %s -> %s ."
 reExtracted = "&a已重新释放语言文件."
 reExtractFailed = "&c重新释放语言文件失败 !!!"
 
@@ -41,6 +42,9 @@ noSuchSubCmd = "没有名为 %s 的子命令."
 commandRegFailed = "命令 %s 向插件 %s 注册失败."
 nullCommandMap = "&cCommandMap 反射失败 !!!!!"
 
+backUpSuccess = "配置文件夹异步备份成功."
+backUpFailed = "配置文件夹异步备份失败."
+
 hasUpdate = "插件有更新: "
 clickUpdate = "点击前往下载"
 
@@ -50,8 +54,19 @@ comment {
   version = "插件版本，用于自动任务，请勿修改 !!"
   uuid = "Violet 插件唯一识别标志，用于插件统计."
   enableStats = "启用 Violet 插件统计."
-  autoUpLang = "自动重新释放语言文件(版本变化时)."
+  autoUpLang = "版本变化时，自动重新释放语言文件."
+  autoBackUp = "版本变化时，自动备份全部配置文件."
   checkUpdate = "是否检查更新."
   saveOnDisable = "在停用插件时执行保存配置文件(前提是配置文件最近一次加载成功)."
   disableCmds = "禁用的子命令, 每个键对应一个字符串列表, 键为命令主名, 值为对应禁用的子命令.(重启生效)"
+}
+
+usage {
+  lang = "/violet lang [语言] \t查看/设置插件语言"
+  save = "/violet save \t\t保存配置文件"
+  debug = "/violet debug \t\t切换调试模式"
+  reload = "/violet reload \t\t重载配置文件"
+  rextract = "/violet rextract \t重新提取语言文件"
+  backup = "/violet backup \t\t备份配置文件夹内的全部内容"
+  plugins = "/violet plugins \t\t列出全部继承 Violet 的插件"
 }
