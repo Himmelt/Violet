@@ -28,20 +28,22 @@ public class FileUtils {
 
     public static boolean zipArchivePath(Path source, Path target, Predicate<Path> filter) {
         try {
-            ZipOutputStream zipOutputStream = new ZipOutputStream(Files.newOutputStream(target));
+            ZipOutputStream zipOut = new ZipOutputStream(Files.newOutputStream(target));
             Files.walk(source)
                     .filter(filter)
                     .filter(path -> !Files.isDirectory(path))
                     .forEach(path -> {
                         ZipEntry entry = new ZipEntry(source.relativize(path).toString());
                         try {
-                            zipOutputStream.putNextEntry(entry);
-                            Files.copy(path, zipOutputStream);
-                            zipOutputStream.closeEntry();
+                            zipOut.putNextEntry(entry);
+                            Files.copy(path, zipOut);
+                            zipOut.closeEntry();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     });
+            zipOut.flush();
+            zipOut.close();
             return true;
         } catch (IOException e) {
             e.printStackTrace();

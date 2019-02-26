@@ -45,7 +45,7 @@ public abstract class VManager extends IManager<SpongePlugin> {
                 if (sender != null) {
                     Sponge.getScheduler().createSyncExecutor(plugin).execute(() -> sendKey(sender, flag ? "backUpSuccess" : "backUpFailed"));
                 }
-                asyncSaveLock.set(false);
+                asyncBackLock.set(false);
             });
         }
     }

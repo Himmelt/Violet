@@ -38,7 +38,7 @@ public abstract class VManager extends IManager<SpigotPlugin> {
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 boolean flag = doBackUp();
                 if (sender != null) Bukkit.getScheduler().runTask(plugin, () -> sendKey(sender, flag ? "backUpSuccess" : "backUpFailed"));
-                asyncSaveLock.set(false);
+                asyncBackLock.set(false);
             });
         }
     }
