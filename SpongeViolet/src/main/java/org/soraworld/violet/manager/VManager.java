@@ -1,5 +1,6 @@
 package org.soraworld.violet.manager;
 
+import org.jetbrains.annotations.Nullable;
 import org.soraworld.violet.plugin.SpongePlugin;
 import org.soraworld.violet.text.ClickText;
 import org.soraworld.violet.text.HoverText;
@@ -23,12 +24,28 @@ public abstract class VManager extends IManager<SpongePlugin> {
         super(plugin, path);
     }
 
-    public void asyncSave() {
-        if (!asyncSaveLock) {
-            asyncSaveLock = true;
+    public void asyncSave(@Nullable CommandSource sender) {
+        if (!asyncSaveLock.get()) {
+            asyncSaveLock.set(true);
             Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
-                save();
-                asyncSaveLock = false;
+                boolean flag = save();
+                if (sender != null) {
+                    Sponge.getScheduler().createSyncExecutor(plugin).execute(() -> sendKey(sender, flag ? "configSaved" : "configSaveFailed"));
+                }
+                asyncSaveLock.set(false);
+            });
+        }
+    }
+
+    public void asyncBackUp(@Nullable CommandSource sender) {
+        if (!asyncBackLock.get()) {
+            asyncBackLock.set(true);
+            Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
+                boolean flag = doBackUp();
+                if (sender != null) {
+                    Sponge.getScheduler().createSyncExecutor(plugin).execute(() -> sendKey(sender, flag ? "backUpSuccess" : "backUpFailed"));
+                }
+                asyncSaveLock.set(false);
             });
         }
     }

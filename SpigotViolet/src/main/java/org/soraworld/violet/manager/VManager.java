@@ -5,6 +5,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 import org.soraworld.violet.nms.Version;
 import org.soraworld.violet.plugin.SpigotPlugin;
 import org.soraworld.violet.text.ClickText;
@@ -20,12 +21,24 @@ public abstract class VManager extends IManager<SpigotPlugin> {
         super(plugin, path);
     }
 
-    public void asyncSave() {
-        if (!asyncSaveLock) {
-            asyncSaveLock = true;
+    public void asyncSave(@Nullable CommandSender sender) {
+        if (!asyncSaveLock.get()) {
+            asyncSaveLock.set(true);
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                save();
-                asyncSaveLock = false;
+                boolean flag = save();
+                if (sender != null) Bukkit.getScheduler().runTask(plugin, () -> sendKey(sender, flag ? "configSaved" : "configSaveFailed"));
+                asyncSaveLock.set(false);
+            });
+        }
+    }
+
+    public void asyncBackUp(@Nullable CommandSender sender) {
+        if (!asyncBackLock.get()) {
+            asyncBackLock.set(true);
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                boolean flag = doBackUp();
+                if (sender != null) Bukkit.getScheduler().runTask(plugin, () -> sendKey(sender, flag ? "backUpSuccess" : "backUpFailed"));
+                asyncSaveLock.set(false);
             });
         }
     }

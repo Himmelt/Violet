@@ -100,7 +100,7 @@ public final class FManager extends VManager {
     public UUID getUUID() {
         if (uuid == null) {
             uuid = UUID.randomUUID();
-            asyncSave();
+            asyncSave(null);
         }
         return uuid;
     }

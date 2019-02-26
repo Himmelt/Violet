@@ -10,16 +10,16 @@ import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.serializers.UUIDSerializer;
 import org.soraworld.violet.text.JsonText;
 import org.soraworld.violet.util.ChatColor;
+import org.soraworld.violet.util.FileUtils;
 
-import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class IManager<T extends IPlugin> {
 
@@ -43,6 +43,11 @@ public abstract class IManager<T extends IPlugin> {
      */
     @Setting(comment = "comment.autoUpLang")
     protected boolean autoUpLang = true;
+    /**
+     * 是否在版本变化时自动备份配置文件夹.
+     */
+    @Setting(comment = "comment.autoBackUp")
+    protected boolean autoBackUp = true;
     /**
      * 是否检查更新
      */
@@ -94,13 +99,15 @@ public abstract class IManager<T extends IPlugin> {
     /**
      * 异步锁.
      */
-    protected static boolean asyncSaveLock = false;
+    protected AtomicBoolean asyncSaveLock = new AtomicBoolean(false);
+    protected AtomicBoolean asyncBackLock = new AtomicBoolean(false);
     /**
      * 插件统计列表.
      */
     protected static final ArrayList<IPlugin> plugins = new ArrayList<>();
     protected static final String defLang = Locale.CHINA.equals(Locale.getDefault()) ? "zh_cn" : "en_us";
     static Translator translator = null;
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss");
 
     /**
      * 实例化管理器.
@@ -177,12 +184,12 @@ public abstract class IManager<T extends IPlugin> {
         try {
             rootNode.load(true, true);
             rootNode.modify(this);
-            boolean flag;
-            if (autoUpLang && !plugin.getVersion().equalsIgnoreCase(version)) {
-                consoleKey("versionChanged", version);
-                flag = reExtract();
-            } else flag = setLang(lang);
-            if (!flag && !defLang.equalsIgnoreCase(lang)) setLang(defLang);
+            if (!plugin.getVersion().equalsIgnoreCase(version)) {
+                consoleKey("versionChanged", version, plugin.getVersion());
+                if (autoBackUp) consoleKey(doBackUp() ? "backUpSuccess" : "backUpFailed");
+                if (autoUpLang) consoleKey(reExtract() ? "rextractSuccess" : "rextractFailed");
+            }
+            if (!setLang(lang) && !defLang.equalsIgnoreCase(lang)) setLang(defLang);
             options.setDebug(debug);
             reloadSuccess = true;
             return true;
@@ -208,8 +215,13 @@ public abstract class IManager<T extends IPlugin> {
         }
     }
 
+    public boolean doBackUp() {
+        Path target = path.resolve("backup/" + DATE_FORMAT.format(new Date()) + ".zip");
+        return FileUtils.zipArchivePath(path, target, p -> !path.relativize(p).toString().toLowerCase().startsWith("backup"));
+    }
+
     public boolean reExtract() {
-        if (deletePath(path.resolve("lang").toFile())) return setLang(lang);
+        if (FileUtils.deletePath(path.resolve("lang").toFile(), debug)) return setLang(lang);
         if (debug) console(ChatColor.RED + "deletePath " + path.resolve("lang") + " failed !!");
         return false;
     }
@@ -285,28 +297,6 @@ public abstract class IManager<T extends IPlugin> {
      */
     public boolean canSaveOnDisable() {
         return saveOnDisable && reloadSuccess;
-    }
-
-    /**
-     * 删除路径下文件,文件夹及自身.
-     *
-     * @param path 路径
-     * @return 是否全部成功
-     */
-    public boolean deletePath(File path) {
-        if (path.isFile()) {
-            boolean flag = path.delete();
-            if (debug && !flag) console(ChatColor.RED + "File " + path + " delete failed !!");
-            return flag;
-        }
-        File[] files = path.listFiles();
-        boolean flag = true;
-        if (files != null && files.length > 0) {
-            for (File file : files) flag = flag && deletePath(file);
-        } else {
-            flag = path.delete();
-        }
-        return flag;
     }
 
     /*------------------------------------------------*/

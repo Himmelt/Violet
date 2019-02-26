@@ -21,8 +21,8 @@ public final class BaseSubCmds {
     public final SubExecutor lang = (cmd, sender, args) -> {
         if (args.notEmpty()) {
             if (manager.setLang(args.first())) {
-                manager.asyncSave();
                 manager.sendKey(sender, "setLang", manager.getLang());
+                manager.asyncSave(null);
             } else {
                 manager.sendKey(sender, "setLangFailed", args.first());
             }
@@ -31,12 +31,10 @@ public final class BaseSubCmds {
 
     @Sub(perm = "admin", usage = "Save Config")
     public final SubExecutor save = (cmd, sender, args) -> {
-        if (args.empty()) {
-            manager.sendKey(sender, manager.save() ? "configSaved" : "configSaveFailed");
-        } else {
+        if (args.notEmpty()) {
             VCommand sub = cmd.getSub(args.first());
             if (sub != null) sub.execute(sender, args.next());
-        }
+        } else manager.asyncSave(sender);
     };
 
     @Sub(perm = "admin", usage = "Switch DEBUG mode")
@@ -53,9 +51,10 @@ public final class BaseSubCmds {
     };
 
     @Sub(perm = "admin", usage = "Re-Extract lang file from jar")
-    public final SubExecutor rextract = (cmd, sender, args) -> {
-        manager.sendKey(sender, manager.reExtract() ? "reExtracted" : "reExtractFailed");
-    };
+    public final SubExecutor rextract = (cmd, sender, args) -> manager.sendKey(sender, manager.reExtract() ? "reExtracted" : "reExtractFailed");
+
+    @Sub(perm = "admin", usage = "Backup all configs")
+    public final SubExecutor backup = (cmd, sender, args) -> manager.asyncBackUp(sender);
 
     @Sub
     public final SubExecutor help = (cmd, sender, args) -> {
