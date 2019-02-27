@@ -150,9 +150,7 @@ public class VCommand extends Command {
     }
 
     public void sendUsage(CommandSender sender) {
-        if (usageMessage != null && !usageMessage.isEmpty()) {
-            manager.sendKey(sender, "cmdUsage", manager.trans(usageMessage));
-        }
+        manager.sendKey(sender, "cmdUsage", getUsage());
     }
 
     public VCommand getSub(String name) {
@@ -214,11 +212,21 @@ public class VCommand extends Command {
     }
 
     public String getDescription() {
-        return usageMessage == null ? "" : manager.trans(usageMessage);
+        return getUsage();
     }
 
     public String getUsage() {
-        return usageMessage == null ? "" : manager.trans(usageMessage);
+        if (usageMessage == null || usageMessage.isEmpty()) {
+            StringBuilder builder = new StringBuilder(getName());
+            VCommand parent = this.parent;
+            while (parent != null) {
+                builder.insert(0, parent.getName() + " ");
+                parent = parent.parent;
+            }
+            builder.insert(0, "/");
+            usageMessage = builder.toString();
+        }
+        return manager.trans(usageMessage).replace("{$id}", manager.getPlugin().getId());
     }
 
     public VCommand setAliases(List<String> aliases) {

@@ -59,11 +59,11 @@ comment {
 }
 
 usage {
-  lang = "/violet lang [lang]       Get/Set plugin language"
-  save = "/violet save            Save config to file"
-  debug = "/violet debug           Switch DEBUG mode"
-  reload = "/violet reload          Reload config from file"
-  rextract = "/violet rextract         Re extract lang files from jar"
-  backup = "/violet backup          Backup all files in config folder"
-  plugins = "/violet plugins          List all violet-plugins"
+  lang = "/{$id} lang [lang]       Get/Set plugin language"
+  save = "/{$id} save            Save config to file"
+  debug = "/{$id} debug           Switch DEBUG mode"
+  reload = "/{$id} reload          Reload config from file"
+  rextract = "/{$id} rextract         Re extract lang files from jar"
+  backup = "/{$id} backup          Backup all files in config folder"
+  plugins = "/{$id} plugins          List all violet-plugins"
 }

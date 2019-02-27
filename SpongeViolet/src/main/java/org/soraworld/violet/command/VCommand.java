@@ -153,9 +153,7 @@ public class VCommand implements CommandCallable {
     }
 
     public void sendUsage(CommandSource sender) {
-        if (usageMessage != null && !usageMessage.isEmpty()) {
-            manager.sendKey(sender, "cmdUsage", manager.trans(usageMessage));
-        }
+        manager.sendKey(sender, "cmdUsage", getUsage());
     }
 
     public VCommand getSub(String name) {
@@ -250,19 +248,33 @@ public class VCommand implements CommandCallable {
         return permission == null || sender.hasPermission(permission);
     }
 
+    public String getUsage() {
+        if (usageMessage == null || usageMessage.isEmpty()) {
+            StringBuilder builder = new StringBuilder(getName());
+            VCommand parent = this.parent;
+            while (parent != null) {
+                builder.insert(0, parent.getName() + " ");
+                parent = parent.parent;
+            }
+            builder.insert(0, "/");
+            usageMessage = builder.toString();
+        }
+        return manager.trans(usageMessage).replace("{$id}", manager.getPlugin().getId());
+    }
+
     @NotNull
     public Text getUsage(@NotNull CommandSource sender) {
-        return usageMessage == null ? Text.of("") : Text.of(manager.trans(usageMessage));
+        return Text.of(getUsage());
     }
 
     @NotNull
     public Optional<Text> getShortDescription(@NotNull CommandSource source) {
-        return Optional.of(getUsage(source));
+        return Optional.of(Text.of(getUsage()));
     }
 
     @NotNull
     public Optional<Text> getHelp(@NotNull CommandSource source) {
-        return Optional.of(getUsage(source));
+        return Optional.of(Text.of(getUsage()));
     }
 
     public int hashCode() {

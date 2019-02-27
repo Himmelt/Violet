@@ -62,11 +62,11 @@ comment {
 }
 
 usage {
-  lang = "/violet lang [语言]     查看/设置插件语言"
-  save = "/violet save           保存配置文件"
-  debug = "/violet debug          切换调试模式"
-  reload = "/violet reload         重载配置文件"
-  rextract = "/violet rextract        重新提取语言文件"
-  backup = "/violet backup         备份配置文件夹内的全部内容"
-  plugins = "/violet plugins         列出全部继承 Violet 的插件"
+  lang = "/{$id} lang [语言]     查看/设置插件语言"
+  save = "/{$id} save           保存配置文件"
+  debug = "/{$id} debug          切换调试模式"
+  reload = "/{$id} reload         重载配置文件"
+  rextract = "/{$id} rextract        重新提取语言文件"
+  backup = "/{$id} backup         备份配置文件夹内的全部内容"
+  plugins = "/{$id} plugins         列出全部继承 Violet 的插件"
 }
