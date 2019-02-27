@@ -333,6 +333,8 @@ public abstract class IManager<T extends IPlugin> {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setInstanceFollowRedirects(false);
             String text = conn.getHeaderField("Location");
+            text = text.substring(text.lastIndexOf('/'));
+            if (!text.matches("/v\\d\\.\\d\\.\\d")) return false;
             return !text.contains(plugin.getVersion());
         } catch (Throwable ignored) {
             return false;
