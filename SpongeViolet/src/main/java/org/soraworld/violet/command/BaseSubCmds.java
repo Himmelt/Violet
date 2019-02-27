@@ -7,6 +7,7 @@ import org.soraworld.violet.manager.FManager;
 import org.soraworld.violet.manager.VManager;
 import org.soraworld.violet.util.ListUtils;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 @Command(name = Violet.PLUGIN_ID, usage = "/violet lang|save|debug|reload|rextract|help|plugins ")
@@ -76,7 +77,7 @@ public final class BaseSubCmds {
     };
 
     @Tab(path = "help")
-    public final TabExecutor tab_help = (cmd, sender, args) -> ListUtils.getMatchList(args.first(), cmd.parent.subs.keySet());
+    public final TabExecutor tab_help = (cmd, sender, args) -> args.size() > 1 ? new ArrayList<>() : ListUtils.getMatchList(args.first(), cmd.parent.subs.keySet());
 
     @Sub(parent = Violet.PLUGIN_ID, perm = "admin", usage = "usage.plugins")
     public final SubExecutor plugins = (cmd, sender, args) -> {
