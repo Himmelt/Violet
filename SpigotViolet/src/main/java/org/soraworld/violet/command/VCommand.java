@@ -89,35 +89,40 @@ public class VCommand extends Command {
         Sub sub = field.getAnnotation(Sub.class);
         if (sub == null || Modifier.isStatic(field.getModifiers())) return;
         if (!sub.parent().isEmpty() && !sub.parent().equalsIgnoreCase(getName())) return;
-
-        SubExecutor<CommandSender> executor = null;
-        try {
-            executor = (SubExecutor) field.get(instance);
-        } catch (Throwable e) {
-            if (manager.isDebug()) e.printStackTrace();
-        }
-        if (executor == null) return;
-
-        Type[] params = Reflects.getActualTypes(SubExecutor.class, executor.getClass());
-        if (params == null || params.length != 1 || !Reflects.isAssignableFrom(CommandSender.class, params[0])) return;
-
         Paths paths = new Paths(sub.path().isEmpty() ? field.getName().toLowerCase() : sub.path().replace(' ', '_').replace(':', '_'));
         String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
         if ("admin".equalsIgnoreCase(perm)) perm = manager.defAdminPerm();
-        if (sub.path().equals(".")) {
-            this.subExecutor = executor;
-            this.exePermission = perm;
-            this.exeOnlyPlayer = sub.onlyPlayer() || Reflects.isAssignableFrom(Player.class, params[0]);
+
+        VCommand command;
+        if (!sub.virtual()) {
+            SubExecutor<CommandSender> executor = null;
+            try {
+                executor = (SubExecutor) field.get(instance);
+            } catch (Throwable e) {
+                if (manager.isDebug()) e.printStackTrace();
+            }
+            if (executor == null) return;
+            Type[] params = Reflects.getActualTypes(SubExecutor.class, executor.getClass());
+            if (params == null || params.length != 1 || !Reflects.isAssignableFrom(CommandSender.class, params[0])) return;
+
+            if (sub.path().equals(".")) {
+                this.subExecutor = executor;
+                this.exePermission = perm;
+                this.exeOnlyPlayer = sub.onlyPlayer() || Reflects.isAssignableFrom(Player.class, params[0]);
+                return;
+            }
+            command = createSub(paths);
+            command.subExecutor = executor;
+            command.onlyPlayer = command.onlyPlayer || sub.onlyPlayer() || Reflects.isAssignableFrom(Player.class, params[0]);
         } else {
-            VCommand command = createSub(paths);
-            if (!sub.virtual()) command.subExecutor = executor;
-            command.permission = perm;
-            command.onlyPlayer = sub.onlyPlayer() || Reflects.isAssignableFrom(Player.class, params[0]);
-            command.tabs.addAll(Arrays.asList(sub.tabs()));
-            command.aliases.addAll(Arrays.asList(sub.aliases()));
-            command.usageMessage = sub.usage();
-            command.update();
+            command = createSub(paths);
+            command.onlyPlayer = command.onlyPlayer || sub.onlyPlayer();
         }
+        command.permission = perm;
+        command.tabs.addAll(Arrays.asList(sub.tabs()));
+        command.aliases.addAll(Arrays.asList(sub.aliases()));
+        command.usageMessage = sub.usage();
+        command.update();
     }
 
     public void extractTab(@NotNull Object instance) {
