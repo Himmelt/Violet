@@ -67,6 +67,9 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
         if (manager == null) {
             Class<?> clazz = mainManagerClass;
             if (clazz != null && IManager.class.isAssignableFrom(clazz)) {
+                Sponge.getServer().getConsole().sendMessage(
+                        Text.of("[" + getName() + "] Injecting @MainManager class - " + clazz.getName())
+                );
                 Constructor[] constructors = clazz.getConstructors();
                 for (Constructor constructor : constructors) {
                     Class<?>[] params = constructor.getParameterTypes();

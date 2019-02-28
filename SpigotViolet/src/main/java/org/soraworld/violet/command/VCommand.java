@@ -19,6 +19,9 @@ import java.util.stream.Collectors;
 
 public class VCommand extends Command {
 
+    private String exePermission = null;
+    private boolean exeOnlyPlayer = false;
+
     protected String name;
     protected String permission;
     protected boolean onlyPlayer;
@@ -101,14 +104,20 @@ public class VCommand extends Command {
         Paths paths = new Paths(sub.path().isEmpty() ? field.getName().toLowerCase() : sub.path().replace(' ', '_').replace(':', '_'));
         String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
         if ("admin".equalsIgnoreCase(perm)) perm = manager.defAdminPerm();
-        VCommand command = createSub(paths);
-        if (!sub.virtual()) command.subExecutor = executor;
-        command.permission = perm;
-        command.onlyPlayer = sub.onlyPlayer() || Reflects.isAssignableFrom(Player.class, params[0]);
-        command.tabs.addAll(Arrays.asList(sub.tabs()));
-        command.aliases.addAll(Arrays.asList(sub.aliases()));
-        command.usageMessage = sub.usage();
-        command.update();
+        if (sub.path().equals(".")) {
+            this.subExecutor = executor;
+            this.exePermission = perm;
+            this.exeOnlyPlayer = sub.onlyPlayer() || Reflects.isAssignableFrom(Player.class, params[0]);
+        } else {
+            VCommand command = createSub(paths);
+            if (!sub.virtual()) command.subExecutor = executor;
+            command.permission = perm;
+            command.onlyPlayer = sub.onlyPlayer() || Reflects.isAssignableFrom(Player.class, params[0]);
+            command.tabs.addAll(Arrays.asList(sub.tabs()));
+            command.aliases.addAll(Arrays.asList(sub.aliases()));
+            command.usageMessage = sub.usage();
+            command.update();
+        }
     }
 
     public void extractTab(@NotNull Object instance) {
@@ -175,19 +184,21 @@ public class VCommand extends Command {
 
     /* ---------------------------------------- modify start -------------------------------------------- */
 
+    /* 执行器非空时，参数优先为子命令 */
     public void execute(CommandSender sender, Args args) {
         if (testPermission(sender)) {
             if (!onlyPlayer || sender instanceof Player) {
-                if (subExecutor == null) {
-                    if (args.notEmpty()) {
-                        VCommand sub = subs.get(args.first());
-                        if (sub != null) {
-                            sub.execute(sender, args.next());
-                            return;
-                        }
-                    }
-                    sendUsage(sender);
-                } else subExecutor.execute(this, sender, args);
+                if (args.notEmpty()) {
+                    VCommand sub = subs.get(args.first());
+                    if (sub != null) sub.execute(sender, args.next());
+                }
+                if (subExecutor != null) {
+                    if (exePermission == null || sender.hasPermission(exePermission)) {
+                        if (!exeOnlyPlayer || sender instanceof Player) {
+                            subExecutor.execute(this, sender, args);
+                        } else manager.sendKey(sender, "onlyPlayer");
+                    } else manager.sendKey(sender, "noCommandPerm", exePermission);
+                } else sendUsage(sender);
             } else manager.sendKey(sender, "onlyPlayer");
         } else manager.sendKey(sender, "noCommandPerm", permission);
     }

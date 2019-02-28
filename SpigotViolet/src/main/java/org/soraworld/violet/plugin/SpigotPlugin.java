@@ -75,6 +75,9 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
         if (manager == null) {
             Class<?> clazz = mainManagerClass;
             if (clazz != null && IManager.class.isAssignableFrom(clazz)) {
+                Bukkit.getConsoleSender().sendMessage(
+                        "[" + getName() + "] Injecting @MainManager class - " + clazz.getName()
+                );
                 Constructor[] constructors = clazz.getConstructors();
                 for (Constructor constructor : constructors) {
                     Class<?>[] params = constructor.getParameterTypes();
