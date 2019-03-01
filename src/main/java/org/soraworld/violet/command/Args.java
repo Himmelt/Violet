@@ -33,7 +33,7 @@ public class Args {
      * @param path 参数树原始字符串
      */
     public Args(String path) {
-        this.paths = path == null ? new String[]{} : path.trim().split("[ ]+");
+        this.paths = path == null || path.isEmpty() || path.equals(" ") ? new String[]{} : path.trim().split("[ ]+");
         this.length = this.paths.length;
         this.current = 0;
         this.origin = path;
