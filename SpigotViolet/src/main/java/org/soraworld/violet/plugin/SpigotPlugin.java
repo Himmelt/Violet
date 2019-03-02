@@ -58,8 +58,8 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
             for (Class<?> clazz : ClassUtils.getClasses(jarFile, getClass().getPackage().getName())) {
                 if (clazz.getAnnotation(Command.class) != null) commandClasses.add(clazz);
                 if (clazz.getAnnotation(EventListener.class) != null) listenerClasses.add(clazz);
-                if (clazz.getAnnotation(Inject.class) != null) injectClasses.add(clazz);
                 if (clazz.getAnnotation(MainManager.class) != null) mainManagerClass = clazz;
+                if (clazz.getAnnotation(Inject.class) != null) injectClasses.add(clazz);
             }
         } else Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Plugin Jar File NOT exist !!!");
     }

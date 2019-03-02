@@ -6,7 +6,7 @@ version = '2.4.0'
 sourceCompatibility = targetCompatibility = 1.8
 
 dependencies {
-    compile 'org.soraworld:hocon:1.2.0'
+    compile 'org.soraworld:hocon:1.2.1'
     testCompile 'junit:junit:4.12'
 }
 
@@ -32,7 +32,7 @@ subprojects {
     }
     dependencies {
         shadeOnly rootProject
-        shadow 'org.soraworld:hocon:1.2.0'
+        shadow 'org.soraworld:hocon:1.2.1'
         testCompile 'junit:junit:4.12'
     }
     task sourcesJar(type: Jar) {

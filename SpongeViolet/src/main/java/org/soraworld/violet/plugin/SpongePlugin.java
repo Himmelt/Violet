@@ -7,6 +7,7 @@ import org.soraworld.violet.command.BaseSubCmds;
 import org.soraworld.violet.command.VCommand;
 import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.inject.EventListener;
+import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.inject.MainManager;
 import org.soraworld.violet.listener.UpdateListener;
 import org.soraworld.violet.manager.IManager;
@@ -22,7 +23,6 @@ import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -36,10 +36,10 @@ import java.util.List;
 
 public class SpongePlugin<M extends VManager> implements IPlugin<M> {
 
-    @Inject
+    @javax.inject.Inject
     @ConfigDir(sharedRoot = false)
     protected Path path;
-    @Inject
+    @javax.inject.Inject
     protected PluginContainer container;
 
     protected M manager;
@@ -55,8 +55,8 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
                 for (Class<?> clazz : ClassUtils.getClasses(jarFile, getClass().getPackage().getName())) {
                     if (clazz.getAnnotation(Command.class) != null) commandClasses.add(clazz);
                     if (clazz.getAnnotation(EventListener.class) != null) listenerClasses.add(clazz);
-                    if (clazz.getAnnotation(Inject.class) != null) injectClasses.add(clazz);
                     if (clazz.getAnnotation(MainManager.class) != null) mainManagerClass = clazz;
+                    if (clazz.getAnnotation(Inject.class) != null) injectClasses.add(clazz);
                 }
             } else Sponge.getServer().getConsole().sendMessage(Text.of(ChatColor.RED + "Plugin Jar File NOT exist !!!"));
         });
@@ -132,11 +132,10 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
     }
 
     private void injectIntoStatic(@NotNull Class<?> clazz) {
-        IManager manager = getManager();
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             if (!Modifier.isStatic(field.getModifiers())) continue;
-            org.soraworld.violet.inject.Inject inject = field.getAnnotation(org.soraworld.violet.inject.Inject.class);
+            Inject inject = field.getAnnotation(Inject.class);
             if (inject != null) {
                 field.setAccessible(true);
                 if (field.getType().isAssignableFrom(manager.getClass())) {
@@ -160,7 +159,7 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
         Field[] fields = instance.getClass().getDeclaredFields();
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers())) continue;
-            org.soraworld.violet.inject.Inject inject = field.getAnnotation(org.soraworld.violet.inject.Inject.class);
+            Inject inject = field.getAnnotation(Inject.class);
             if (inject != null) {
                 field.setAccessible(true);
                 if (field.getType().isAssignableFrom(manager.getClass())) {
