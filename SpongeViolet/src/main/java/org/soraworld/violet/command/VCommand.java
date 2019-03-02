@@ -161,6 +161,11 @@ public class VCommand implements CommandCallable {
         Type[] params = Reflects.getActualTypes(TabExecutor.class, executor.getClass());
         if (params == null || params.length != 1 || !Reflects.isAssignableFrom(CommandSource.class, params[0])) return;
 
+        if (tab.path().equals(".")) {
+            this.tabExecutor = executor;
+            return;
+        }
+
         Paths paths = new Paths(tab.path().isEmpty() ? field.getName().toLowerCase() : tab.path().replace(' ', '_').replace(':', '_'));
         VCommand command = getSub(paths);
         if (command != null) command.tabExecutor = executor;
