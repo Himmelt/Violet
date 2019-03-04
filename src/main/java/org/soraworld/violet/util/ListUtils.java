@@ -14,4 +14,12 @@ public class ListUtils {
         else for (String s : possibles) if (s.startsWith(text)) list.add(s);
         return list;
     }
+
+    @NotNull
+    public static List<String> getMatchListIgnoreCase(@NotNull String text, @NotNull Collection<String> possibles) {
+        ArrayList<String> list = new ArrayList<>();
+        if (text.isEmpty()) list.addAll(possibles);
+        else for (String s : possibles) if (s.toLowerCase().startsWith(text.toLowerCase())) list.add(s);
+        return list;
+    }
 }
