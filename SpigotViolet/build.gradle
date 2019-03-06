@@ -29,9 +29,11 @@ publishing {
 }
 
 bintray {
-    key = BINTRAY_KEY
-    user = BINTRAY_USER
+    key = _BINTRAY_KEY
+    user = _BINTRAY_USER
     publications = ['mavenJava']
+    publish = true
+    override = true
     pkg {
         repo = 'Minecraft'
         name = 'Violet'

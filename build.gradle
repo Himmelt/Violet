@@ -3,6 +3,11 @@ apply plugin: 'java'
 group = 'org.soraworld'
 version = '2.4.0'
 
+ext {
+    _BINTRAY_KEY = System.getenv('BINTRAY_KEY') != null ? System.getenv('BINTRAY_KEY') : BINTRAY_KEY
+    _BINTRAY_USER = System.getenv('BINTRAY_USER') != null ? System.getenv('BINTRAY_USER') : BINTRAY_USER
+}
+
 sourceCompatibility = targetCompatibility = 1.8
 
 repositories {
@@ -28,17 +33,23 @@ subprojects {
         options.encoding = 'UTF-8'
     }
 
+    repositories {
+        jcenter()
+    }
+
     configurations {
         shadow
         compile.extendsFrom(shadow)
         shadeOnly
         compileOnly.extendsFrom(shadeOnly)
     }
+
     dependencies {
         shadeOnly rootProject
         shadow 'org.soraworld:hocon:1.2.1'
         testCompile 'junit:junit:4.12'
     }
+
     task sourcesJar(type: Jar) {
         classifier = 'sources'
         from sourceSets.main.allJava, rootProject.sourceSets.main.allJava
