@@ -3,7 +3,8 @@ Violet Library Plugin
 # 紫罗兰
 紫罗兰 Spigot/Sponge 模板插件
 
-[ ![Download](https://api.bintray.com/packages/himmelt/Minecraft/Violet/images/download.svg) ](https://bintray.com/himmelt/Minecraft/Violet/_latestVersion)
+[![Build Status](https://travis-ci.org/Himmelt/Violet.svg?branch=master)](https://travis-ci.org/Himmelt/Violet)
+[![Download](https://api.bintray.com/packages/himmelt/Minecraft/Violet/images/download.svg)](https://bintray.com/himmelt/Minecraft/Violet/_latestVersion)
 
 ### 简介
 这是一个模板插件，可以省去部分重复工作，加速插件开发。
