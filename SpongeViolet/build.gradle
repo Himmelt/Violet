@@ -20,6 +20,7 @@ publishing {
             groupId = 'org.soraworld'
             artifactId = 'violet-sponge'
             version = project.version
+            artifact shadowJar
             artifact sourcesJar
             artifact javadocJar
         }

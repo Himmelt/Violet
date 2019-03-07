@@ -31,6 +31,7 @@ publishing {
             groupId = 'org.soraworld'
             artifactId = 'violet-spigot'
             version = project.version
+            artifact shadowJar
             artifact sourcesJar
             artifact javadocJar
         }

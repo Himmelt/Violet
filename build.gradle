@@ -57,7 +57,7 @@ subprojects {
         classifier = 'sources'
         from sourceSets.main.allJava, rootProject.sourceSets.main.allJava
         includeEmptyDirs = false
-        exclude 'net/minecraft/server','org/bukkit/craftbukkit'
+        exclude 'net/minecraft/server', 'org/bukkit/craftbukkit'
     }
     javadoc {
         options.encoding = 'UTF-8'
@@ -69,28 +69,29 @@ subprojects {
         classifier = 'javadoc'
         from javadoc.destinationDir
         includeEmptyDirs = false
-        exclude 'net/minecraft/server','org/bukkit/craftbukkit'
+        exclude 'net/minecraft/server', 'org/bukkit/craftbukkit'
     }
     jar {
         configurations.shadeOnly.copyRecursive().setTransitive(false).each {
             artifact -> from(zipTree(artifact))
         }
         includeEmptyDirs = false
-        exclude 'net/minecraft/server','org/bukkit/craftbukkit'
+        exclude 'net/minecraft/server', 'org/bukkit/craftbukkit'
     }
-    task release(type: Jar, dependsOn: build) {
+    task shadowJar(type: Jar) {
         classifier = 'shadow'
         from sourceSets.main.output, rootProject.sourceSets.main.output
         configurations.shadow.copyRecursive().setTransitive(false).each {
             artifact -> from(zipTree(artifact))
         }
         includeEmptyDirs = false
-        exclude 'net/minecraft/server','org/bukkit/craftbukkit'
+        exclude 'net/minecraft/server', 'org/bukkit/craftbukkit'
     }
     artifacts {
         archives jar
         archives javadocJar
         archives sourcesJar
+        archives shadowJar
     }
 }
 
