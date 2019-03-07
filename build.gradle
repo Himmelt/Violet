@@ -1,7 +1,10 @@
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+
 apply plugin: 'java'
 
 group = 'org.soraworld'
-version = '2.4.0'
+version = getVioletVersion()
 
 ext {
     _BINTRAY_KEY = System.getenv('BINTRAY_KEY') != null ? System.getenv('BINTRAY_KEY') : BINTRAY_KEY
@@ -53,6 +56,8 @@ subprojects {
     task sourcesJar(type: Jar) {
         classifier = 'sources'
         from sourceSets.main.allJava, rootProject.sourceSets.main.allJava
+        includeEmptyDirs = false
+        exclude 'net/minecraft/server','org/bukkit/craftbukkit'
     }
     javadoc {
         options.encoding = 'UTF-8'
@@ -63,11 +68,15 @@ subprojects {
     task javadocJar(type: Jar, dependsOn: javadoc) {
         classifier = 'javadoc'
         from javadoc.destinationDir
+        includeEmptyDirs = false
+        exclude 'net/minecraft/server','org/bukkit/craftbukkit'
     }
     jar {
         configurations.shadeOnly.copyRecursive().setTransitive(false).each {
             artifact -> from(zipTree(artifact))
         }
+        includeEmptyDirs = false
+        exclude 'net/minecraft/server','org/bukkit/craftbukkit'
     }
     task release(type: Jar, dependsOn: build) {
         classifier = 'shadow'
@@ -75,6 +84,8 @@ subprojects {
         configurations.shadow.copyRecursive().setTransitive(false).each {
             artifact -> from(zipTree(artifact))
         }
+        includeEmptyDirs = false
+        exclude 'net/minecraft/server','org/bukkit/craftbukkit'
     }
     artifacts {
         archives jar
@@ -87,25 +98,13 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
-compileJava.doFirst {
-    replaceVersion()
-}
-
-void replaceVersion() {
-    def violet = new File("src/main/java/org/soraworld/violet/Violet.java")
-    def plugin = new File("SpigotViolet/src/main/resources/plugin.yml")
-
-    def text = violet.newReader("UTF-8").text
-    text = text.replaceAll("PLUGIN_VERSION = \"[0-9].[0-9].[0-9]\"", "PLUGIN_VERSION = \"" + rootProject.version.toString() + "\"")
-    def writer = violet.newWriter("UTF-8")
-    writer.write(text)
-    writer.flush()
-    writer.close()
-
-    text = plugin.newReader("UTF-8").text
-    text = text.replaceAll("version: [0-9].[0-9].[0-9]", "version: " + rootProject.version.toString())
-    writer = plugin.newWriter("UTF-8")
-    writer.write(text)
-    writer.flush()
-    writer.close()
+static String getVioletVersion() {
+    Pattern pattern1 = Pattern.compile("PLUGIN_VERSION = \"[0-9].[0-9].[0-9]\"")
+    Pattern pattern2 = Pattern.compile("[0-9].[0-9].[0-9]")
+    Matcher matcher1 = pattern1.matcher(new File("src/main/java/org/soraworld/violet/Violet.java").newReader("UTF-8").text)
+    if (matcher1.find()) {
+        Matcher matcher2 = pattern2.matcher(matcher1.group())
+        if (matcher2.find()) return matcher2.group()
+    }
+    return "x.y.z"
 }
