@@ -24,6 +24,7 @@ public class VCommand implements CommandCallable {
 
     private String exePermission = null;
     private boolean exeOnlyPlayer = false;
+    private boolean tabOnlyPlayer = false;
 
     protected String name;
     protected String usageMessage;
@@ -163,12 +164,16 @@ public class VCommand implements CommandCallable {
 
         if (tab.path().equals(".")) {
             this.tabExecutor = executor;
+            this.tabOnlyPlayer = Reflects.isAssignableFrom(Player.class, params[0]);
             return;
         }
 
         Paths paths = new Paths(tab.path().isEmpty() ? field.getName().toLowerCase() : tab.path().replace(' ', '_').replace(':', '_'));
         VCommand command = getSub(paths);
-        if (command != null) command.tabExecutor = executor;
+        if (command != null) {
+            command.tabExecutor = executor;
+            command.tabOnlyPlayer = Reflects.isAssignableFrom(Player.class, params[0]);
+        }
     }
 
     public void sendUsage(CommandSource sender) {
@@ -195,6 +200,10 @@ public class VCommand implements CommandCallable {
         this.tabs.addAll(tabs);
     }
 
+    public List<String> getTabs() {
+        return new ArrayList<>(tabs);
+    }
+
     /* ---------------------------------------- modify start -------------------------------------------- */
 
     /* 执行器非空时，参数优先为子命令 */
@@ -219,15 +228,17 @@ public class VCommand implements CommandCallable {
         } else manager.sendKey(sender, "noCommandPerm", permission);
     }
 
-    public List<String> tabComplete(CommandSource sender, Args args) {
-        if (tabExecutor != null) return tabExecutor.complete(this, sender, args);
+    public List<String> tabComplete(CommandSource sender, Args args, boolean skipExecutor) {
+        if (!skipExecutor && tabExecutor != null && (!tabOnlyPlayer || sender instanceof Player)) {
+            return tabExecutor.complete(this, sender, args);
+        }
         String first = args.first();
         if (args.size() == 1) {
             return ListUtils.getMatchList(first, !tabs.isEmpty() ? tabs : subs.keySet().stream().filter(s -> subs.get(s).testPermission(sender)).collect(Collectors.toList()));
         }
         if (subs.containsKey(first) && subs.get(first).testPermission(sender)) {
             args.next();
-            return subs.get(first).tabComplete(sender, args);
+            return subs.get(first).tabComplete(sender, args, false);
         }
         return new ArrayList<>();
     }
@@ -265,7 +276,7 @@ public class VCommand implements CommandCallable {
             ss = Arrays.copyOf(ss, ss.length + 1);
             ss[ss.length - 1] = "";
         }
-        return tabComplete(sender, new Args(ss));
+        return tabComplete(sender, new Args(ss), false);
     }
 
     public boolean testPermission(@NotNull CommandSource sender) {
