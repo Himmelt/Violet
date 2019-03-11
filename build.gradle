@@ -3,7 +3,12 @@ import java.util.regex.Pattern
 
 buildscript {
     repositories {
-        jcenter()
+        maven {
+            url = 'https://plugins.gradle.org/m2/'
+        }
+        maven {
+            url = 'https://maven.aliyun.com/repository/public/'
+        }
     }
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:latest.release'
@@ -27,6 +32,9 @@ ext {
 sourceCompatibility = targetCompatibility = 1.8
 
 repositories {
+    maven {
+        url = 'https://maven.aliyun.com/repository/public/'
+    }
     jcenter()
     maven {
         url = 'https://oss.jfrog.org/artifactory/libs-snapshot/'
@@ -55,6 +63,9 @@ subprojects {
     }
 
     repositories {
+        maven {
+            url = 'https://maven.aliyun.com/repository/public/'
+        }
         jcenter()
         maven {
             url = 'https://oss.jfrog.org/artifactory/libs-snapshot/'
