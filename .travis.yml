@@ -11,5 +11,4 @@ cache:
 script:
   - gradle clean
   - gradle build
-  - gradle :SpigotViolet:bintrayUpload
-  - gradle :SpongeViolet:bintrayUpload
+  - gradle test

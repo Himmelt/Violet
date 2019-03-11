@@ -1,10 +1,23 @@
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:latest.release'
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:latest.release"
+    }
+}
+
 apply plugin: 'java'
 
 group = 'org.soraworld'
-version = getVioletVersion()
+version = getVioletVersion().concat(isMasterBranch() ? '' : '-SNAPSHOT')
+
+println 'Current Branch  ' + gitBranch()
+println 'Current Version ' + project.version
 
 ext {
     _BINTRAY_KEY = System.getenv('BINTRAY_KEY') != null ? System.getenv('BINTRAY_KEY') : BINTRAY_KEY
@@ -29,6 +42,8 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
+    apply plugin: 'com.jfrog.bintray'
+    apply plugin: 'com.jfrog.artifactory'
 
     group rootProject.group
     version rootProject.version
@@ -65,18 +80,21 @@ subprojects {
         includeEmptyDirs = false
         exclude 'net/minecraft/server', 'org/bukkit/craftbukkit'
     }
+
     javadoc {
         options.encoding = 'UTF-8'
         options.charSet = 'UTF-8'
         source = sourceSets.main.allJava
         source += rootProject.sourceSets.main.allJava
     }
+
     task javadocJar(type: Jar, dependsOn: javadoc) {
         classifier = 'javadoc'
         from javadoc.destinationDir
         includeEmptyDirs = false
         exclude 'net/minecraft/server', 'org/bukkit/craftbukkit'
     }
+
     jar {
         configurations.shadeOnly.copyRecursive().setTransitive(false).each {
             artifact -> from(zipTree(artifact))
@@ -84,6 +102,7 @@ subprojects {
         includeEmptyDirs = false
         exclude 'net/minecraft/server', 'org/bukkit/craftbukkit'
     }
+
     task shadowJar(type: Jar) {
         classifier = 'shadow'
         from sourceSets.main.output, rootProject.sourceSets.main.output
@@ -93,12 +112,52 @@ subprojects {
         includeEmptyDirs = false
         exclude 'net/minecraft/server', 'org/bukkit/craftbukkit'
     }
+
     artifacts {
         archives jar
         archives javadocJar
         archives sourcesJar
         archives shadowJar
     }
+
+    bintray {
+        key = _BINTRAY_KEY
+        user = _BINTRAY_USER
+        publications = ['mavenRelease']
+        publish = true
+        override = true
+        pkg {
+            repo = 'Minecraft'
+            name = 'Violet'
+            licenses = ['MIT']
+            vcsUrl = 'https://github.com/Himmelt/Violet.git'
+            publicDownloadNumbers = true
+            version {
+                name = project.version
+                desc = 'Violet Plugin Library.'
+                released = new Date()
+            }
+        }
+    }
+
+    artifactory {
+        contextUrl = 'https://oss.jfrog.org/artifactory'
+        publish {
+            repository {
+                repoKey = 'oss-snapshot-local'
+                username = _BINTRAY_USER
+                password = _BINTRAY_KEY
+                maven = true
+            }
+            defaults {
+                publications('mavenSnapshot')
+            }
+        }
+    }
+
+    task publishMaven()
+
+    tasks.publishMaven.dependsOn(isMasterBranch() ? 'bintrayUpload' : 'artifactoryPublish')
 }
 
 tasks.withType(JavaCompile) {
@@ -114,4 +173,19 @@ static String getVioletVersion() {
         if (matcher2.find()) return matcher2.group()
     }
     return "x.y.z"
+}
+
+static String gitBranch() {
+    def branch = System.getenv('CIRCLE_BRANCH')
+    if (branch != null) return branch.trim()
+    branch = System.getenv('TRAVIS_BRANCH')
+    if (branch != null) return branch.trim()
+    branch = 'unknown'
+    def info = 'git branch'.execute().text.trim()
+    info.eachLine { line -> if (line.contains('*')) branch = line.replace('*', '').trim() }
+    return branch
+}
+
+static boolean isMasterBranch() {
+    return gitBranch().equalsIgnoreCase('master')
 }

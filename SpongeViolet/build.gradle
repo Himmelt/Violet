@@ -1,5 +1,4 @@
 plugins {
-    id "com.jfrog.bintray" version "1.8.0"
     id 'org.spongepowered.plugin' version '0.9.0'
 }
 
@@ -15,7 +14,7 @@ dependencies {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        mavenRelease(MavenPublication) {
             from components.java
             groupId = 'org.soraworld'
             artifactId = 'violet-sponge'
@@ -24,25 +23,12 @@ publishing {
             artifact sourcesJar
             artifact javadocJar
         }
-    }
-}
-
-bintray {
-    key = _BINTRAY_KEY
-    user = _BINTRAY_USER
-    publications = ['mavenJava']
-    publish = true
-    override = true
-    pkg {
-        repo = 'Minecraft'
-        name = 'Violet'
-        licenses = ['MIT']
-        vcsUrl = 'https://github.com/Himmelt/Violet.git'
-        publicDownloadNumbers = true
-        version {
-            name = project.version
-            desc = 'Violet Plugin Library.'
-            released = new Date()
+        mavenSnapshot(MavenPublication) {
+            from components.java
+            groupId = 'org.soraworld'
+            artifactId = 'violet-sponge'
+            version = project.version
+            artifact sourcesJar
         }
     }
 }
