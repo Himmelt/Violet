@@ -27,6 +27,8 @@ println 'Current Version ' + project.version
 ext {
     _BINTRAY_KEY = System.getenv('BINTRAY_KEY') != null ? System.getenv('BINTRAY_KEY') : BINTRAY_KEY
     _BINTRAY_USER = System.getenv('BINTRAY_USER') != null ? System.getenv('BINTRAY_USER') : BINTRAY_USER
+    _REPO_KEY = isMasterBranch() ? 'oss-release-local' : 'oss-snapshot-local'
+    _PUBLISH_CFG = isMasterBranch() ? 'mavenRelease' : 'mavenSnapshot'
 }
 
 sourceCompatibility = targetCompatibility = 1.8
@@ -155,20 +157,16 @@ subprojects {
         contextUrl = 'https://oss.jfrog.org/artifactory'
         publish {
             repository {
-                repoKey = 'oss-snapshot-local'
+                repoKey = _REPO_KEY
                 username = _BINTRAY_USER
                 password = _BINTRAY_KEY
                 maven = true
             }
             defaults {
-                publications('mavenSnapshot')
+                publications(_PUBLISH_CFG)
             }
         }
     }
-
-    task publishMaven()
-
-    tasks.publishMaven.dependsOn(isMasterBranch() ? 'bintrayUpload' : 'artifactoryPublish')
 }
 
 tasks.withType(JavaCompile) {
