@@ -3,7 +3,8 @@ Violet Library Plugin
 # 紫罗兰
 紫罗兰 Spigot/Sponge 模板插件
 
-[![Build Status](https://travis-ci.org/Himmelt/Violet.svg?branch=master)](https://travis-ci.org/Himmelt/Violet)
+[![TravisCI](https://img.shields.io/travis/Himmelt/Violet/master.svg?label=TravisCI&style=flat-square)](https://travis-ci.org/Himmelt/Violet)
+[![CircleCI](https://img.shields.io/circleci/project/github/Himmelt/Violet/master.svg?label=CircleCI&style=flat-square)](https://circleci.com/gh/Himmelt/Violet)
 [![Download](https://api.bintray.com/packages/himmelt/Minecraft/Violet/images/download.svg)](https://bintray.com/himmelt/Minecraft/Violet/_latestVersion)
 
 ### 简介
