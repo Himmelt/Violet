@@ -222,6 +222,10 @@ public class VCommand extends Command {
         } else manager.sendKey(sender, "noCommandPerm", permission);
     }
 
+    public List<String> tabComplete(CommandSender sender, Args args) {
+        return tabComplete(sender, args, false);
+    }
+
     public List<String> tabComplete(CommandSender sender, Args args, boolean skipExecutor) {
         if (!skipExecutor && tabExecutor != null && (!tabOnlyPlayer || sender instanceof Player)) {
             return tabExecutor.complete(this, sender, args);
