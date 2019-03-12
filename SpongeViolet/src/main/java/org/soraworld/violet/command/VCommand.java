@@ -242,7 +242,7 @@ public class VCommand implements CommandCallable {
         }
         if (subs.containsKey(first) && subs.get(first).testPermission(sender)) {
             args.next();
-            return subs.get(first).tabComplete(sender, args, false);
+            return subs.get(first).tabComplete(sender, args);
         }
         return new ArrayList<>();
     }
@@ -280,7 +280,7 @@ public class VCommand implements CommandCallable {
             ss = Arrays.copyOf(ss, ss.length + 1);
             ss[ss.length - 1] = "";
         }
-        return tabComplete(sender, new Args(ss), false);
+        return tabComplete(sender, new Args(ss));
     }
 
     public boolean testPermission(@NotNull CommandSource sender) {

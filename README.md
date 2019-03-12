@@ -3,9 +3,15 @@ Violet Library Plugin
 # 紫罗兰
 紫罗兰 Spigot/Sponge 模板插件
 
-[![TravisCI](https://img.shields.io/travis/Himmelt/Violet/master.svg?label=TravisCI&style=flat-square)](https://travis-ci.org/Himmelt/Violet)
-[![CircleCI](https://img.shields.io/circleci/project/github/Himmelt/Violet/master.svg?label=CircleCI&style=flat-square)](https://circleci.com/gh/Himmelt/Violet)
+[![TravisCI](https://img.shields.io/travis/Himmelt/Violet/master.svg?label=TravisCI&logo=travis-ci)](https://travis-ci.org/Himmelt/Violet)
+[![CircleCI](https://img.shields.io/circleci/project/github/Himmelt/Violet/master.svg?label=CircleCI&logo=circleci)](https://circleci.com/gh/Himmelt/Violet)
+[![License](https://img.shields.io/github/license/Himmelt/Violet.svg?color=important)](https://github.com/Himmelt/Violet/blob/master/LICENSE)
+
 [![Download](https://api.bintray.com/packages/himmelt/Minecraft/Violet/images/download.svg)](https://bintray.com/himmelt/Minecraft/Violet/_latestVersion)
+[![Download](https://img.shields.io/badge/Download-release|spigot-success.svg)](https://oss.jfrog.org/artifactory/libs-release/org/soraworld/violet-spigot/)
+[![Download](https://img.shields.io/badge/Download-release|sponge-success.svg)](https://oss.jfrog.org/artifactory/libs-release/org/soraworld/violet-sponge/)
+[![Download](https://img.shields.io/badge/Download-snapshot|spigot-success.svg)](https://oss.jfrog.org/artifactory/libs-snapshot/org/soraworld/violet-spigot/)
+[![Download](https://img.shields.io/badge/Download-snapshot|sponge-success.svg)](https://oss.jfrog.org/artifactory/libs-snapshot/org/soraworld/violet-sponge/)
 
 ### 简介
 这是一个模板插件，可以省去部分重复工作，加速插件开发。

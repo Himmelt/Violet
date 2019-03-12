@@ -236,7 +236,7 @@ public class VCommand extends Command {
         }
         if (subs.containsKey(first) && subs.get(first).testPermission(sender)) {
             args.next();
-            return subs.get(first).tabComplete(sender, args, false);
+            return subs.get(first).tabComplete(sender, args);
         }
         return new ArrayList<>();
     }
@@ -281,11 +281,11 @@ public class VCommand extends Command {
     }
 
     public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
-        return tabComplete(sender, new Args(args), false);
+        return tabComplete(sender, new Args(args));
     }
 
     public List<String> tabComplete(CommandSender sender, String alias, String[] args, Location location) {
-        return tabComplete(sender, new Args(args), false);
+        return tabComplete(sender, new Args(args));
     }
 
     public boolean testPermission(CommandSender sender) {
