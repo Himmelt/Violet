@@ -39,7 +39,7 @@ repositories {
     }
     jcenter()
     maven {
-        url = 'https://oss.jfrog.org/artifactory/libs-snapshot/'
+        url = 'https://oss.jfrog.org/artifactory/oss-snapshot-local/'
     }
 }
 
@@ -70,7 +70,7 @@ subprojects {
         }
         jcenter()
         maven {
-            url = 'https://oss.jfrog.org/artifactory/libs-snapshot/'
+            url = 'https://oss.jfrog.org/artifactory/oss-snapshot-local/'
         }
     }
 
