@@ -275,8 +275,7 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
     @Nullable
     public VCommand registerCommand(@NotNull Command annotation) {
         String perm = annotation.perm();
-        if (perm.isEmpty()) perm = null;
-        else if (perm.equalsIgnoreCase("admin")) perm = manager.defAdminPerm();
+        perm = manager.mappingPerm(perm);
         VCommand command = new VCommand(annotation.name(), perm, annotation.onlyPlayer(), null, manager);
         command.setAliases(Arrays.asList(annotation.aliases()));
         command.setTabs(Arrays.asList(annotation.tabs()));

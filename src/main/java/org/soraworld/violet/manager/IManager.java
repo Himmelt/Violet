@@ -58,6 +58,8 @@ public abstract class IManager<T extends IPlugin> {
      */
     @Setting(comment = "comment.saveOnDisable")
     protected boolean saveOnDisable = true;
+    @Setting(comment = "comment.permMap")
+    protected HashMap<String, String> permMap = new HashMap<>();
 
     /**
      * 纯文本抬头.
@@ -184,6 +186,7 @@ public abstract class IManager<T extends IPlugin> {
         try {
             rootNode.load(true, true);
             rootNode.modify(this);
+            permMap.putIfAbsent("admin", defAdminPerm());
             if (!setLang(lang) && !defLang.equalsIgnoreCase(lang)) setLang(defLang);
             options.setDebug(debug);
             reloadSuccess = true;
@@ -205,6 +208,7 @@ public abstract class IManager<T extends IPlugin> {
         reloadSuccess = true;
         version = getPlugin().getVersion();
         try {
+            permMap.putIfAbsent("admin", defAdminPerm());
             rootNode.extract(this);
             rootNode.save();
             return true;
@@ -339,6 +343,10 @@ public abstract class IManager<T extends IPlugin> {
         } catch (Throwable ignored) {
             return false;
         }
+    }
+
+    public String mappingPerm(String perm) {
+        return permMap.getOrDefault(perm, perm);
     }
 
     public abstract ChatColor defChatColor();

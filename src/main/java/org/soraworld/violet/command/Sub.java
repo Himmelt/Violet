@@ -13,6 +13,7 @@ import java.lang.annotation.*;
 public @interface Sub {
 
     String parent() default "";
+
     /**
      * 命令树, 用 . 分隔
      * 大写字母会被转换为小写字母.
@@ -32,7 +33,7 @@ public @interface Sub {
 
     /**
      * 权限.
-     * 如果填 "admin" 则 使用 Manager 的 defaultAdmin()
+     * 此处权限会经过配置文件的权限映射表处理.
      *
      * @return 权限
      */

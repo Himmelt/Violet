@@ -95,7 +95,7 @@ public class VCommand implements CommandCallable {
         if (!sub.parent().isEmpty() && !sub.parent().equalsIgnoreCase(getName())) return;
         Paths paths = new Paths(sub.path().isEmpty() ? field.getName().toLowerCase() : sub.path().replace(' ', '_').replace(':', '_'));
         String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
-        if ("admin".equalsIgnoreCase(perm)) perm = manager.defAdminPerm();
+        perm = manager.mappingPerm(perm);
 
         VCommand command;
         if (!sub.virtual()) {
