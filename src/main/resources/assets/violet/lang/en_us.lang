@@ -55,6 +55,7 @@ comment {
   autoBackUp = "Backup all config files while version changed."
   checkUpdate = "Check update."
   saveOnDisable = "Save config file on disable plugin, precondition is last load action is success."
+  permMap = "Custom permissions mapping, using to customize permission string."
   disableCmds = "Sub commands to disable, key is the name of the command, value is a list of disabled sub cmds.(need restart)"
 }
 
