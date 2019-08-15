@@ -218,7 +218,7 @@ public class VCommand implements CommandCallable {
                     }
                 }
                 if (subExecutor != null) {
-                    if (exePermission == null || sender.hasPermission(exePermission)) {
+                    if (exePermission == null || exePermission.isEmpty() || sender.hasPermission(exePermission)) {
                         if (!exeOnlyPlayer || sender instanceof Player) {
                             subExecutor.execute(this, sender, args);
                         } else manager.sendKey(sender, "onlyPlayer");
@@ -284,7 +284,7 @@ public class VCommand implements CommandCallable {
     }
 
     public boolean testPermission(@NotNull CommandSource sender) {
-        return permission == null || sender.hasPermission(permission);
+        return permission == null || permission.isEmpty() || sender.hasPermission(permission);
     }
 
     public String getUsage() {

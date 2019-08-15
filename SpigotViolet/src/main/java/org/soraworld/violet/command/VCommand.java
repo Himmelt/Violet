@@ -212,7 +212,7 @@ public class VCommand extends Command {
                     if (sub != null) sub.execute(sender, args.next());
                 }
                 if (subExecutor != null) {
-                    if (exePermission == null || sender.hasPermission(exePermission)) {
+                    if (exePermission == null || exePermission.isEmpty() || sender.hasPermission(exePermission)) {
                         if (!exeOnlyPlayer || sender instanceof Player) {
                             subExecutor.execute(this, sender, args);
                         } else manager.sendKey(sender, "onlyPlayer");

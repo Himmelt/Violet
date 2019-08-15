@@ -9,6 +9,7 @@ import org.soraworld.violet.util.ChatColor;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.title.Title;
@@ -106,5 +107,11 @@ public abstract class VManager extends IManager<SpongePlugin> {
 
     public void broadcast(String text) {
         Sponge.getServer().getBroadcastChannel().send(Text.of(colorHead + text));
+    }
+
+    public boolean hasPermission(Subject subject, String permission) {
+        if (permission == null || permission.isEmpty()) return true;
+        permission = permMap.getOrDefault(permission, permission);
+        return permission == null || permission.isEmpty() || subject.hasPermission(permission);
     }
 }

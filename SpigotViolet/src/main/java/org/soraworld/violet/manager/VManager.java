@@ -5,6 +5,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.Nullable;
 import org.soraworld.violet.nms.Version;
 import org.soraworld.violet.plugin.SpigotPlugin;
@@ -97,5 +98,11 @@ public abstract class VManager extends IManager<SpigotPlugin> {
 
     public void broadcast(String text) {
         Bukkit.broadcastMessage(colorHead + text);
+    }
+
+    public boolean hasPermission(Permissible subject, String permission) {
+        if (permission == null || permission.isEmpty()) return true;
+        permission = permMap.getOrDefault(permission, permission);
+        return permission == null || permission.isEmpty() || subject.hasPermission(permission);
     }
 }
