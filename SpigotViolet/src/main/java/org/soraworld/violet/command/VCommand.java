@@ -209,7 +209,10 @@ public class VCommand extends Command {
             if (!onlyPlayer || sender instanceof Player) {
                 if (args.notEmpty()) {
                     VCommand sub = subs.get(args.first());
-                    if (sub != null) sub.execute(sender, args.next());
+                    if (sub != null) {
+                        sub.execute(sender, args.next());
+                        return;
+                    }
                 }
                 if (subExecutor != null) {
                     if (exePermission == null || exePermission.isEmpty() || sender.hasPermission(exePermission)) {
