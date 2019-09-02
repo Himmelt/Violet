@@ -27,7 +27,8 @@ public abstract class VManager extends IManager<SpigotPlugin> {
             asyncSaveLock.set(true);
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 boolean flag = save();
-                if (sender != null) Bukkit.getScheduler().runTask(plugin, () -> sendKey(sender, flag ? "configSaved" : "configSaveFailed"));
+                if (sender != null)
+                    Bukkit.getScheduler().runTask(plugin, () -> sendKey(sender, flag ? "configSaved" : "configSaveFailed"));
                 asyncSaveLock.set(false);
             });
         }
@@ -38,7 +39,8 @@ public abstract class VManager extends IManager<SpigotPlugin> {
             asyncBackLock.set(true);
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 boolean flag = doBackUp();
-                if (sender != null) Bukkit.getScheduler().runTask(plugin, () -> sendKey(sender, flag ? "backUpSuccess" : "backUpFailed"));
+                if (sender != null)
+                    Bukkit.getScheduler().runTask(plugin, () -> sendKey(sender, flag ? "backUpSuccess" : "backUpFailed"));
                 asyncBackLock.set(false);
             });
         }
@@ -59,11 +61,13 @@ public abstract class VManager extends IManager<SpigotPlugin> {
     }
 
     public void sendActionBar(Player player, String text) {
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(text));
+        if (Version.v1_7_R4) send(player, text);
+        else player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(text));
     }
 
     public void sendActionKey(Player player, String key, Object... args) {
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(trans(key, args)));
+        if (Version.v1_7_R4) sendKey(player, key, args);
+        else player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(trans(key, args)));
     }
 
     public void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
