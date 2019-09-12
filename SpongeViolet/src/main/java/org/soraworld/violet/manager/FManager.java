@@ -33,11 +33,14 @@ public final class FManager extends VManager {
             String text = langMaps.computeIfAbsent(lang, this::loadLangMap).get(key);
             if (text == null || text.isEmpty()) {
                 return trans(key, args);
-            } else return text;
+            } else {
+                return text;
+            }
         };
         dataPath = path.resolve("storedata");
     }
 
+    @Override
     public boolean setLang(String lang) {
         boolean flag = super.setLang(lang);
         langMaps.clear();
@@ -77,7 +80,9 @@ public final class FManager extends VManager {
             synchronized (asyncLock.computeIfAbsent(uuid, u -> new Object())) {
                 DataAPI.writeStore(uuid, node);
                 node.save();
-                if (clear) DataAPI.clearStore(uuid);
+                if (clear) {
+                    DataAPI.clearStore(uuid);
+                }
             }
             debug("UUID:" + uuid + " store data save success.");
         } catch (Exception e) {
@@ -89,15 +94,18 @@ public final class FManager extends VManager {
     public void asyncSaveData(UUID uuid, boolean clear) {
         Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
             saveData(uuid, clear);
-            if (clear) asyncLock.remove(uuid);
+            if (clear) {
+                asyncLock.remove(uuid);
+            }
         });
     }
 
+    @Override
     public ChatColor defChatColor() {
         return ChatColor.DARK_PURPLE;
     }
 
-    public UUID getUUID() {
+    public UUID getUuid() {
         if (uuid == null) {
             uuid = UUID.randomUUID();
             asyncSave(null);

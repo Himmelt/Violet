@@ -64,6 +64,7 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
         } else Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Plugin Jar File NOT exist !!!");
     }
 
+    @Override
     public void registerInjectClass(@NotNull Class<?> clazz) {
         if (clazz.getAnnotation(Command.class) != null) commandClasses.add(clazz);
         if (clazz.getAnnotation(EventListener.class) != null) listenerClasses.add(clazz);
@@ -188,6 +189,7 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
         }
     }
 
+    @Override
     public String getVersion() {
         return getDescription().getVersion();
     }
@@ -233,24 +235,29 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
         }
     }
 
+    @Override
     public M getManager() {
         return manager;
     }
 
+    @Override
     public void setManager(M manager) {
         this.manager = manager;
     }
 
-    public String updateURL() {
+    @Override
+    public String updateUrl() {
         String website = getDescription().getWebsite();
         if (!website.endsWith("/")) website += "/";
         return website + "releases/latest";
     }
 
+    @Override
     public void registerInjectClasses() {
         registerInjectClass(UpdateListener.class);
     }
 
+    @Override
     public Path getRootPath() {
         return getDataFolder().toPath();
     }

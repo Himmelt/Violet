@@ -4,6 +4,7 @@ import java.util.StringJoiner;
 
 /**
  * 命令参数树
+ * @author Himmelt
  */
 public class Args {
 
@@ -22,7 +23,9 @@ public class Args {
         this.length = this.paths.length;
         this.current = 0;
         StringJoiner joiner = new StringJoiner(" ", "", "");
-        for (String s : paths) joiner.add(s);
+        for (String s : paths) {
+            joiner.add(s);
+        }
         this.origin = joiner.toString();
     }
 
@@ -33,7 +36,7 @@ public class Args {
      * @param path 参数树原始字符串
      */
     public Args(String path) {
-        this.paths = path == null || path.isEmpty() || path.equals(" ") ? new String[]{} : path.trim().split("[ ]+");
+        this.paths = path == null || path.isEmpty() || " ".equals(path) ? new String[]{} : path.trim().split("[ ]+");
         this.length = this.paths.length;
         this.current = 0;
         this.origin = path;
@@ -72,7 +75,9 @@ public class Args {
      * @return 下移后的参数树
      */
     public Args next() {
-        if (current < length) current++;
+        if (current < length) {
+            current++;
+        }
         return this;
     }
 
@@ -82,7 +87,9 @@ public class Args {
      * @return 上移后的参数树
      */
     public Args revert() {
-        if (current > 0) current--;
+        if (current > 0) {
+            current--;
+        }
         return this;
     }
 
@@ -101,7 +108,9 @@ public class Args {
      * @return 当前路径段
      */
     public String first() {
-        if (current >= length) return "";
+        if (current >= length) {
+            return "";
+        }
         return paths[current];
     }
 
@@ -112,7 +121,9 @@ public class Args {
      * @return 路径段
      */
     public String get(int index) {
-        if (current + index >= length) return "";
+        if (current + index >= length) {
+            return "";
+        }
         return paths[current + index];
     }
 
@@ -132,13 +143,18 @@ public class Args {
      */
     public String getContent() {
         StringJoiner joiner = new StringJoiner(" ", "", "");
-        for (int i = current; i < length; i++) joiner.add(paths[i]);
+        for (int i = current; i < length; i++) {
+            joiner.add(paths[i]);
+        }
         return joiner.toString();
     }
 
+    @Override
     public String toString() {
         StringJoiner joiner = new StringJoiner(", ", "{ ", " }");
-        for (String arg : paths) joiner.add(arg);
+        for (String arg : paths) {
+            joiner.add(arg);
+        }
         return joiner.toString();
     }
 }

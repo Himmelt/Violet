@@ -8,6 +8,9 @@ import org.spongepowered.api.plugin.Plugin;
 
 import java.util.UUID;
 
+/**
+ * @author Himmelt
+ */
 @Plugin(
         id = Violet.PLUGIN_ID,
         name = Violet.PLUGIN_NAME,
@@ -24,23 +27,26 @@ public class SpongeViolet extends SpongePlugin<FManager> {
         instance = this;
     }
 
+    @Override
     public FManager getManager() {
         return manager;
     }
 
+    @Override
     public void afterEnable() {
         for (Player player : Sponge.getServer().getOnlinePlayers()) {
             manager.asyncLoadData(player.getUniqueId());
         }
     }
 
+    @Override
     public void beforeDisable() {
         for (Player player : Sponge.getServer().getOnlinePlayers()) {
             manager.saveData(player.getUniqueId(), false);
         }
     }
 
-    public static UUID getUUID() {
-        return instance.manager.getUUID();
+    public static UUID getUuid() {
+        return instance.manager.getUuid();
     }
 }

@@ -3,6 +3,7 @@ package org.soraworld.violet;
 
 /**
  * Violet 常量.
+ * @author Himmelt
  */
 public final class Violet {
     public static final String PLUGIN_ID = "violet";

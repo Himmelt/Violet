@@ -75,7 +75,9 @@ public final class DataAPI {
 
     public static Object getTemp(UUID uuid, String key) {
         Map<String, Object> data = tempData.get(uuid);
-        if (data != null) return data.get(key);
+        if (data != null) {
+            return data.get(key);
+        }
         return null;
     }
 
@@ -141,7 +143,9 @@ public final class DataAPI {
 
     public static Object removeTemp(UUID uuid, String key) {
         Map<String, Object> data = tempData.get(uuid);
-        if (data != null) return data.remove(key);
+        if (data != null) {
+            return data.remove(key);
+        }
         return null;
     }
 
@@ -193,7 +197,9 @@ public final class DataAPI {
 
     public static Object getStore(UUID uuid, String key) {
         Map<String, Object> data = storeData.get(uuid);
-        if (data != null) return data.get(key);
+        if (data != null) {
+            return data.get(key);
+        }
         return null;
     }
 
@@ -259,7 +265,9 @@ public final class DataAPI {
 
     public static Object removeStore(UUID uuid, String key) {
         Map<String, Object> data = storeData.get(uuid);
-        if (data != null) return data.remove(key);
+        if (data != null) {
+            return data.remove(key);
+        }
         return null;
     }
 
@@ -273,6 +281,8 @@ public final class DataAPI {
 
     public static void writeStore(UUID uuid, FileNode node) {
         Map<String, Object> map = storeData.get(uuid);
-        if (map != null) node.fromTypeMap(map);
+        if (map != null) {
+            node.fromTypeMap(map);
+        }
     }
 }

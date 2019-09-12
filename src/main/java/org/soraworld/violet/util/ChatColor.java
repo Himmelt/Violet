@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 /**
  * 颜色枚举 和 处理工具.
+ * @author Himmelt
  */
 public enum ChatColor {
     /**
@@ -183,6 +184,7 @@ public enum ChatColor {
         return TRUE_HEAD_PATTERN.matcher(text).replaceAll(FAKE_COLOR_STRING);
     }
 
+    @Override
     public String toString() {
         return string;
     }

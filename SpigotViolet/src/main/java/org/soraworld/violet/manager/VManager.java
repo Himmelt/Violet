@@ -16,6 +16,9 @@ import org.soraworld.violet.util.ChatColor;
 
 import java.nio.file.Path;
 
+/**
+ * @author Himmelt
+ */
 public abstract class VManager extends IManager<SpigotPlugin> {
 
     public VManager(SpigotPlugin plugin, Path path) {
@@ -27,8 +30,9 @@ public abstract class VManager extends IManager<SpigotPlugin> {
             asyncSaveLock.set(true);
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 boolean flag = save();
-                if (sender != null)
+                if (sender != null) {
                     Bukkit.getScheduler().runTask(plugin, () -> sendKey(sender, flag ? "configSaved" : "configSaveFailed"));
+                }
                 asyncSaveLock.set(false);
             });
         }
@@ -39,8 +43,9 @@ public abstract class VManager extends IManager<SpigotPlugin> {
             asyncBackLock.set(true);
             Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                 boolean flag = doBackUp();
-                if (sender != null)
+                if (sender != null) {
                     Bukkit.getScheduler().runTask(plugin, () -> sendKey(sender, flag ? "backUpSuccess" : "backUpFailed"));
+                }
                 asyncBackLock.set(false);
             });
         }
@@ -61,18 +66,27 @@ public abstract class VManager extends IManager<SpigotPlugin> {
     }
 
     public void sendActionBar(Player player, String text) {
-        if (Version.v1_7_R4) send(player, text);
-        else player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(text));
+        if (Version.v1_7_R4) {
+            send(player, text);
+        } else {
+            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(text));
+        }
     }
 
     public void sendActionKey(Player player, String key, Object... args) {
-        if (Version.v1_7_R4) sendKey(player, key, args);
-        else player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(trans(key, args)));
+        if (Version.v1_7_R4) {
+            sendKey(player, key, args);
+        } else {
+            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(trans(key, args)));
+        }
     }
 
     public void sendTitle(Player player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
-        if (Version.v1_7_R4) send(player, title);
-        else player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
+        if (Version.v1_7_R4) {
+            send(player, title);
+        } else {
+            player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
+        }
     }
 
     public void checkUpdate(CommandSender sender) {
@@ -82,30 +96,34 @@ public abstract class VManager extends IManager<SpigotPlugin> {
                     if (sender instanceof Player) {
                         Bukkit.getScheduler().runTask(plugin, () -> {
                             sendJson((Player) sender, new JsonText(trans("hasUpdate")),
-                                    new JsonText(ChatColor.GREEN + plugin.updateURL(),
-                                            new ClickText(plugin.updateURL(), ClickText.Action.OPEN_URL),
+                                    new JsonText(ChatColor.GREEN + plugin.updateUrl(),
+                                            new ClickText(plugin.updateUrl(), ClickText.Action.OPEN_URL),
                                             new HoverText(trans("clickUpdate"), HoverText.Action.SHOW_TEXT)
                                     )
                             );
                         });
                     } else {
-                        send(sender, trans("hasUpdate") + ChatColor.GREEN + plugin.updateURL());
+                        send(sender, trans("hasUpdate") + ChatColor.GREEN + plugin.updateUrl());
                     }
                 }
             });
         }
     }
 
+    @Override
     public void console(String text) {
         Bukkit.getConsoleSender().sendMessage(colorHead + text);
     }
 
+    @Override
     public void broadcast(String text) {
         Bukkit.broadcastMessage(colorHead + text);
     }
 
     public boolean hasPermission(Permissible subject, String permission) {
-        if (permission == null || permission.isEmpty()) return true;
+        if (permission == null || permission.isEmpty()) {
+            return true;
+        }
         permission = permMap.getOrDefault(permission, permission);
         return permission == null || permission.isEmpty() || subject.hasPermission(permission);
     }

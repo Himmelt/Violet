@@ -1,5 +1,8 @@
 package org.soraworld.violet.text;
 
+/**
+ * @author Himmelt
+ */
 public class HoverText {
 
     protected final String value;
@@ -15,6 +18,7 @@ public class HoverText {
         this.action = action == null ? Action.SHOW_TEXT : action;
     }
 
+    @Override
     public String toString() {
         return "\"hoverEvent\":{"
                 + "\"action\":\"" + action + "\","
@@ -34,6 +38,7 @@ public class HoverText {
             this.name = name;
         }
 
+        @Override
         public String toString() {
             return name;
         }

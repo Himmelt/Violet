@@ -12,14 +12,16 @@ import java.util.UUID;
 
 /**
  * UUID 序列化器.
+ *
+ * @author Himmelt
  */
 public class UUIDSerializer extends TypeSerializer<UUID, NodeBase> {
 
     public UUIDSerializer() throws SerializerException {
     }
 
-    @NotNull
-    public UUID deserialize(@NotNull Type fieldType, @NotNull NodeBase node) throws HoconException {
+    @Override
+    public @NotNull UUID deserialize(@NotNull Type fieldType, @NotNull NodeBase node) throws HoconException {
         try {
             return UUID.fromString(node.getString());
         } catch (Throwable e) {
@@ -27,8 +29,9 @@ public class UUIDSerializer extends TypeSerializer<UUID, NodeBase> {
         }
     }
 
-    @NotNull
-    public NodeBase serialize(@NotNull Type fieldType, @NotNull UUID value, @NotNull Options options) {
+
+    @Override
+    public @NotNull NodeBase serialize(@NotNull Type fieldType, @NotNull UUID value, @NotNull Options options) {
         return new NodeBase(options, value);
     }
 }

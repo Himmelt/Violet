@@ -18,6 +18,7 @@ import java.nio.file.Path;
 
 /**
  * Sponge 管理器.
+ * @author Himmelt
  */
 public abstract class VManager extends IManager<SpongePlugin> {
 
@@ -87,30 +88,34 @@ public abstract class VManager extends IManager<SpongePlugin> {
                     if (sender instanceof Player) {
                         Sponge.getScheduler().createSyncExecutor(plugin).execute(() -> {
                             sendJson((Player) sender, new JsonText(trans("hasUpdate")),
-                                    new JsonText(ChatColor.GREEN + plugin.updateURL(),
-                                            new ClickText(plugin.updateURL(), ClickText.Action.OPEN_URL),
+                                    new JsonText(ChatColor.GREEN + plugin.updateUrl(),
+                                            new ClickText(plugin.updateUrl(), ClickText.Action.OPEN_URL),
                                             new HoverText(trans("clickUpdate"), HoverText.Action.SHOW_TEXT)
                                     )
                             );
                         });
                     } else {
-                        send(sender, trans("hasUpdate") + ChatColor.GREEN + plugin.updateURL());
+                        send(sender, trans("hasUpdate") + ChatColor.GREEN + plugin.updateUrl());
                     }
                 }
             });
         }
     }
 
+    @Override
     public void console(String text) {
         Sponge.getServer().getConsole().sendMessage(Text.of(colorHead + text));
     }
 
+    @Override
     public void broadcast(String text) {
         Sponge.getServer().getBroadcastChannel().send(Text.of(colorHead + text));
     }
 
     public boolean hasPermission(Subject subject, String permission) {
-        if (permission == null || permission.isEmpty()) return true;
+        if (permission == null || permission.isEmpty()) {
+            return true;
+        }
         permission = permMap.getOrDefault(permission, permission);
         return permission == null || permission.isEmpty() || subject.hasPermission(permission);
     }

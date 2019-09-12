@@ -127,12 +127,16 @@ public abstract class IManager<T extends IPlugin> {
             this.options.registerType(new UUIDSerializer());
         } catch (SerializerException e) {
             console(ChatColor.RED + "TypeSerializer for UUID register failed");
-            if (debug) e.printStackTrace();
+            if (debug) {
+                e.printStackTrace();
+            }
         }
         this.confile = path.resolve(plugin.getId().replace(' ', '_') + ".conf");
         this.rootNode = new FileNode(confile.toFile(), options);
         setHead(defChatHead());
-        if (!plugins.contains(plugin)) plugins.add(plugin);
+        if (!plugins.contains(plugin)) {
+            plugins.add(plugin);
+        }
     }
 
     /**
@@ -170,8 +174,11 @@ public abstract class IManager<T extends IPlugin> {
             }
             return map;
         } catch (Throwable e) {
-            if (extract) console(ChatColor.RED + "Lang file " + langFile + " load exception !!!");
-            else console(ChatColor.RED + "Lang file " + url + " extract exception !!!");
+            if (extract) {
+                console(ChatColor.RED + "Lang file " + langFile + " load exception !!!");
+            } else {
+                console(ChatColor.RED + "Lang file " + url + " extract exception !!!");
+            }
             debug(e);
             return new HashMap<>();
         }
@@ -187,13 +194,19 @@ public abstract class IManager<T extends IPlugin> {
             rootNode.load(true, true);
             rootNode.modify(this);
             permMap.putIfAbsent("admin", defAdminPerm());
-            if (!setLang(lang) && !defLang.equalsIgnoreCase(lang)) setLang(defLang);
+            if (!setLang(lang) && !defLang.equalsIgnoreCase(lang)) {
+                setLang(defLang);
+            }
             options.setDebug(debug);
             reloadSuccess = true;
             if (!plugin.getVersion().equalsIgnoreCase(version)) {
                 consoleKey("versionChanged", version, plugin.getVersion());
-                if (autoBackUp) consoleKey(doBackUp() ? "backUpSuccess" : "backUpFailed");
-                if (autoUpLang) consoleKey(reExtract() ? "reExtracted" : "reExtractFailed");
+                if (autoBackUp) {
+                    consoleKey(doBackUp() ? "backUpSuccess" : "backUpFailed");
+                }
+                if (autoUpLang) {
+                    consoleKey(reExtract() ? "reExtracted" : "reExtractFailed");
+                }
             }
             return true;
         } catch (Throwable e) {
@@ -225,8 +238,12 @@ public abstract class IManager<T extends IPlugin> {
     }
 
     public boolean reExtract() {
-        if (FileUtils.deletePath(path.resolve("lang").toFile(), debug)) return setLang(lang);
-        if (debug) console(ChatColor.RED + "deletePath " + path.resolve("lang") + " failed !!");
+        if (FileUtils.deletePath(path.resolve("lang").toFile(), debug)) {
+            return setLang(lang);
+        }
+        if (debug) {
+            console(ChatColor.RED + "deletePath " + path.resolve("lang") + " failed !!");
+        }
         return false;
     }
 
@@ -241,7 +258,9 @@ public abstract class IManager<T extends IPlugin> {
             this.lang = lang;
             langMap = temp;
             String head = langMap.get("chatHead");
-            if (head != null && !head.isEmpty()) setHead(head);
+            if (head != null && !head.isEmpty()) {
+                setHead(head);
+            }
             return true;
         } else {
             consoleKey("emptyLangMap");
@@ -263,7 +282,9 @@ public abstract class IManager<T extends IPlugin> {
         if ((text == null || text.isEmpty()) && !plugin.getId().equalsIgnoreCase(Violet.PLUGIN_ID) && translator != null) {
             text = translator.trans(lang, key, args);
         }
-        if (text == null || text.isEmpty()) return key;
+        if (text == null || text.isEmpty()) {
+            return key;
+        }
         if (args.length > 0) {
             try {
                 return String.format(text, args);
@@ -314,15 +335,21 @@ public abstract class IManager<T extends IPlugin> {
     }
 
     public void debugKey(String key, Object... args) {
-        if (isDebug()) consoleKey(key, args);
+        if (isDebug()) {
+            consoleKey(key, args);
+        }
     }
 
     public void debug(String text) {
-        if (isDebug()) console(text);
+        if (isDebug()) {
+            console(text);
+        }
     }
 
     public void debug(Throwable e) {
-        if (isDebug()) e.printStackTrace();
+        if (isDebug()) {
+            e.printStackTrace();
+        }
     }
 
     public void beforeLoad() {
@@ -333,12 +360,14 @@ public abstract class IManager<T extends IPlugin> {
 
     public boolean hasUpdate() {
         try {
-            URL url = new URL(plugin.updateURL());
+            URL url = new URL(plugin.updateUrl());
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setInstanceFollowRedirects(false);
             String text = conn.getHeaderField("Location");
             text = text.substring(text.lastIndexOf('/'));
-            if (!text.matches("/v\\d\\.\\d\\.\\d")) return false;
+            if (!text.matches("/v\\d\\.\\d\\.\\d")) {
+                return false;
+            }
             return !text.contains(plugin.getVersion());
         } catch (Throwable ignored) {
             return false;

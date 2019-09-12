@@ -8,18 +8,25 @@ import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * @author Himmelt
+ */
 public class FileUtils {
 
     public static boolean deletePath(File path, boolean debug) {
         if (path.isFile()) {
             boolean flag = path.delete();
-            if (debug && !flag) System.out.println("File " + path + " delete failed !!");
+            if (debug && !flag) {
+                System.out.println("File " + path + " delete failed !!");
+            }
             return flag;
         }
         File[] files = path.listFiles();
         boolean flag = true;
         if (files != null && files.length > 0) {
-            for (File file : files) flag = flag && deletePath(file, debug);
+            for (File file : files) {
+                flag = flag && deletePath(file, debug);
+            }
         } else {
             flag = path.delete();
         }

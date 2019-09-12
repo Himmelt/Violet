@@ -15,16 +15,19 @@ public class SpigotViolet extends SpigotPlugin<FManager> {
         instance = this;
     }
 
+    @Override
     public FManager getManager() {
         return manager;
     }
 
+    @Override
     public void afterEnable() {
         for (Player player : Bukkit.getServer().getOnlinePlayers()) {
             manager.asyncLoadData(player.getUniqueId());
         }
     }
 
+    @Override
     public void beforeDisable() {
         for (Player player : Bukkit.getServer().getOnlinePlayers()) {
             manager.saveData(player.getUniqueId(), false);

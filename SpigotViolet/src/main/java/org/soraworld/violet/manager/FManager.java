@@ -38,6 +38,7 @@ public final class FManager extends VManager {
         dataPath = path.resolve("storedata");
     }
 
+    @Override
     public boolean setLang(String lang) {
         boolean flag = super.setLang(lang);
         langMaps.clear();
@@ -93,6 +94,7 @@ public final class FManager extends VManager {
         });
     }
 
+    @Override
     public ChatColor defChatColor() {
         return ChatColor.DARK_PURPLE;
     }

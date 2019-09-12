@@ -2,6 +2,9 @@ package org.soraworld.violet.command;
 
 import java.lang.annotation.*;
 
+/**
+ * @author Himmelt
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 @Documented

@@ -7,6 +7,9 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+/**
+ * @author Himmelt
+ */
 public final class ClassUtils {
     public static Set<Class<?>> getClasses(File jarFile, String packageName) {
         Set<Class<?>> classes = new HashSet<>();

@@ -1,5 +1,8 @@
 package org.soraworld.violet.text;
 
+/**
+ * @author Himmelt
+ */
 public class ClickText {
 
     private final String value;
@@ -10,6 +13,7 @@ public class ClickText {
         this.action = action;
     }
 
+    @Override
     public String toString() {
         return "\"clickEvent\":{"
                 + "\"action\":\"" + action + "\","
@@ -30,6 +34,7 @@ public class ClickText {
             this.name = name;
         }
 
+        @Override
         public String toString() {
             return name;
         }
