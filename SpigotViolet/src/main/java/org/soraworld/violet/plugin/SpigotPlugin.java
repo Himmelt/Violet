@@ -28,6 +28,9 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 
+/**
+ * @author Himmelt
+ */
 public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlugin<M> {
 
     protected M manager;
@@ -35,7 +38,7 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
     protected final HashSet<Class<?>> injectClasses = new HashSet<>();
     protected final HashSet<Class<?>> commandClasses = new HashSet<>();
     protected final HashSet<Class<?>> listenerClasses = new HashSet<>();
-    private static final CommandMap commandMap;
+    private static final CommandMap COMMAND_MAP;
 
     static {
         CommandMap map = null;
@@ -45,30 +48,48 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
             Object object = field.get(Bukkit.getServer());
             if (object instanceof CommandMap) {
                 map = (CommandMap) object;
-            } else System.out.println("Invalid CommandMap in Server !!!");
+            } else {
+                System.out.println("Invalid CommandMap in Server !!!");
+            }
         } catch (Throwable e) {
             e.printStackTrace();
         }
-        commandMap = map;
+        COMMAND_MAP = map;
     }
 
     private void scanJarPackageClasses() {
         File jarFile = getFile();
         if (jarFile.exists()) {
             for (Class<?> clazz : ClassUtils.getClasses(jarFile, getClass().getPackage().getName())) {
-                if (clazz.getAnnotation(Command.class) != null) commandClasses.add(clazz);
-                if (clazz.getAnnotation(EventListener.class) != null) listenerClasses.add(clazz);
-                if (clazz.getAnnotation(MainManager.class) != null) mainManagerClass = clazz;
-                if (clazz.getAnnotation(Inject.class) != null) injectClasses.add(clazz);
+                if (clazz.getAnnotation(Command.class) != null) {
+                    commandClasses.add(clazz);
+                }
+                if (clazz.getAnnotation(EventListener.class) != null) {
+                    listenerClasses.add(clazz);
+                }
+                if (clazz.getAnnotation(MainManager.class) != null) {
+                    mainManagerClass = clazz;
+                }
+                if (clazz.getAnnotation(Inject.class) != null) {
+                    injectClasses.add(clazz);
+                }
             }
-        } else Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Plugin Jar File NOT exist !!!");
+        } else {
+            Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Plugin Jar File NOT exist !!!");
+        }
     }
 
     @Override
     public void registerInjectClass(@NotNull Class<?> clazz) {
-        if (clazz.getAnnotation(Command.class) != null) commandClasses.add(clazz);
-        if (clazz.getAnnotation(EventListener.class) != null) listenerClasses.add(clazz);
-        if (clazz.getAnnotation(Inject.class) != null) injectClasses.add(clazz);
+        if (clazz.getAnnotation(Command.class) != null) {
+            commandClasses.add(clazz);
+        }
+        if (clazz.getAnnotation(EventListener.class) != null) {
+            listenerClasses.add(clazz);
+        }
+        if (clazz.getAnnotation(Inject.class) != null) {
+            injectClasses.add(clazz);
+        }
     }
 
     private void injectMainManager(@NotNull Path path) {
@@ -97,7 +118,9 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
         if (manager != null) {
             setManager(manager);
             injectClasses.forEach(this::injectIntoStatic);
-        } else Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "CANT register or inject main manager !!!");
+        } else {
+            Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "CANT register or inject main manager !!!");
+        }
     }
 
     private void injectCommands() {
@@ -144,7 +167,9 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
         IManager manager = getManager();
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
-            if (!Modifier.isStatic(field.getModifiers())) continue;
+            if (!Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
             Inject inject = field.getAnnotation(Inject.class);
             if (inject != null) {
                 field.setAccessible(true);
@@ -168,7 +193,9 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
     private void injectIntoInstance(@NotNull Object instance) {
         Field[] fields = instance.getClass().getDeclaredFields();
         for (Field field : fields) {
-            if (Modifier.isStatic(field.getModifiers())) continue;
+            if (Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
             Inject inject = field.getAnnotation(Inject.class);
             if (inject != null) {
                 field.setAccessible(true);
@@ -194,6 +221,7 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
         return getDescription().getVersion();
     }
 
+    @Override
     public void onLoad() {
         scanJarPackageClasses();
         registerInjectClasses();
@@ -208,6 +236,7 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
         injectMainManager(path);
     }
 
+    @Override
     public void onEnable() {
         if (manager != null) {
             manager.beforeLoad();
@@ -220,9 +249,12 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
             manager.consoleKey("pluginEnabled", getId() + "-" + getVersion());
             afterEnable();
             manager.checkUpdate(Bukkit.getConsoleSender());
-        } else Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Plugin " + getId() + " enable failed !!!!");
+        } else {
+            Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Plugin " + getId() + " enable failed !!!!");
+        }
     }
 
+    @Override
     public void onDisable() {
         if (manager != null) {
             beforeDisable();
@@ -248,7 +280,9 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
     @Override
     public String updateUrl() {
         String website = getDescription().getWebsite();
-        if (!website.endsWith("/")) website += "/";
+        if (!website.endsWith("/")) {
+            website += "/";
+        }
         return website + "releases/latest";
     }
 
@@ -280,11 +314,15 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
     }
 
     public boolean registerCommand(@NotNull VCommand command) {
-        if (commandMap != null) {
-            if (commandMap.register(getId(), command)) {
+        if (COMMAND_MAP != null) {
+            if (COMMAND_MAP.register(getId(), command)) {
                 return true;
-            } else manager.consoleKey("commandRegFailed", command.getName(), getName());
-        } else manager.consoleKey("nullCommandMap");
+            } else {
+                manager.consoleKey("commandRegFailed", command.getName(), getName());
+            }
+        } else {
+            manager.consoleKey("nullCommandMap");
+        }
         return false;
     }
 }

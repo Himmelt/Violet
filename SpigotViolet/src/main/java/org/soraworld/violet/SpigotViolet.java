@@ -7,6 +7,9 @@ import org.soraworld.violet.plugin.SpigotPlugin;
 
 import java.util.UUID;
 
+/**
+ * @author Himmelt
+ */
 public class SpigotViolet extends SpigotPlugin<FManager> {
 
     private static SpigotViolet instance;
@@ -34,7 +37,7 @@ public class SpigotViolet extends SpigotPlugin<FManager> {
         }
     }
 
-    public static UUID getUUID() {
-        return instance.manager.getUUID();
+    public static UUID getUuid() {
+        return instance.manager.getUuid();
     }
 }

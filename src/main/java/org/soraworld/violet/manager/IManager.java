@@ -21,6 +21,12 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * The type Manager.
+ *
+ * @param <T> the type parameter
+ * @author Himmelt
+ */
 public abstract class IManager<T extends IPlugin> {
 
     /**
@@ -58,6 +64,9 @@ public abstract class IManager<T extends IPlugin> {
      */
     @Setting(comment = "comment.saveOnDisable")
     protected boolean saveOnDisable = true;
+    /**
+     * The Perm map.
+     */
     @Setting(comment = "comment.permMap")
     protected HashMap<String, String> permMap = new HashMap<>();
 
@@ -69,6 +78,9 @@ public abstract class IManager<T extends IPlugin> {
      * 带颜色抬头.
      */
     protected String colorHead;
+    /**
+     * The Json head.
+     */
     protected JsonText jsonHead;
     /**
      * 配置是否加载成功.
@@ -102,12 +114,21 @@ public abstract class IManager<T extends IPlugin> {
      * 异步锁.
      */
     protected AtomicBoolean asyncSaveLock = new AtomicBoolean(false);
+    /**
+     * The Async back lock.
+     */
     protected AtomicBoolean asyncBackLock = new AtomicBoolean(false);
     /**
      * 插件统计列表.
      */
-    protected static final ArrayList<IPlugin> plugins = new ArrayList<>();
-    protected static final String defLang = Locale.CHINA.equals(Locale.getDefault()) ? "zh_cn" : "en_us";
+    protected static final ArrayList<IPlugin> PLUGINS = new ArrayList<>();
+    /**
+     * The constant DEF_LANG.
+     */
+    protected static final String DEF_LANG = Locale.CHINA.equals(Locale.getDefault()) ? "zh_cn" : "en_us";
+    /**
+     * The Translator.
+     */
     static Translator translator = null;
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss");
 
@@ -134,8 +155,8 @@ public abstract class IManager<T extends IPlugin> {
         this.confile = path.resolve(plugin.getId().replace(' ', '_') + ".conf");
         this.rootNode = new FileNode(confile.toFile(), options);
         setHead(defChatHead());
-        if (!plugins.contains(plugin)) {
-            plugins.add(plugin);
+        if (!PLUGINS.contains(plugin)) {
+            PLUGINS.add(plugin);
         }
     }
 
@@ -154,12 +175,12 @@ public abstract class IManager<T extends IPlugin> {
      * 获取对应语言的翻译映射表.
      *
      * @param lang 目标语言
-     * @return 翻译映射表
+     * @return 翻译映射表 hash map
      */
     final HashMap<String, String> loadLangMap(String lang) {
         Path langFile = path.resolve("lang").resolve(lang + ".lang");
         boolean extract = false;
-        URL url = plugin.getAssetURL("lang/" + lang + ".lang");
+        URL url = plugin.getAssetUrl("lang/" + lang + ".lang");
         try {
             if (Files.notExists(langFile)) {
                 Files.createDirectories(langFile.getParent());
@@ -184,9 +205,14 @@ public abstract class IManager<T extends IPlugin> {
         }
     }
 
+    /**
+     * Load boolean.
+     *
+     * @return the boolean
+     */
     public boolean load() {
         if (Files.notExists(confile)) {
-            setLang(defLang);
+            setLang(DEF_LANG);
             save();
             return true;
         }
@@ -194,8 +220,8 @@ public abstract class IManager<T extends IPlugin> {
             rootNode.load(true, true);
             rootNode.modify(this);
             permMap.putIfAbsent("admin", defAdminPerm());
-            if (!setLang(lang) && !defLang.equalsIgnoreCase(lang)) {
-                setLang(defLang);
+            if (!setLang(lang) && !DEF_LANG.equalsIgnoreCase(lang)) {
+                setLang(DEF_LANG);
             }
             options.setDebug(debug);
             reloadSuccess = true;
@@ -217,6 +243,11 @@ public abstract class IManager<T extends IPlugin> {
         }
     }
 
+    /**
+     * Save boolean.
+     *
+     * @return the boolean
+     */
     public boolean save() {
         reloadSuccess = true;
         version = getPlugin().getVersion();
@@ -232,11 +263,21 @@ public abstract class IManager<T extends IPlugin> {
         }
     }
 
+    /**
+     * Do back up boolean.
+     *
+     * @return the boolean
+     */
     public boolean doBackUp() {
         Path target = path.resolve("backup/" + DATE_FORMAT.format(new Date()) + ".zip");
         return FileUtils.zipArchivePath(path, target, p -> !path.relativize(p).toString().toLowerCase().startsWith("backup"));
     }
 
+    /**
+     * Re extract boolean.
+     *
+     * @return the boolean
+     */
     public boolean reExtract() {
         if (FileUtils.deletePath(path.resolve("lang").toFile(), debug)) {
             return setLang(lang);
@@ -247,10 +288,21 @@ public abstract class IManager<T extends IPlugin> {
         return false;
     }
 
+    /**
+     * Gets lang.
+     *
+     * @return the lang
+     */
     public String getLang() {
         return lang;
     }
 
+    /**
+     * Sets lang.
+     *
+     * @param lang the lang
+     * @return the lang
+     */
     public boolean setLang(String lang) {
         lang = lang.toLowerCase();
         HashMap<String, String> temp = loadLangMap(lang);
@@ -268,15 +320,32 @@ public abstract class IManager<T extends IPlugin> {
         }
     }
 
+    /**
+     * Is debug boolean.
+     *
+     * @return the boolean
+     */
     public boolean isDebug() {
         return debug;
     }
 
+    /**
+     * Sets debug.
+     *
+     * @param debug the debug
+     */
     public void setDebug(boolean debug) {
         this.debug = debug;
         options.setDebug(debug);
     }
 
+    /**
+     * Trans string.
+     *
+     * @param key  the key
+     * @param args the args
+     * @return the string
+     */
     public String trans(@NotNull String key, Object... args) {
         String text = langMap.get(key);
         if ((text == null || text.isEmpty()) && !plugin.getId().equalsIgnoreCase(Violet.PLUGIN_ID) && translator != null) {
@@ -295,22 +364,49 @@ public abstract class IManager<T extends IPlugin> {
         return text;
     }
 
+    /**
+     * Broadcast key.
+     *
+     * @param key  the key
+     * @param args the args
+     */
     public void broadcastKey(String key, Object... args) {
         broadcast(trans(key, args));
     }
 
+    /**
+     * Console key.
+     *
+     * @param key  the key
+     * @param args the args
+     */
     public void consoleKey(String key, Object... args) {
         console(trans(key, args));
     }
 
+    /**
+     * Println.
+     *
+     * @param text the text
+     */
     public void println(String text) {
         System.out.println(plainHead + text);
     }
 
+    /**
+     * Gets plugin.
+     *
+     * @return the plugin
+     */
     public T getPlugin() {
         return plugin;
     }
 
+    /**
+     * Gets path.
+     *
+     * @return the path
+     */
     public Path getPath() {
         return path;
     }
@@ -318,7 +414,7 @@ public abstract class IManager<T extends IPlugin> {
     /**
      * 在停用插件时是否可以保存配置.
      *
-     * @return 是否可以保存配置
+     * @return 是否可以保存配置 boolean
      */
     public boolean canSaveOnDisable() {
         return saveOnDisable && reloadSuccess;
@@ -326,38 +422,75 @@ public abstract class IManager<T extends IPlugin> {
 
     /*------------------------------------------------*/
 
+    /**
+     * Def chat head string.
+     *
+     * @return the string
+     */
     public String defChatHead() {
         return "[" + getPlugin().getName() + "] ";
     }
 
+    /**
+     * Def admin perm string.
+     *
+     * @return the string
+     */
     public String defAdminPerm() {
         return getPlugin().getId() + ".admin";
     }
 
+    /**
+     * Debug key.
+     *
+     * @param key  the key
+     * @param args the args
+     */
     public void debugKey(String key, Object... args) {
         if (isDebug()) {
             consoleKey(key, args);
         }
     }
 
+    /**
+     * Debug.
+     *
+     * @param text the text
+     */
     public void debug(String text) {
         if (isDebug()) {
             console(text);
         }
     }
 
+    /**
+     * Debug.
+     *
+     * @param e the e
+     */
     public void debug(Throwable e) {
         if (isDebug()) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Before load.
+     */
     public void beforeLoad() {
     }
 
+    /**
+     * After load.
+     */
     public void afterLoad() {
     }
 
+    /**
+     * Has update boolean.
+     *
+     * @return the boolean
+     */
     public boolean hasUpdate() {
         try {
             URL url = new URL(plugin.updateUrl());
@@ -374,13 +507,34 @@ public abstract class IManager<T extends IPlugin> {
         }
     }
 
+    /**
+     * Mapping perm string.
+     *
+     * @param perm the perm
+     * @return the string
+     */
     public String mappingPerm(String perm) {
         return permMap.getOrDefault(perm, perm);
     }
 
+    /**
+     * Def chat color chat color.
+     *
+     * @return the chat color
+     */
     public abstract ChatColor defChatColor();
 
+    /**
+     * Console.
+     *
+     * @param text the text
+     */
     public abstract void console(String text);
 
+    /**
+     * Broadcast.
+     *
+     * @param message the message
+     */
     public abstract void broadcast(String message);
 }

@@ -9,6 +9,9 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 
+/**
+ * @author Himmelt
+ */
 @EventListener
 public class UpdateListener {
     @Inject

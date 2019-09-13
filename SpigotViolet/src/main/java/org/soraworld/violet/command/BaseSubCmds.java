@@ -10,6 +10,9 @@ import org.soraworld.violet.util.ListUtils;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
+/**
+ * @author Himmelt
+ */
 @Command(name = Violet.PLUGIN_ID, usage = "/violet lang|save|debug|reload|rextract|help|plugins ")
 public final class BaseSubCmds {
 
@@ -24,19 +27,27 @@ public final class BaseSubCmds {
             String oldLang = manager.getLang();
             if (manager.setLang(args.first())) {
                 manager.sendKey(sender, "setLang", manager.getLang());
-                if (!manager.getLang().equalsIgnoreCase(oldLang)) manager.asyncSave(null);
+                if (!manager.getLang().equalsIgnoreCase(oldLang)) {
+                    manager.asyncSave(null);
+                }
             } else {
                 manager.sendKey(sender, "setLangFailed", args.first());
             }
-        } else manager.sendKey(sender, "getLang", manager.getLang());
+        } else {
+            manager.sendKey(sender, "getLang", manager.getLang());
+        }
     };
 
     @Sub(perm = "admin", usage = "usage.save")
     public final SubExecutor save = (cmd, sender, args) -> {
         if (args.notEmpty()) {
             VCommand sub = cmd.getSub(args.first());
-            if (sub != null) sub.execute(sender, args.next());
-        } else manager.asyncSave(sender);
+            if (sub != null) {
+                sub.execute(sender, args.next());
+            }
+        } else {
+            manager.asyncSave(sender);
+        }
     };
 
     @Sub(perm = "admin", usage = "usage.debug")
@@ -47,7 +58,7 @@ public final class BaseSubCmds {
 
     @Sub(perm = "admin", usage = "usage.reload", tabs = {"lang"})
     public final SubExecutor reload = (cmd, sender, args) -> {
-        if (args.first().equalsIgnoreCase("lang")) {
+        if ("lang".equalsIgnoreCase(args.first())) {
             manager.setLang(manager.getLang());
             manager.sendKey(sender, "reloadLang");
         } else {
@@ -67,12 +78,17 @@ public final class BaseSubCmds {
     public final SubExecutor help = (cmd, sender, args) -> {
         if (args.notEmpty()) {
             VCommand sub = cmd.parent.getSub(args.first());
-            if (sub != null) sub.sendUsage(sender);
-            else manager.sendKey(sender, "noSuchSubCmd", args.first());
+            if (sub != null) {
+                sub.sendUsage(sender);
+            } else {
+                manager.sendKey(sender, "noSuchSubCmd", args.first());
+            }
         } else {
             LinkedHashSet<VCommand> subs = new LinkedHashSet<>(cmd.parent.subs.values());
             subs.remove(cmd);
-            for (VCommand sub : subs) sub.sendUsage(sender);
+            for (VCommand sub : subs) {
+                sub.sendUsage(sender);
+            }
         }
     };
 

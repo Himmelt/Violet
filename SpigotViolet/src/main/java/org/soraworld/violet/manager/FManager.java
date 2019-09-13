@@ -17,6 +17,9 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @author Himmelt
+ */
 @MainManager
 public final class FManager extends VManager {
 
@@ -25,7 +28,7 @@ public final class FManager extends VManager {
     private final Path dataPath;
 
     private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
-    private static final ConcurrentHashMap<UUID, Object> asyncLock = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<UUID, Object> ASYNC_LOCK = new ConcurrentHashMap<>();
 
     public FManager(SpigotViolet plugin, Path path) {
         super(plugin, path);
@@ -33,7 +36,9 @@ public final class FManager extends VManager {
             String text = langMaps.computeIfAbsent(lang, this::loadLangMap).get(key);
             if (text == null || text.isEmpty()) {
                 return trans(key, args);
-            } else return text;
+            } else {
+                return text;
+            }
         };
         dataPath = path.resolve("storedata");
     }
@@ -46,10 +51,15 @@ public final class FManager extends VManager {
         return flag;
     }
 
+    /**
+     * Load data.
+     *
+     * @param uuid the uuid
+     */
     public void loadData(UUID uuid) {
         FileNode node = new FileNode(dataPath.resolve(uuid.toString() + ".dat").toFile(), DataAPI.options);
         try {
-            synchronized (asyncLock.computeIfAbsent(uuid, u -> new Object())) {
+            synchronized (ASYNC_LOCK.computeIfAbsent(uuid, u -> new Object())) {
                 node.load(false, true);
                 DataAPI.readStore(uuid, node);
             }
@@ -75,10 +85,12 @@ public final class FManager extends VManager {
         }
         FileNode node = new FileNode(dataFile.toFile(), DataAPI.options);
         try {
-            synchronized (asyncLock.computeIfAbsent(uuid, u -> new Object())) {
+            synchronized (ASYNC_LOCK.computeIfAbsent(uuid, u -> new Object())) {
                 DataAPI.writeStore(uuid, node);
                 node.save();
-                if (clear) DataAPI.clearStore(uuid);
+                if (clear) {
+                    DataAPI.clearStore(uuid);
+                }
             }
             debug("UUID:" + uuid + " store data save success.");
         } catch (Exception e) {
@@ -90,7 +102,9 @@ public final class FManager extends VManager {
     public void asyncSaveData(UUID uuid, boolean clear) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             saveData(uuid, clear);
-            if (clear) asyncLock.remove(uuid);
+            if (clear) {
+                ASYNC_LOCK.remove(uuid);
+            }
         });
     }
 
@@ -99,7 +113,7 @@ public final class FManager extends VManager {
         return ChatColor.DARK_PURPLE;
     }
 
-    public UUID getUUID() {
+    public UUID getUuid() {
         if (uuid == null) {
             uuid = UUID.randomUUID();
             asyncSave(null);
@@ -108,7 +122,7 @@ public final class FManager extends VManager {
     }
 
     public void listPlugins(CommandSender sender) {
-        for (IPlugin plugin : plugins) {
+        for (IPlugin plugin : PLUGINS) {
             sendKey(sender, "pluginInfo", plugin.getId(), plugin.getVersion());
         }
     }

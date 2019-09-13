@@ -8,6 +8,9 @@ import org.soraworld.violet.inject.EventListener;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.manager.VManager;
 
+/**
+ * @author Himmelt
+ */
 @EventListener
 public class UpdateListener implements Listener {
     @Inject

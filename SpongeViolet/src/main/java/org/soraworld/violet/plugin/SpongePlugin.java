@@ -34,6 +34,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+/**
+ * @author Himmelt
+ */
 public class SpongePlugin<M extends VManager> implements IPlugin<M> {
 
     @javax.inject.Inject

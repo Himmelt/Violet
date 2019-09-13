@@ -111,7 +111,7 @@ public interface IPlugin<M extends IManager> {
      * @param path the path
      * @return the asset url
      */
-    default URL getAssetURL(String path) {
+    default URL getAssetUrl(String path) {
         return getClass().getResource("/assets/" + assetsId() + '/' + path);
     }
 

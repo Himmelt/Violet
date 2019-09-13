@@ -12,11 +12,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * The type Entity selector.
+ *
+ * @author Himmelt
+ */
 public class EntitySelector {
 
-    // @p
+    /**
+     * Match nearest player player.
+     * {@code @p}
+     *
+     * @param sender the sender
+     * @return the player
+     */
+
     public static Player matchNearestPlayer(CommandSender sender) {
-        if (sender instanceof Player) return (Player) sender;
+        if (sender instanceof Player) {
+            return (Player) sender;
+        }
         Player player = null;
         Location location = null;
         if (sender instanceof BlockCommandSender) {
@@ -38,7 +52,15 @@ public class EntitySelector {
         return player;
     }
 
-    // @p[radius=xxx]
+    /**
+     * Match nearby players list.
+     * {@code @p[radius=xxx]}
+     *
+     * @param sender the sender
+     * @param radius the radius
+     * @return the list
+     */
+
     public static List<Player> matchNearbyPlayers(CommandSender sender, double radius) {
         Location location = null;
         if (sender instanceof Entity) {
@@ -53,7 +75,14 @@ public class EntitySelector {
         return new ArrayList<>();
     }
 
-    // @p[radius=xxx]
+    /**
+     * Match around players list.
+     * {@code @p[radius=xxx]}
+     *
+     * @param sender the sender
+     * @param radius the radius
+     * @return the list
+     */
     public static List<Player> matchAroundPlayers(CommandSender sender, double radius) {
         Location location = null;
         if (sender instanceof Entity) {
@@ -71,11 +100,23 @@ public class EntitySelector {
         return new ArrayList<>();
     }
 
-    // @a
+    /**
+     * Match all players list.
+     * {@code @a}
+     *
+     * @return the list
+     */
+
     public static List<Player> matchAllPlayers() {
         return new ArrayList<>(Bukkit.getOnlinePlayers());
     }
 
+    /**
+     * Match entities list.
+     *
+     * @param selector the selector
+     * @return the list
+     */
     public static List<Entity> matchEntities(String selector) {
         return new ArrayList<>();
     }

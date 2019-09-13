@@ -17,6 +17,9 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @author Himmelt
+ */
 @MainManager
 public final class FManager extends VManager {
 
@@ -25,7 +28,7 @@ public final class FManager extends VManager {
     private final Path dataPath;
 
     private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
-    private static final ConcurrentHashMap<UUID, Object> asyncLock = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<UUID, Object> ASYNC_LOCK = new ConcurrentHashMap<>();
 
     public FManager(SpongeViolet plugin, Path path) {
         super(plugin, path);
@@ -51,7 +54,7 @@ public final class FManager extends VManager {
     public void loadData(UUID uuid) {
         FileNode node = new FileNode(dataPath.resolve(uuid.toString() + ".dat").toFile(), DataAPI.options);
         try {
-            synchronized (asyncLock.computeIfAbsent(uuid, u -> new Object())) {
+            synchronized (ASYNC_LOCK.computeIfAbsent(uuid, u -> new Object())) {
                 node.load(false, true);
                 DataAPI.readStore(uuid, node);
             }
@@ -77,7 +80,7 @@ public final class FManager extends VManager {
         }
         FileNode node = new FileNode(dataFile.toFile(), DataAPI.options);
         try {
-            synchronized (asyncLock.computeIfAbsent(uuid, u -> new Object())) {
+            synchronized (ASYNC_LOCK.computeIfAbsent(uuid, u -> new Object())) {
                 DataAPI.writeStore(uuid, node);
                 node.save();
                 if (clear) {
@@ -95,7 +98,7 @@ public final class FManager extends VManager {
         Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
             saveData(uuid, clear);
             if (clear) {
-                asyncLock.remove(uuid);
+                ASYNC_LOCK.remove(uuid);
             }
         });
     }
@@ -114,7 +117,7 @@ public final class FManager extends VManager {
     }
 
     public void listPlugins(CommandSource sender) {
-        for (IPlugin plugin : plugins) {
+        for (IPlugin plugin : PLUGINS) {
             sendKey(sender, "pluginInfo", plugin.getId(), plugin.getVersion());
         }
     }

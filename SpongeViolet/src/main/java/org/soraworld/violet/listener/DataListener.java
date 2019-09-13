@@ -16,6 +16,9 @@ import org.spongepowered.api.util.Tristate;
 
 import java.util.UUID;
 
+/**
+ * @author Himmelt
+ */
 @EventListener
 public class DataListener {
 
