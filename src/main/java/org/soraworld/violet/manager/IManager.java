@@ -221,7 +221,7 @@ public abstract class IManager<T extends IPlugin> {
             if (!setLang(lang) && !DEF_LANG.equalsIgnoreCase(lang)) {
                 setLang(DEF_LANG);
             }
-            options.setDebug(debug);
+            setDebug(debug);
             reloadSuccess = true;
             if (!plugin.getVersion().equalsIgnoreCase(version)) {
                 consoleKey("versionChanged", version, plugin.getVersion());
