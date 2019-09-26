@@ -59,7 +59,7 @@ public final class FManager extends VManager {
                 DataAPI.readStore(uuid, node);
             }
             debug("UUID:" + uuid + " store data load success.");
-        } catch (Exception e) {
+        } catch (Throwable e) {
             console(ChatColor.RED + "UUID:" + uuid + " store data load exception.");
             debug(e);
         }
@@ -88,7 +88,7 @@ public final class FManager extends VManager {
                 }
             }
             debug("UUID:" + uuid + " store data save success.");
-        } catch (Exception e) {
+        } catch (Throwable e) {
             console(ChatColor.RED + "UUID:" + uuid + " store data save exception.");
             debug(e);
         }

@@ -1,6 +1,7 @@
 package org.soraworld.violet.manager;
 
 import org.jetbrains.annotations.Nullable;
+import org.soraworld.violet.Violet;
 import org.soraworld.violet.plugin.SpongePlugin;
 import org.soraworld.violet.text.ClickText;
 import org.soraworld.violet.text.HoverText;
@@ -18,12 +19,19 @@ import java.nio.file.Path;
 
 /**
  * Sponge 管理器.
+ *
  * @author Himmelt
  */
 public abstract class VManager extends IManager<SpongePlugin> {
 
     public VManager(SpongePlugin plugin, Path path) {
         super(plugin, path);
+    }
+
+    @Override
+    public void setDebug(boolean debug) {
+        super.setDebug(debug);
+        Violet.DEBUG_MODE = debug;
     }
 
     public void asyncSave(@Nullable CommandSource sender) {

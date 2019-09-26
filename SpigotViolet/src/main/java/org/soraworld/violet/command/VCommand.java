@@ -152,9 +152,7 @@ public class VCommand extends Command {
             Field field = instance.getClass().getDeclaredField(name);
             tryAddSub(field, instance);
         } catch (Throwable e) {
-            if (manager.isDebug()) {
-                e.printStackTrace();
-            }
+            manager.debug(e);
             manager.consoleKey("extractNoSuchSub", instance.getClass().getName(), name);
         }
     }
@@ -177,9 +175,7 @@ public class VCommand extends Command {
             try {
                 executor = (SubExecutor) field.get(instance);
             } catch (Throwable e) {
-                if (manager.isDebug()) {
-                    e.printStackTrace();
-                }
+                manager.debug(e);
             }
             if (executor == null) {
                 return;
@@ -238,9 +234,7 @@ public class VCommand extends Command {
             Field field = instance.getClass().getDeclaredField(name);
             tryAddTab(field, instance);
         } catch (Throwable e) {
-            if (manager.isDebug()) {
-                e.printStackTrace();
-            }
+            manager.debug(e);
             manager.consoleKey("extractNoSuchTab", instance.getClass().getName(), name);
         }
     }
@@ -258,9 +252,7 @@ public class VCommand extends Command {
         try {
             executor = (TabExecutor) field.get(instance);
         } catch (Throwable e) {
-            if (manager.isDebug()) {
-                e.printStackTrace();
-            }
+            manager.debug(e);
         }
         if (executor == null) {
             return;

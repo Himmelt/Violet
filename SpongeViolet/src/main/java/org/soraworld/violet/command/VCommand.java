@@ -126,9 +126,7 @@ public class VCommand implements CommandCallable {
             Field field = instance.getClass().getDeclaredField(name);
             tryAddSub(field, instance);
         } catch (Throwable e) {
-            if (manager.isDebug()) {
-                e.printStackTrace();
-            }
+            manager.debug(e);
             manager.consoleKey("extractNoSuchSub", instance.getClass().getName(), name);
         }
     }
@@ -151,9 +149,7 @@ public class VCommand implements CommandCallable {
             try {
                 executor = (SubExecutor) field.get(instance);
             } catch (Throwable e) {
-                if (manager.isDebug()) {
-                    e.printStackTrace();
-                }
+                manager.debug(e);
             }
             if (executor == null) {
                 return;
@@ -212,9 +208,7 @@ public class VCommand implements CommandCallable {
             Field field = instance.getClass().getDeclaredField(name);
             tryAddTab(field, instance);
         } catch (Throwable e) {
-            if (manager.isDebug()) {
-                e.printStackTrace();
-            }
+            manager.debug(e);
             manager.consoleKey("extractNoSuchTab", instance.getClass().getName(), name);
         }
     }
@@ -232,9 +226,7 @@ public class VCommand implements CommandCallable {
         try {
             executor = (TabExecutor) field.get(instance);
         } catch (Throwable e) {
-            if (manager.isDebug()) {
-                e.printStackTrace();
-            }
+            manager.debug(e);
         }
         if (executor == null) {
             return;

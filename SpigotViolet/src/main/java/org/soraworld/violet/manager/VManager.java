@@ -7,6 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.Nullable;
+import org.soraworld.violet.Violet;
 import org.soraworld.violet.nms.Version;
 import org.soraworld.violet.plugin.SpigotPlugin;
 import org.soraworld.violet.text.ClickText;
@@ -23,6 +24,12 @@ public abstract class VManager extends IManager<SpigotPlugin> {
 
     public VManager(SpigotPlugin plugin, Path path) {
         super(plugin, path);
+    }
+
+    @Override
+    public void setDebug(boolean debug) {
+        super.setDebug(debug);
+        Violet.DEBUG_MODE = debug;
     }
 
     public void asyncSave(@Nullable CommandSender sender) {

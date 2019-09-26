@@ -1,5 +1,7 @@
 package org.soraworld.violet.util;
 
+import org.soraworld.violet.Violet;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -50,14 +52,22 @@ public class FileUtils {
                                 Files.copy(path, zipOut);
                                 zipOut.closeEntry();
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                if (Violet.DEBUG_MODE) {
+                                    e.printStackTrace();
+                                } else {
+                                    System.out.println("IOException: " + e.getLocalizedMessage());
+                                }
                             }
                         });
                 zipOut.flush();
                 zipOut.close();
                 return true;
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (Throwable e) {
+                if (Violet.DEBUG_MODE) {
+                    e.printStackTrace();
+                } else {
+                    System.out.println("Exception: " + e.getLocalizedMessage());
+                }
             }
         }
         return false;

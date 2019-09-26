@@ -1,5 +1,7 @@
 package org.soraworld.violet.util;
 
+import org.soraworld.violet.Violet;
+
 import java.io.File;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -23,8 +25,12 @@ public final class ClassUtils {
                 }
             }
             file.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Throwable e) {
+            if (Violet.DEBUG_MODE) {
+                e.printStackTrace();
+            } else {
+                System.out.println("Package Classes scan Error: " + e.getLocalizedMessage());
+            }
         }
         return classes;
     }

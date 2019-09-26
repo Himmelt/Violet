@@ -148,9 +148,7 @@ public abstract class IManager<T extends IPlugin> {
             this.options.registerType(new UUIDSerializer());
         } catch (SerializerException e) {
             console(ChatColor.RED + "TypeSerializer for UUID register failed");
-            if (debug) {
-                e.printStackTrace();
-            }
+            debug(e);
         }
         this.confile = path.resolve(plugin.getId().replace(' ', '_') + ".conf");
         this.rootNode = new FileNode(confile.toFile(), options);
