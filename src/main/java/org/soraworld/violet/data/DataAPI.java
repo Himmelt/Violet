@@ -141,6 +141,34 @@ public final class DataAPI {
         tempData.computeIfAbsent(uuid, u -> new HashMap<>()).put(key, value);
     }
 
+    public static void setTempBool(UUID uuid, String key, boolean value) {
+        setTemp(uuid, key, value);
+    }
+
+    public static void setTempByte(UUID uuid, String key, byte value) {
+        setTemp(uuid, key, value);
+    }
+
+    public static void setTempInt(UUID uuid, String key, int value) {
+        setTemp(uuid, key, value);
+    }
+
+    public static void setTempLong(UUID uuid, String key, long value) {
+        setTemp(uuid, key, value);
+    }
+
+    public static void setTempFloat(UUID uuid, String key, float value) {
+        setTemp(uuid, key, value);
+    }
+
+    public static void setTempDouble(UUID uuid, String key, double value) {
+        setTemp(uuid, key, value);
+    }
+
+    public static void setTempString(UUID uuid, String key, String value) {
+        setTemp(uuid, key, value);
+    }
+
     public static Object removeTemp(UUID uuid, String key) {
         Map<String, Object> data = tempData.get(uuid);
         if (data != null) {
@@ -261,6 +289,34 @@ public final class DataAPI {
 
     public static void setStore(UUID uuid, String key, Object value) {
         storeData.computeIfAbsent(uuid, u -> new HashMap<>()).put(key, value);
+    }
+
+    public static void setStoreBool(UUID uuid, String key, boolean value) {
+        setStore(uuid, key, value);
+    }
+
+    public static void setStoreByte(UUID uuid, String key, byte value) {
+        setStore(uuid, key, value);
+    }
+
+    public static void setStoreInt(UUID uuid, String key, int value) {
+        setStore(uuid, key, value);
+    }
+
+    public static void setStoreLong(UUID uuid, String key, long value) {
+        setStore(uuid, key, value);
+    }
+
+    public static void setStoreFloat(UUID uuid, String key, float value) {
+        setStore(uuid, key, value);
+    }
+
+    public static void setStoreDouble(UUID uuid, String key, double value) {
+        setStore(uuid, key, value);
+    }
+
+    public static void setStoreString(UUID uuid, String key, String value) {
+        setStore(uuid, key, value);
     }
 
     public static Object removeStore(UUID uuid, String key) {
