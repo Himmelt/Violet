@@ -119,7 +119,7 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
             setManager(manager);
             injectClasses.forEach(this::injectIntoStatic);
         } else {
-            Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "CANT register or inject main manager !!!");
+            Bukkit.getConsoleSender().sendMessage(ChatColor.RED + getName() + " CANT register or inject main manager !!!");
         }
     }
 

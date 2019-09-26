@@ -18,10 +18,18 @@ public final class ClassUtils {
         try {
             JarFile file = new JarFile(jarFile);
             for (Enumeration<JarEntry> entry = file.entries(); entry.hasMoreElements(); ) {
-                JarEntry jarEntry = entry.nextElement();
-                String name = jarEntry.getName().replace("/", ".");
-                if (name.startsWith(packageName) && name.endsWith(".class")) {
-                    classes.add(Class.forName(name.substring(0, name.length() - 6)));
+                try {
+                    JarEntry jarEntry = entry.nextElement();
+                    String name = jarEntry.getName().replace("/", ".");
+                    if (name.startsWith(packageName) && name.endsWith(".class")) {
+                        classes.add(Class.forName(name.substring(0, name.length() - 6)));
+                    }
+                } catch (Throwable e) {
+                    if (Violet.DEBUG_MODE) {
+                        e.printStackTrace();
+                    } else {
+                        System.out.println("Package Classes scan Error: " + e.getLocalizedMessage());
+                    }
                 }
             }
             file.close();

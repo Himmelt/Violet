@@ -102,7 +102,7 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
             setManager(manager);
             injectClasses.forEach(this::injectIntoStatic);
         } else {
-            Sponge.getServer().getConsole().sendMessage(Text.of(ChatColor.RED + "CANT register or inject main manager !!!"));
+            Sponge.getServer().getConsole().sendMessage(Text.of(ChatColor.RED + getName() + " CANT register or inject main manager !!!"));
         }
     }
 
