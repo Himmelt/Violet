@@ -11,8 +11,8 @@ import java.nio.file.Path;
 /**
  * The interface Plugin.
  *
- * @author Himmelt
  * @param <M> the type parameter
+ * @author Himmelt
  */
 public interface IPlugin<M extends IManager> {
 
@@ -41,6 +41,7 @@ public interface IPlugin<M extends IManager> {
         return getId();
     }
 
+
     /**
      * Gets version.
      *
@@ -54,6 +55,8 @@ public interface IPlugin<M extends IManager> {
      * @return the root path
      */
     Path getRootPath();
+
+    void beforeLoad();
 
     /**
      * Is enabled boolean.

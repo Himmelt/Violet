@@ -28,6 +28,11 @@ public class SpongeViolet extends SpongePlugin<FManager> {
     }
 
     @Override
+    public void beforeLoad() {
+        loadLibraries();
+    }
+
+    @Override
     public FManager getManager() {
         return manager;
     }

@@ -223,6 +223,7 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
 
     @Override
     public void onLoad() {
+        beforeLoad();
         scanJarPackageClasses();
         registerInjectClasses();
         Path path = getRootPath();
@@ -294,6 +295,10 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
     @Override
     public Path getRootPath() {
         return getDataFolder().toPath();
+    }
+
+    @Override
+    public void beforeLoad() {
     }
 
     public void registerListener(@NotNull Object listener) {

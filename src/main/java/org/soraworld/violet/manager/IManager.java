@@ -268,7 +268,10 @@ public abstract class IManager<T extends IPlugin> {
      */
     public boolean doBackUp() {
         Path target = path.resolve("backup/" + DATE_FORMAT.format(new Date()) + ".zip");
-        return FileUtils.zipArchivePath(path, target, p -> !path.relativize(p).toString().toLowerCase().startsWith("backup"));
+        return FileUtils.zipArchivePath(path, target, p -> {
+            String name = path.relativize(p).toString().toLowerCase();
+            return !name.startsWith("backup") && !name.startsWith("rocksdb") && !name.startsWith("lib");
+        });
     }
 
     /**
@@ -382,12 +385,31 @@ public abstract class IManager<T extends IPlugin> {
         console(trans(key, args));
     }
 
+    public void log(@NotNull String text) {
+
+    }
+
+    public void logKey(@NotNull String key, Object... args) {
+        log(trans(key, args));
+    }
+
+    public void consoleLog(@NotNull String text) {
+        console(text);
+        log(text);
+    }
+
+    public void consoleLogKey(@NotNull String key, Object... args) {
+        String text = trans(key, args);
+        console(text);
+        log(text);
+    }
+
     /**
      * Println.
      *
      * @param text the text
      */
-    public void println(String text) {
+    public void println(@NotNull String text) {
         System.out.println(plainHead + text);
     }
 

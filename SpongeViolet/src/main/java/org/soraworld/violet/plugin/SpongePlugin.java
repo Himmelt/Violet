@@ -9,7 +9,6 @@ import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.inject.EventListener;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.inject.MainManager;
-import org.soraworld.violet.listener.UpdateListener;
 import org.soraworld.violet.manager.IManager;
 import org.soraworld.violet.manager.VManager;
 import org.soraworld.violet.util.ChatColor;
@@ -200,6 +199,7 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
 
     @Listener
     public void onLoad(GamePreInitializationEvent event) {
+        beforeLoad();
         scanJarPackageClasses();
         registerInjectClasses();
         Path path = getRootPath();
@@ -253,6 +253,10 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
     }
 
     @Override
+    public void beforeLoad() {
+    }
+
+    @Override
     public String getId() {
         return container.getId();
     }
@@ -302,11 +306,6 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
         if (clazz.getAnnotation(Inject.class) != null) {
             injectClasses.add(clazz);
         }
-    }
-
-    @Override
-    public void registerInjectClasses() {
-        registerInjectClass(UpdateListener.class);
     }
 
     public void registerListener(@NotNull Object listener) {
