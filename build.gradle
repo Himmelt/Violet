@@ -45,7 +45,6 @@ repositories {
 
 dependencies {
     compile 'org.soraworld:hocon:1.2.2-SNAPSHOT'
-    implementation 'org.rocksdb:rocksdbjni:6.2.2'
     testCompile 'junit:junit:4.12'
 }
 
@@ -85,7 +84,6 @@ subprojects {
     dependencies {
         shadeOnly rootProject
         shadow 'org.soraworld:hocon:1.2.2-SNAPSHOT'
-        implementation 'org.rocksdb:rocksdbjni:6.2.2'
         testCompile 'junit:junit:4.12'
     }
 

@@ -13,7 +13,6 @@ import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.inject.EventListener;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.inject.MainManager;
-import org.soraworld.violet.listener.UpdateListener;
 import org.soraworld.violet.manager.IManager;
 import org.soraworld.violet.manager.VManager;
 import org.soraworld.violet.util.ChatColor;
@@ -249,7 +248,6 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
             registerListeners();
             manager.consoleKey("pluginEnabled", getId() + "-" + getVersion());
             afterEnable();
-            manager.checkUpdate(Bukkit.getConsoleSender());
         } else {
             Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Plugin " + getId() + " enable failed !!!!");
         }
@@ -276,20 +274,6 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
     @Override
     public void setManager(M manager) {
         this.manager = manager;
-    }
-
-    @Override
-    public String updateUrl() {
-        String website = getDescription().getWebsite();
-        if (!website.endsWith("/")) {
-            website += "/";
-        }
-        return website + "releases/latest";
-    }
-
-    @Override
-    public void registerInjectClasses() {
-        registerInjectClass(UpdateListener.class);
     }
 
     @Override

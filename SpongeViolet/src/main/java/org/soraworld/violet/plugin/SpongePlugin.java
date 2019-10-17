@@ -225,7 +225,6 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
             registerListeners();
             manager.consoleKey("pluginEnabled", getId() + "-" + getVersion());
             afterEnable();
-            manager.checkUpdate(Sponge.getServer().getConsole());
         } else {
             Sponge.getServer().getConsole().sendMessage(Text.of(ChatColor.RED + "Plugin " + getId() + " enable failed !!!!"));
         }
@@ -284,15 +283,6 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
     @Override
     public void setManager(M manager) {
         this.manager = manager;
-    }
-
-    @Override
-    public String updateUrl() {
-        String website = container.getUrl().orElse("https://github.com/Himmelt/" + container.getName());
-        if (!website.endsWith("/")) {
-            website += "/";
-        }
-        return website + "releases/latest";
     }
 
     @Override

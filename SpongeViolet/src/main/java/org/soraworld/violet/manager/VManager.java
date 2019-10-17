@@ -2,8 +2,6 @@ package org.soraworld.violet.manager;
 
 import org.jetbrains.annotations.Nullable;
 import org.soraworld.violet.plugin.SpongePlugin;
-import org.soraworld.violet.text.ClickText;
-import org.soraworld.violet.text.HoverText;
 import org.soraworld.violet.text.JsonText;
 import org.soraworld.violet.util.ChatColor;
 import org.spongepowered.api.Sponge;
@@ -80,27 +78,6 @@ public abstract class VManager extends IManager<SpongePlugin> {
                 .title(Text.of(title))
                 .subtitle(Text.of(subtitle))
                 .fadeIn(fadeIn).stay(stay).fadeOut(fadeOut).build());
-    }
-
-    public void checkUpdate(CommandSource sender) {
-        if (checkUpdate) {
-            Sponge.getScheduler().createAsyncExecutor(plugin).execute(() -> {
-                if (hasUpdate()) {
-                    if (sender instanceof Player) {
-                        Sponge.getScheduler().createSyncExecutor(plugin).execute(() -> {
-                            sendJson((Player) sender, new JsonText(trans("hasUpdate")),
-                                    new JsonText(ChatColor.GREEN + plugin.updateUrl(),
-                                            new ClickText(plugin.updateUrl(), ClickText.Action.OPEN_URL),
-                                            new HoverText(trans("clickUpdate"), HoverText.Action.SHOW_TEXT)
-                                    )
-                            );
-                        });
-                    } else {
-                        send(sender, trans("hasUpdate") + ChatColor.GREEN + plugin.updateUrl());
-                    }
-                }
-            });
-        }
     }
 
     @Override

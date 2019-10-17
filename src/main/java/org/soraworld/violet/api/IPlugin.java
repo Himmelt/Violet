@@ -41,7 +41,6 @@ public interface IPlugin<M extends IManager> {
         return getId();
     }
 
-
     /**
      * Gets version.
      *
@@ -56,6 +55,9 @@ public interface IPlugin<M extends IManager> {
      */
     Path getRootPath();
 
+    /**
+     * Before load.
+     */
     void beforeLoad();
 
     /**
@@ -90,13 +92,6 @@ public interface IPlugin<M extends IManager> {
      * @param manager the manager
      */
     void setManager(M manager);
-
-    /**
-     * Update url string.
-     *
-     * @return the string
-     */
-    String updateUrl();
 
     /**
      * Gets asset stream.

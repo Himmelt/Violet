@@ -12,7 +12,6 @@ import org.soraworld.violet.text.JsonText;
 import org.soraworld.violet.util.ChatColor;
 import org.soraworld.violet.util.FileUtils;
 
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,11 +53,6 @@ public abstract class IManager<T extends IPlugin> {
      */
     @Setting(comment = "comment.autoBackUp")
     protected boolean autoBackUp = true;
-    /**
-     * 是否检查更新
-     */
-    @Setting(comment = "comment.checkUpdate")
-    protected boolean checkUpdate = true;
     /**
      * 是否在插件停用时保存配置文件.
      */
@@ -148,7 +142,7 @@ public abstract class IManager<T extends IPlugin> {
             this.options.registerType(new UUIDSerializer());
         } catch (SerializerException e) {
             console(ChatColor.RED + "TypeSerializer for UUID register failed");
-            debug(e);
+            e.printStackTrace();
         }
         this.confile = path.resolve(plugin.getId().replace(' ', '_') + ".conf");
         this.rootNode = new FileNode(confile.toFile(), options);
@@ -235,7 +229,7 @@ public abstract class IManager<T extends IPlugin> {
             return true;
         } catch (Throwable e) {
             console(ChatColor.RED + "Config file load exception !!!");
-            debug(e);
+            e.printStackTrace();
             reloadSuccess = false;
             return false;
         }
@@ -256,7 +250,7 @@ public abstract class IManager<T extends IPlugin> {
             return true;
         } catch (Throwable e) {
             console(ChatColor.RED + "Config file save exception !!!");
-            debug(e);
+            e.printStackTrace();
             return false;
         }
     }
@@ -270,7 +264,7 @@ public abstract class IManager<T extends IPlugin> {
         Path target = path.resolve("backup/" + DATE_FORMAT.format(new Date()) + ".zip");
         return FileUtils.zipArchivePath(path, target, p -> {
             String name = path.relativize(p).toString().toLowerCase();
-            return !name.startsWith("backup") && !name.startsWith("rocksdb") && !name.startsWith("lib");
+            return !name.startsWith("backup");
         });
     }
 
@@ -504,27 +498,6 @@ public abstract class IManager<T extends IPlugin> {
      * After load.
      */
     public void afterLoad() {
-    }
-
-    /**
-     * Has update boolean.
-     *
-     * @return the boolean
-     */
-    public boolean hasUpdate() {
-        try {
-            URL url = new URL(plugin.updateUrl());
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setInstanceFollowRedirects(false);
-            String text = conn.getHeaderField("Location");
-            text = text.substring(text.lastIndexOf('/'));
-            if (!text.matches("/v\\d\\.\\d\\.\\d")) {
-                return false;
-            }
-            return !text.contains(plugin.getVersion());
-        } catch (Throwable ignored) {
-            return false;
-        }
     }
 
     /**

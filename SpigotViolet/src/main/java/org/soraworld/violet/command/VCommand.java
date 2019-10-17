@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 /**
  * The type V command.
+ *
  * @author Himmelt
  */
 public class VCommand extends Command {
@@ -130,7 +131,7 @@ public class VCommand extends Command {
      */
     public void extractSub(@NotNull Object instance) {
         Field[] fields = instance.getClass().getDeclaredFields();
-        if (fields == null || fields.length == 0) {
+        if (fields.length == 0) {
             return;
         }
         for (Field field : fields) {
@@ -212,7 +213,7 @@ public class VCommand extends Command {
      */
     public void extractTab(@NotNull Object instance) {
         Field[] fields = instance.getClass().getDeclaredFields();
-        if (fields == null || fields.length == 0) {
+        if (fields.length == 0) {
             return;
         }
         for (Field field : fields) {
@@ -343,7 +344,6 @@ public class VCommand extends Command {
 
     /* ---------------------------------------- modify start -------------------------------------------- */
 
-
     /**
      * Execute.
      * 执行器非空时，参数优先为子命令
@@ -419,17 +419,19 @@ public class VCommand extends Command {
     /* ---------------------------------------- origin start -------------------------------------------- */
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
+
     @Override
-    public String getDescription() {
+    public @NotNull String getDescription() {
         return getUsage();
     }
 
+
     @Override
-    public String getUsage() {
+    public @NotNull String getUsage() {
         if (usageMessage == null || usageMessage.isEmpty()) {
             StringBuilder builder = new StringBuilder(getName());
             VCommand parent = this.parent;
@@ -444,40 +446,41 @@ public class VCommand extends Command {
     }
 
     @Override
-    public VCommand setAliases(List<String> aliases) {
+    public @NotNull VCommand setAliases(@NotNull List<String> aliases) {
         this.aliases.clear();
         this.aliases.addAll(aliases);
         return this;
     }
 
     @Override
-    public List<String> getAliases() {
+    public @NotNull List<String> getAliases() {
         return aliases;
     }
 
     @Override
-    public boolean execute(CommandSender sender, String label, String[] args) {
+    public boolean execute(@NotNull CommandSender sender, @NotNull String label, @NotNull String[] args) {
         execute(sender, new Args(args));
         return true;
     }
 
     @Override
-    public List<String> tabComplete(CommandSender sender, String alias, String[] args) {
+    public @NotNull List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) {
+        return tabComplete(sender, new Args(args));
+    }
+
+    @NotNull
+    @Override
+    public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args, Location location) {
         return tabComplete(sender, new Args(args));
     }
 
     @Override
-    public List<String> tabComplete(CommandSender sender, String alias, String[] args, Location location) {
-        return tabComplete(sender, new Args(args));
-    }
-
-    @Override
-    public boolean testPermission(CommandSender sender) {
+    public boolean testPermission(@NotNull CommandSender sender) {
         return permission == null || permission.isEmpty() || sender.hasPermission(permission);
     }
 
     @Override
-    public boolean testPermissionSilent(CommandSender sender) {
+    public boolean testPermissionSilent(@NotNull CommandSender sender) {
         return permission == null || permission.isEmpty() || sender.hasPermission(permission);
     }
 

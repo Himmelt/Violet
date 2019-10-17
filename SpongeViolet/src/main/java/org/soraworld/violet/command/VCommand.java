@@ -104,7 +104,7 @@ public class VCommand implements CommandCallable {
      */
     public void extractSub(@NotNull Object instance) {
         Field[] fields = instance.getClass().getDeclaredFields();
-        if (fields == null || fields.length == 0) {
+        if (fields.length == 0) {
             return;
         }
         for (Field field : fields) {
@@ -186,7 +186,7 @@ public class VCommand implements CommandCallable {
      */
     public void extractTab(@NotNull Object instance) {
         Field[] fields = instance.getClass().getDeclaredFields();
-        if (fields == null || fields.length == 0) {
+        if (fields.length == 0) {
             return;
         }
         for (Field field : fields) {
@@ -380,10 +380,9 @@ public class VCommand implements CommandCallable {
         return name;
     }
 
-    public VCommand setAliases(List<String> aliases) {
+    public void setAliases(List<String> aliases) {
         this.aliases.clear();
         this.aliases.addAll(aliases);
-        return this;
     }
 
     public List<String> getAliases() {
@@ -395,15 +394,13 @@ public class VCommand implements CommandCallable {
     }
 
     @Override
-    @NotNull
-    public CommandResult process(@NotNull CommandSource sender, @NotNull String args) {
+    public @NotNull CommandResult process(@NotNull CommandSource sender, @NotNull String args) {
         execute(sender, new Args(args));
         return CommandResult.success();
     }
 
     @Override
-    @NotNull
-    public List<String> getSuggestions(@NotNull CommandSource sender, @NotNull String args, Location<World> location) {
+    public @NotNull List<String> getSuggestions(@NotNull CommandSource sender, @NotNull String args, Location<World> location) {
         String[] ss = args.trim().split("[ ]+");
         if (!args.isEmpty() && args.endsWith(" ")) {
             ss = Arrays.copyOf(ss, ss.length + 1);
@@ -432,20 +429,17 @@ public class VCommand implements CommandCallable {
     }
 
     @Override
-    @NotNull
-    public Text getUsage(@NotNull CommandSource sender) {
+    public @NotNull Text getUsage(@NotNull CommandSource sender) {
         return Text.of(getUsage());
     }
 
     @Override
-    @NotNull
-    public Optional<Text> getShortDescription(@NotNull CommandSource source) {
+    public @NotNull Optional<Text> getShortDescription(@NotNull CommandSource source) {
         return Optional.of(Text.of(getUsage()));
     }
 
     @Override
-    @NotNull
-    public Optional<Text> getHelp(@NotNull CommandSource source) {
+    public @NotNull Optional<Text> getHelp(@NotNull CommandSource source) {
         return Optional.of(Text.of(getUsage()));
     }
 

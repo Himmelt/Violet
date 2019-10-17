@@ -9,8 +9,6 @@ import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.Nullable;
 import org.soraworld.violet.nms.Version;
 import org.soraworld.violet.plugin.SpigotPlugin;
-import org.soraworld.violet.text.ClickText;
-import org.soraworld.violet.text.HoverText;
 import org.soraworld.violet.text.JsonText;
 import org.soraworld.violet.util.ChatColor;
 
@@ -86,27 +84,6 @@ public abstract class VManager extends IManager<SpigotPlugin> {
             send(player, title);
         } else {
             player.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
-        }
-    }
-
-    public void checkUpdate(CommandSender sender) {
-        if (checkUpdate) {
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-                if (hasUpdate()) {
-                    if (sender instanceof Player) {
-                        Bukkit.getScheduler().runTask(plugin, () -> {
-                            sendJson((Player) sender, new JsonText(trans("hasUpdate")),
-                                    new JsonText(ChatColor.GREEN + plugin.updateUrl(),
-                                            new ClickText(plugin.updateUrl(), ClickText.Action.OPEN_URL),
-                                            new HoverText(trans("clickUpdate"), HoverText.Action.SHOW_TEXT)
-                                    )
-                            );
-                        });
-                    } else {
-                        send(sender, trans("hasUpdate") + ChatColor.GREEN + plugin.updateUrl());
-                    }
-                }
-            });
         }
     }
 
