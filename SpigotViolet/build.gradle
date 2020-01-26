@@ -1,13 +1,10 @@
-repositories {
-    maven {
-        name = 'spigot'
-        url = 'https://hub.spigotmc.org/nexus/content/groups/public/'
-    }
+sourceSets {
+    api
 }
 
 dependencies {
-    compileOnly 'org.spigotmc:spigot-api:1.14.1-R0.1-SNAPSHOT'
-    //compileOnly 'org.spigotmc:spigot-api:1.8-R0.1-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'
+    compileOnly sourceSets.api.output
 }
 
 processResources {
@@ -15,26 +12,5 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         include 'plugin.yml'
         expand 'version': project.version
-    }
-}
-
-publishing {
-    publications {
-        mavenRelease(MavenPublication) {
-            from components.java
-            groupId = 'org.soraworld'
-            artifactId = 'violet-spigot'
-            version = project.version
-            artifact shadowJar
-            artifact sourcesJar
-            artifact javadocJar
-        }
-        mavenSnapshot(MavenPublication) {
-            from components.java
-            groupId = 'org.soraworld'
-            artifactId = 'violet-spigot'
-            version = project.version
-            artifact sourcesJar
-        }
     }
 }
