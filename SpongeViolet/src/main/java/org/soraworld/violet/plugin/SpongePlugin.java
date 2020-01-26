@@ -9,7 +9,6 @@ import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.inject.EventListener;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.inject.MainManager;
-import org.soraworld.violet.listener.UpdateListener;
 import org.soraworld.violet.manager.IManager;
 import org.soraworld.violet.manager.VManager;
 import org.soraworld.violet.util.ChatColor;
@@ -34,6 +33,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+/**
+ * @author Himmelt
+ */
 public class SpongePlugin<M extends VManager> implements IPlugin<M> {
 
     @javax.inject.Inject
@@ -53,12 +55,22 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
             File jarFile = path.toFile();
             if (jarFile.exists()) {
                 for (Class<?> clazz : ClassUtils.getClasses(jarFile, getClass().getPackage().getName())) {
-                    if (clazz.getAnnotation(Command.class) != null) commandClasses.add(clazz);
-                    if (clazz.getAnnotation(EventListener.class) != null) listenerClasses.add(clazz);
-                    if (clazz.getAnnotation(MainManager.class) != null) mainManagerClass = clazz;
-                    if (clazz.getAnnotation(Inject.class) != null) injectClasses.add(clazz);
+                    if (clazz.getAnnotation(Command.class) != null) {
+                        commandClasses.add(clazz);
+                    }
+                    if (clazz.getAnnotation(EventListener.class) != null) {
+                        listenerClasses.add(clazz);
+                    }
+                    if (clazz.getAnnotation(MainManager.class) != null) {
+                        mainManagerClass = clazz;
+                    }
+                    if (clazz.getAnnotation(Inject.class) != null) {
+                        injectClasses.add(clazz);
+                    }
                 }
-            } else Sponge.getServer().getConsole().sendMessage(Text.of(ChatColor.RED + "Plugin Jar File NOT exist !!!"));
+            } else {
+                Sponge.getServer().getConsole().sendMessage(Text.of(ChatColor.RED + "Plugin Jar File NOT exist !!!"));
+            }
         });
     }
 
@@ -88,7 +100,9 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
         if (manager != null) {
             setManager(manager);
             injectClasses.forEach(this::injectIntoStatic);
-        } else Sponge.getServer().getConsole().sendMessage(Text.of(ChatColor.RED + "CANT register or inject main manager !!!"));
+        } else {
+            Sponge.getServer().getConsole().sendMessage(Text.of(ChatColor.RED + getName() + " CANT register or inject main manager !!!"));
+        }
     }
 
     private void injectCommands() {
@@ -134,7 +148,9 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
     private void injectIntoStatic(@NotNull Class<?> clazz) {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
-            if (!Modifier.isStatic(field.getModifiers())) continue;
+            if (!Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
             Inject inject = field.getAnnotation(Inject.class);
             if (inject != null) {
                 field.setAccessible(true);
@@ -158,7 +174,9 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
     private void injectIntoInstance(@NotNull Object instance) {
         Field[] fields = instance.getClass().getDeclaredFields();
         for (Field field : fields) {
-            if (Modifier.isStatic(field.getModifiers())) continue;
+            if (Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
             Inject inject = field.getAnnotation(Inject.class);
             if (inject != null) {
                 field.setAccessible(true);
@@ -181,6 +199,7 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
 
     @Listener
     public void onLoad(GamePreInitializationEvent event) {
+        beforeLoad();
         scanJarPackageClasses();
         registerInjectClasses();
         Path path = getRootPath();
@@ -206,8 +225,9 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
             registerListeners();
             manager.consoleKey("pluginEnabled", getId() + "-" + getVersion());
             afterEnable();
-            manager.checkUpdate(Sponge.getServer().getConsole());
-        } else Sponge.getServer().getConsole().sendMessage(Text.of(ChatColor.RED + "Plugin " + getId() + " enable failed !!!!"));
+        } else {
+            Sponge.getServer().getConsole().sendMessage(Text.of(ChatColor.RED + "Plugin " + getId() + " enable failed !!!!"));
+        }
     }
 
     @Listener
@@ -223,49 +243,59 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
         }
     }
 
+    @Override
     public Path getRootPath() {
-        if (path == null) path = new File("config", getId()).toPath();
+        if (path == null) {
+            path = new File("config", getId()).toPath();
+        }
         return path;
     }
 
+    @Override
+    public void beforeLoad() {
+    }
+
+    @Override
     public String getId() {
         return container.getId();
     }
 
+    @Override
     public String getName() {
         return container.getName();
     }
 
+    @Override
     public String getVersion() {
         return container.getVersion().orElse("x.y.z");
     }
 
+    @Override
     public boolean isEnabled() {
         return Sponge.getPluginManager().isLoaded(container.getId());
     }
 
+    @Override
     public M getManager() {
         return manager;
     }
 
+    @Override
     public void setManager(M manager) {
         this.manager = manager;
     }
 
-    public String updateURL() {
-        String website = container.getUrl().orElse("https://github.com/Himmelt/" + container.getName());
-        if (!website.endsWith("/")) website += "/";
-        return website + "releases/latest";
-    }
-
+    @Override
     public void registerInjectClass(@NotNull Class<?> clazz) {
-        if (clazz.getAnnotation(Command.class) != null) commandClasses.add(clazz);
-        if (clazz.getAnnotation(EventListener.class) != null) listenerClasses.add(clazz);
-        if (clazz.getAnnotation(Inject.class) != null) injectClasses.add(clazz);
-    }
-
-    public void registerInjectClasses() {
-        registerInjectClass(UpdateListener.class);
+        if (clazz.getAnnotation(Command.class) != null) {
+            commandClasses.add(clazz);
+        }
+        if (clazz.getAnnotation(EventListener.class) != null) {
+            listenerClasses.add(clazz);
+        }
+        if (clazz.getAnnotation(Inject.class) != null) {
+            injectClasses.add(clazz);
+        }
     }
 
     public void registerListener(@NotNull Object listener) {

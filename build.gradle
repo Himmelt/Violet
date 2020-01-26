@@ -44,7 +44,7 @@ repositories {
 }
 
 dependencies {
-    compile 'org.soraworld:hocon:1.2.1-SNAPSHOT'
+    compile 'org.soraworld:hocon:1.2.2-SNAPSHOT'
     testCompile 'junit:junit:4.12'
 }
 
@@ -83,7 +83,7 @@ subprojects {
 
     dependencies {
         shadeOnly rootProject
-        shadow 'org.soraworld:hocon:1.2.1-SNAPSHOT'
+        shadow 'org.soraworld:hocon:1.2.2-SNAPSHOT'
         testCompile 'junit:junit:4.12'
     }
 

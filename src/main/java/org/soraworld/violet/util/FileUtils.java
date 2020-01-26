@@ -1,25 +1,34 @@
 package org.soraworld.violet.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+/**
+ * @author Himmelt
+ */
 public class FileUtils {
 
     public static boolean deletePath(File path, boolean debug) {
         if (path.isFile()) {
             boolean flag = path.delete();
-            if (debug && !flag) System.out.println("File " + path + " delete failed !!");
+            if (debug && !flag) {
+                System.out.println("File " + path + " delete failed !!");
+            }
             return flag;
         }
         File[] files = path.listFiles();
         boolean flag = true;
         if (files != null && files.length > 0) {
-            for (File file : files) flag = flag && deletePath(file, debug);
+            for (File file : files) {
+                flag = flag && deletePath(file, debug);
+            }
         } else {
             flag = path.delete();
         }
@@ -43,17 +52,27 @@ public class FileUtils {
                                 Files.copy(path, zipOut);
                                 zipOut.closeEntry();
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                System.out.println("!!!!! IOException: " + e.getLocalizedMessage());
                             }
                         });
                 zipOut.flush();
                 zipOut.close();
                 return true;
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (Throwable e) {
+                System.out.println("!!!!! Exception: " + e.getLocalizedMessage());
             }
         }
         return false;
     }
 
+    public static byte[] readInputStream(InputStream inputStream) throws IOException {
+        byte[] buffer = new byte[1024];
+        int len;
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        while ((len = inputStream.read(buffer)) != -1) {
+            bos.write(buffer, 0, len);
+        }
+        bos.close();
+        return bos.toByteArray();
+    }
 }

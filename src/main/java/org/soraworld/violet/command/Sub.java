@@ -6,6 +6,7 @@ import java.lang.annotation.*;
  * 子命令注解.
  * 只有注解签名为 {@code public static void (SpigotManager,CommandSender,Paths);}
  * 和 {@code public static void (SpongeManager,CommandSource,Paths);} 的方法才会被提取.
+ * @author Himmelt
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

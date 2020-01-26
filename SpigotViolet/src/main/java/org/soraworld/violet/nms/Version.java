@@ -1,5 +1,8 @@
 package org.soraworld.violet.nms;
 
+/**
+ * @author Himmelt
+ */
 public final class Version {
     public static final boolean v1_7_R4;
     public static final boolean v1_8_R1;
