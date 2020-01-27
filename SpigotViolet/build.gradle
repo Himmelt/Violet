@@ -3,8 +3,21 @@ sourceSets {
 }
 
 dependencies {
-    compileOnly 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'
+    shade 'org.ow2.asm:asm:5.2'
+    shade 'org.soraworld:hocon:1.2.2-SNAPSHOT'
+    compileOnly rootProject
     compileOnly sourceSets.api.output
+    compileOnly 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'
+}
+
+jar {
+    from sourceSets.main.output, rootProject.sourceSets.main.output
+    configurations.shade.copyRecursive().setTransitive(false).each {
+        artifact ->
+            println "spigot:" + artifact
+            from(zipTree(artifact))
+    }
+    includeEmptyDirs = false
 }
 
 processResources {
