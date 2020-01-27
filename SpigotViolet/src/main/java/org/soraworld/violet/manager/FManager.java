@@ -1,9 +1,8 @@
 package org.soraworld.violet.manager;
 
 import org.bukkit.command.CommandSender;
-import org.soraworld.violet.SpigotViolet;
 import org.soraworld.violet.api.IPlugin;
-import org.soraworld.violet.inject.MainManager;
+import org.soraworld.violet.inject.Manager;
 import org.soraworld.violet.util.ChatColor;
 
 import java.nio.file.Path;
@@ -12,8 +11,8 @@ import java.util.HashMap;
 /**
  * @author Himmelt
  */
-@MainManager
-public final class FManager extends VManager {
+@Manager
+public final class FManager extends SpigotManager {
 
     private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
 

@@ -9,34 +9,27 @@ import org.jetbrains.annotations.Nullable;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.command.BaseSubCmds;
 import org.soraworld.violet.command.VCommand;
+import org.soraworld.violet.core.ManagerCore;
+import org.soraworld.violet.core.PluginCore;
 import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.inject.EventListener;
 import org.soraworld.violet.inject.Inject;
-import org.soraworld.violet.inject.MainManager;
-import org.soraworld.violet.manager.IManager;
-import org.soraworld.violet.manager.VManager;
-import org.soraworld.violet.util.ChatColor;
-import org.soraworld.violet.util.ClassUtils;
+import org.soraworld.violet.manager.SpigotManager;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.HashSet;
 
 /**
  * @author Himmelt
  */
-public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlugin<M> {
+public class SpigotPlugin extends JavaPlugin implements IPlugin {
 
-    protected M manager;
-    protected Class<?> mainManagerClass;
-    protected final HashSet<Class<?>> injectClasses = new HashSet<>();
-    protected final HashSet<Class<?>> commandClasses = new HashSet<>();
-    protected final HashSet<Class<?>> listenerClasses = new HashSet<>();
+    private final PluginCore plugin = new PluginCore(this);
+    private final SpigotManager manager = new SpigotManager(this, getRootPath());
+
     private static final CommandMap COMMAND_MAP;
 
     static {
@@ -54,72 +47,6 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
             e.printStackTrace();
         }
         COMMAND_MAP = map;
-    }
-
-    private void scanJarPackageClasses() {
-        File jarFile = getFile();
-        if (jarFile.exists()) {
-            for (Class<?> clazz : ClassUtils.getClasses(jarFile, getClass().getPackage().getName(), getClassLoader())) {
-                if (clazz.getAnnotation(Command.class) != null) {
-                    commandClasses.add(clazz);
-                }
-                if (clazz.getAnnotation(EventListener.class) != null) {
-                    listenerClasses.add(clazz);
-                }
-                if (clazz.getAnnotation(MainManager.class) != null) {
-                    mainManagerClass = clazz;
-                }
-                if (clazz.getAnnotation(Inject.class) != null) {
-                    injectClasses.add(clazz);
-                }
-            }
-        } else {
-            Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Plugin Jar File NOT exist !!!");
-        }
-    }
-
-    @Override
-    public void registerInjectClass(@NotNull Class<?> clazz) {
-        if (clazz.getAnnotation(Command.class) != null) {
-            commandClasses.add(clazz);
-        }
-        if (clazz.getAnnotation(EventListener.class) != null) {
-            listenerClasses.add(clazz);
-        }
-        if (clazz.getAnnotation(Inject.class) != null) {
-            injectClasses.add(clazz);
-        }
-    }
-
-    private void injectMainManager(@NotNull Path path) {
-        M manager = registerManager(path);
-        if (manager == null) {
-            Class<?> clazz = mainManagerClass;
-            if (clazz != null && IManager.class.isAssignableFrom(clazz)) {
-                Bukkit.getConsoleSender().sendMessage(
-                        "[" + getName() + "] Injecting @MainManager class - " + clazz.getName()
-                );
-                Constructor[] constructors = clazz.getConstructors();
-                for (Constructor constructor : constructors) {
-                    Class<?>[] params = constructor.getParameterTypes();
-                    if (params.length == 2 && IPlugin.class.isAssignableFrom(params[0]) && Path.class.equals(params[1])) {
-                        constructor.setAccessible(true);
-                        try {
-                            manager = (M) constructor.newInstance(this, path);
-                            break;
-                        } catch (Throwable e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-        }
-        if (manager != null) {
-            setManager(manager);
-            injectClasses.forEach(this::injectIntoStatic);
-        } else {
-            Bukkit.getConsoleSender().sendMessage(ChatColor.RED + getName() + " CANT register or inject main manager !!!");
-        }
     }
 
     private void injectCommands() {
@@ -163,7 +90,7 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
     }
 
     private void injectIntoStatic(@NotNull Class<?> clazz) {
-        IManager manager = getManager();
+        ManagerCore manager = getManager();
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             if (!Modifier.isStatic(field.getModifiers())) {
@@ -221,68 +148,39 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
     }
 
     @Override
-    public void onLoad() {
-        beforeLoad();
-        scanJarPackageClasses();
-        registerInjectClasses();
-        Path path = getRootPath();
-        if (Files.notExists(path)) {
-            try {
-                Files.createDirectories(path);
-            } catch (Throwable e) {
-                e.printStackTrace();
-            }
-        }
-        injectMainManager(path);
+    public final void onLoad() {
+        plugin.onLoad();
     }
 
     @Override
     public void onEnable() {
-        if (manager != null) {
-            manager.beforeLoad();
-            manager.load();
-            manager.afterLoad();
-            injectCommands();
-            registerCommands();
-            injectListeners();
-            registerListeners();
-            manager.consoleKey("pluginEnabled", getId() + "-" + getVersion());
-            afterEnable();
-        } else {
-            Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Plugin " + getId() + " enable failed !!!!");
-        }
+        plugin.onEnable();
     }
 
     @Override
     public void onDisable() {
-        if (manager != null) {
-            beforeDisable();
-            if (manager != null) {
-                manager.consoleKey("pluginDisabled", getId() + "-" + getVersion());
-                if (manager.canSaveOnDisable()) {
-                    manager.consoleKey(manager.save() ? "configSaved" : "configSaveFailed");
-                }
-            }
-        }
+        plugin.onDisable();
     }
 
     @Override
-    public M getManager() {
+    public SpigotManager getManager() {
         return manager;
     }
 
     @Override
-    public void setManager(M manager) {
-        this.manager = manager;
+    public ManagerCore getManagerCore() {
+        return manager.getCore();
     }
 
     @Override
-    public Path getRootPath() {
+    @NotNull
+    public final Path getRootPath() {
         return getDataFolder().toPath();
     }
 
     @Override
-    public void beforeLoad() {
+    public final File getJarFile() {
+        return getFile();
     }
 
     public void registerListener(@NotNull Object listener) {

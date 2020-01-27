@@ -4,7 +4,7 @@ import org.soraworld.violet.Violet;
 import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.manager.FManager;
-import org.soraworld.violet.manager.VManager;
+import org.soraworld.violet.manager.SpigotManager;
 import org.soraworld.violet.util.ListUtils;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import java.util.LinkedHashSet;
 public final class BaseSubCmds {
 
     @Inject
-    private VManager manager;
+    private SpigotManager manager;
     @Inject
     private FManager fManager;
 

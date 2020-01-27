@@ -2,7 +2,7 @@ package org.soraworld.violet.manager;
 
 import org.soraworld.violet.SpongeViolet;
 import org.soraworld.violet.api.IPlugin;
-import org.soraworld.violet.inject.MainManager;
+import org.soraworld.violet.inject.Manager;
 import org.soraworld.violet.util.ChatColor;
 import org.spongepowered.api.command.CommandSource;
 
@@ -12,8 +12,8 @@ import java.util.HashMap;
 /**
  * @author Himmelt
  */
-@MainManager
-public final class FManager extends VManager {
+@Manager
+public final class FManager extends SpongeManager {
 
     private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
 

@@ -7,6 +7,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.Nullable;
+import org.soraworld.violet.api.IManager;
+import org.soraworld.violet.core.ManagerCore;
 import org.soraworld.violet.nms.Version;
 import org.soraworld.violet.plugin.SpigotPlugin;
 import org.soraworld.violet.text.JsonText;
@@ -17,10 +19,12 @@ import java.nio.file.Path;
 /**
  * @author Himmelt
  */
-public abstract class VManager extends IManager<SpigotPlugin> {
+public final class SpigotManager implements IManager {
 
-    public VManager(SpigotPlugin plugin, Path path) {
-        super(plugin, path);
+    private final ManagerCore core;
+
+    public SpigotManager(SpigotPlugin plugin, Path path) {
+        core = new ManagerCore(plugin, path);
     }
 
     public void asyncSave(@Nullable CommandSender sender) {
@@ -88,6 +92,11 @@ public abstract class VManager extends IManager<SpigotPlugin> {
     }
 
     @Override
+    public ChatColor defChatColor() {
+        return ChatColor.WHITE;
+    }
+
+    @Override
     public void console(String text) {
         Bukkit.getConsoleSender().sendMessage(colorHead + text);
     }
@@ -103,5 +112,19 @@ public abstract class VManager extends IManager<SpigotPlugin> {
         }
         permission = permMap.getOrDefault(permission, permission);
         return permission == null || permission.isEmpty() || subject.hasPermission(permission);
+    }
+
+    @Override
+    public boolean load() {
+        return core.load();
+    }
+
+    @Override
+    public void consoleKey(String key, String s) {
+
+    }
+
+    public ManagerCore getCore() {
+        return core;
     }
 }

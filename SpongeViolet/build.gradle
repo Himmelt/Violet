@@ -22,9 +22,7 @@ dependencies {
 jar {
     from sourceSets.main.output, rootProject.sourceSets.main.output
     configurations.shade.copyRecursive().setTransitive(false).each {
-        artifact ->
-            println "sponge:" + artifact
-            from(zipTree(artifact))
+        artifact -> from(zipTree(artifact))
     }
     includeEmptyDirs = false
 }

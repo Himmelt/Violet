@@ -11,14 +11,15 @@ import java.util.jar.JarFile;
  * @author Himmelt
  */
 public final class ClassUtils {
-    public static Set<Class<?>> getClasses(File jarFile, String packageName, ClassLoader loader) {
+    public static Set<Class<?>> scanClasses(File jarFile, String packageName, ClassLoader loader) {
         Set<Class<?>> classes = new HashSet<>();
         try {
-            JarFile file = new JarFile(jarFile);
-            for (Enumeration<JarEntry> entry = file.entries(); entry.hasMoreElements(); ) {
+            JarFile jar = new JarFile(jarFile);
+            Enumeration<JarEntry> et = jar.entries();
+            while (et.hasMoreElements()) {
                 try {
-                    JarEntry jarEntry = entry.nextElement();
-                    String name = jarEntry.getName().replace("/", ".");
+                    JarEntry entry = et.nextElement();
+                    String name = entry.getName().replace("/", ".");
                     if (name.startsWith(packageName) && name.endsWith(".class")) {
                         classes.add(Class.forName(name.substring(0, name.length() - 6), false, loader));
                     }
@@ -26,7 +27,7 @@ public final class ClassUtils {
                     System.out.println("!!!!! Package Classes scan Error: " + e.getLocalizedMessage());
                 }
             }
-            file.close();
+            jar.close();
         } catch (Throwable e) {
             System.out.println("!!!!! Package Classes scan Error: " + e.getLocalizedMessage());
         }

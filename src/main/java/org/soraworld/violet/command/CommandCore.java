@@ -4,15 +4,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.soraworld.hocon.node.Paths;
 import org.soraworld.hocon.util.Reflects;
-import org.soraworld.violet.manager.SpongeManager;
+import org.soraworld.violet.api.ICommandSender;
+import org.soraworld.violet.api.IManager;
+import org.soraworld.violet.api.IPlayer;
+import org.soraworld.violet.api.IPlugin;
+import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.util.ListUtils;
-import org.spongepowered.api.command.CommandCallable;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -25,23 +22,54 @@ import java.util.stream.Collectors;
  *
  * @author Himmelt
  */
-public class VCommand implements CommandCallable {
+public final class CommandCore {
 
     private String exePermission = null;
     private boolean exeOnlyPlayer = false;
     private boolean tabOnlyPlayer = false;
 
+    /**
+     * The Name.
+     */
     protected String name;
-    protected String usageMessage;
+    /**
+     * The Permission.
+     */
     protected String permission;
+    /**
+     * The Only player.
+     */
     protected boolean onlyPlayer;
-    protected VCommand parent;
-    protected SpongeManager manager;
-    protected SubExecutor<CommandSource> subExecutor;
-    protected TabExecutor<CommandSource> tabExecutor;
+    /**
+     * The Parent.
+     */
+    protected CommandCore parent;
+    /**
+     * The Sub executor.
+     */
+    protected SubExecutor<ICommandSender> subExecutor;
+    /**
+     * The Tab executor.
+     */
+    protected TabExecutor<ICommandSender> tabExecutor;
+    /**
+     * The Tabs.
+     */
     protected final List<String> tabs = new ArrayList<>();
+    /**
+     * The Aliases.
+     */
     protected final List<String> aliases = new ArrayList<>();
-    protected final Map<String, VCommand> subs = new LinkedHashMap<>();
+    /**
+     * The Subs.
+     */
+    protected final Map<String, CommandCore> subs = new LinkedHashMap<>();
+    private String usage;
+
+    @Inject
+    private IManager manager;
+    @Inject
+    private IPlugin plugin;
 
     /**
      * Instantiates a new V command.
@@ -52,7 +80,7 @@ public class VCommand implements CommandCallable {
      * @param parent     the parent
      * @param manager    the manager
      */
-    public VCommand(@NotNull String name, @Nullable String permission, boolean onlyPlayer, @Nullable VCommand parent, @NotNull SpongeManager manager) {
+    public CommandCore(@NotNull String name, @Nullable String permission, boolean onlyPlayer, @Nullable CommandCore parent, @NotNull IManager manager) {
         this.name = name;
         this.permission = permission;
         this.onlyPlayer = onlyPlayer;
@@ -65,8 +93,8 @@ public class VCommand implements CommandCallable {
      *
      * @param sub the sub
      */
-    public void addSub(@NotNull VCommand sub) {
-        VCommand old = subs.get(sub.getName());
+    public void addSub(@NotNull CommandCore sub) {
+        CommandCore old = subs.get(sub.getName());
         if (old != null) {
             subs.entrySet().removeIf(entry -> entry.getValue() == old);
             if (old != sub) {
@@ -79,13 +107,13 @@ public class VCommand implements CommandCallable {
         }
     }
 
-    private VCommand createSub(Paths paths) {
+    private CommandCore createSub(Paths paths) {
         if (paths.empty()) {
             return this;
         }
-        VCommand sub = subs.get(paths.first());
+        CommandCore sub = subs.get(paths.first());
         if (sub == null) {
-            sub = new VCommand(paths.first(), null, false, this, manager);
+            sub = new CommandCore(paths.first(), null, false, this, manager);
         }
         return sub.createSub(paths.next());
     }
@@ -143,9 +171,9 @@ public class VCommand implements CommandCallable {
         String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
         perm = manager.mappingPerm(perm);
 
-        VCommand command;
+        CommandCore command;
         if (!sub.virtual()) {
-            SubExecutor<CommandSource> executor = null;
+            SubExecutor<ICommandSender> executor = null;
             try {
                 executor = (SubExecutor) field.get(instance);
             } catch (Throwable e) {
@@ -155,19 +183,19 @@ public class VCommand implements CommandCallable {
                 return;
             }
             Type[] params = Reflects.getActualTypes(SubExecutor.class, executor.getClass());
-            if (params == null || params.length != 1 || !Reflects.isAssignableFrom(CommandSource.class, params[0])) {
+            if (params == null || params.length != 1 || !Reflects.isAssignableFrom(ICommandSender.class, params[0])) {
                 return;
             }
 
             if (".".equals(sub.path())) {
                 this.subExecutor = executor;
                 this.exePermission = perm;
-                this.exeOnlyPlayer = sub.onlyPlayer() || Reflects.isAssignableFrom(Player.class, params[0]);
+                this.exeOnlyPlayer = sub.onlyPlayer() || Reflects.isAssignableFrom(IPlayer.class, params[0]);
                 return;
             }
             command = createSub(paths);
             command.subExecutor = executor;
-            command.onlyPlayer = command.onlyPlayer || sub.onlyPlayer() || Reflects.isAssignableFrom(Player.class, params[0]);
+            command.onlyPlayer = command.onlyPlayer || sub.onlyPlayer() || Reflects.isAssignableFrom(IPlayer.class, params[0]);
         } else {
             command = createSub(paths);
             command.onlyPlayer = command.onlyPlayer || sub.onlyPlayer();
@@ -175,7 +203,7 @@ public class VCommand implements CommandCallable {
         command.permission = perm;
         command.tabs.addAll(Arrays.asList(sub.tabs()));
         command.aliases.addAll(Arrays.asList(sub.aliases()));
-        command.usageMessage = sub.usage();
+        command.usage = sub.usage();
         command.update();
     }
 
@@ -222,7 +250,7 @@ public class VCommand implements CommandCallable {
             return;
         }
 
-        TabExecutor<CommandSource> executor = null;
+        TabExecutor<ICommandSender> executor = null;
         try {
             executor = (TabExecutor) field.get(instance);
         } catch (Throwable e) {
@@ -233,21 +261,21 @@ public class VCommand implements CommandCallable {
         }
 
         Type[] params = Reflects.getActualTypes(TabExecutor.class, executor.getClass());
-        if (params == null || params.length != 1 || !Reflects.isAssignableFrom(CommandSource.class, params[0])) {
+        if (params == null || params.length != 1 || !Reflects.isAssignableFrom(ICommandSender.class, params[0])) {
             return;
         }
 
         if (".".equals(tab.path())) {
             this.tabExecutor = executor;
-            this.tabOnlyPlayer = Reflects.isAssignableFrom(Player.class, params[0]);
+            this.tabOnlyPlayer = Reflects.isAssignableFrom(IPlayer.class, params[0]);
             return;
         }
 
         Paths paths = new Paths(tab.path().isEmpty() ? field.getName().toLowerCase() : tab.path().replace(' ', '_').replace(':', '_'));
-        VCommand command = getSub(paths);
+        CommandCore command = getSub(paths);
         if (command != null) {
             command.tabExecutor = executor;
-            command.tabOnlyPlayer = Reflects.isAssignableFrom(Player.class, params[0]);
+            command.tabOnlyPlayer = Reflects.isAssignableFrom(IPlayer.class, params[0]);
         }
     }
 
@@ -256,7 +284,7 @@ public class VCommand implements CommandCallable {
      *
      * @param sender the sender
      */
-    public void sendUsage(CommandSource sender) {
+    public void sendUsage(ICommandSender sender) {
         manager.sendKey(sender, "cmdUsage", getUsage());
     }
 
@@ -266,7 +294,7 @@ public class VCommand implements CommandCallable {
      * @param name the name
      * @return the sub
      */
-    public VCommand getSub(String name) {
+    public CommandCore getSub(String name) {
         return subs.get(name);
     }
 
@@ -276,11 +304,11 @@ public class VCommand implements CommandCallable {
      * @param paths the paths
      * @return the sub
      */
-    public VCommand getSub(Paths paths) {
+    public CommandCore getSub(Paths paths) {
         if (paths.empty()) {
             return this;
         }
-        VCommand sub = subs.get(paths.first());
+        CommandCore sub = subs.get(paths.first());
         if (sub != null) {
             return sub.getSub(paths.next());
         }
@@ -292,7 +320,7 @@ public class VCommand implements CommandCallable {
      *
      * @return the parent
      */
-    public VCommand getParent() {
+    public CommandCore getParent() {
         return parent;
     }
 
@@ -324,11 +352,11 @@ public class VCommand implements CommandCallable {
      * @param sender the sender
      * @param args   the args
      */
-    public void execute(CommandSource sender, Args args) {
+    public void execute(ICommandSender sender, Args args) {
         if (testPermission(sender)) {
-            if (!onlyPlayer || sender instanceof Player) {
+            if (!onlyPlayer || sender instanceof IPlayer) {
                 if (args.notEmpty()) {
-                    VCommand sub = subs.get(args.first());
+                    CommandCore sub = subs.get(args.first());
                     if (sub != null) {
                         sub.execute(sender, args.next());
                         return;
@@ -336,7 +364,7 @@ public class VCommand implements CommandCallable {
                 }
                 if (subExecutor != null) {
                     if (exePermission == null || exePermission.isEmpty() || sender.hasPermission(exePermission)) {
-                        if (!exeOnlyPlayer || sender instanceof Player) {
+                        if (!exeOnlyPlayer || sender instanceof IPlayer) {
                             subExecutor.execute(this, sender, args);
                         } else {
                             manager.sendKey(sender, "onlyPlayer");
@@ -355,12 +383,27 @@ public class VCommand implements CommandCallable {
         }
     }
 
-    public List<String> tabComplete(CommandSource sender, Args args) {
+    /**
+     * Tab complete list.
+     *
+     * @param sender the sender
+     * @param args   the args
+     * @return the list
+     */
+    public List<String> tabComplete(ICommandSender sender, Args args) {
         return tabComplete(sender, args, false);
     }
 
-    public List<String> tabComplete(CommandSource sender, Args args, boolean skipExecutor) {
-        if (!skipExecutor && tabExecutor != null && (!tabOnlyPlayer || sender instanceof Player)) {
+    /**
+     * Tab complete list.
+     *
+     * @param sender       the sender
+     * @param args         the args
+     * @param skipExecutor the skip executor
+     * @return the list
+     */
+    public List<String> tabComplete(ICommandSender sender, Args args, boolean skipExecutor) {
+        if (!skipExecutor && tabExecutor != null && (!tabOnlyPlayer || sender instanceof IPlayer)) {
             return tabExecutor.complete(this, sender, args);
         }
         String first = args.first();
@@ -376,71 +419,37 @@ public class VCommand implements CommandCallable {
 
     /* ---------------------------------------- origin start -------------------------------------------- */
 
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
-    public void setAliases(List<String> aliases) {
-        this.aliases.clear();
-        this.aliases.addAll(aliases);
-    }
-
-    public List<String> getAliases() {
-        return aliases;
-    }
-
-    public void setUsage(String usage) {
-        this.usageMessage = usage;
-    }
-
-    @Override
-    public @NotNull CommandResult process(@NotNull CommandSource sender, @NotNull String args) {
-        execute(sender, new Args(args));
-        return CommandResult.success();
-    }
-
-    @Override
-    public @NotNull List<String> getSuggestions(@NotNull CommandSource sender, @NotNull String args, Location<World> location) {
-        String[] ss = args.trim().split("[ ]+");
-        if (!args.isEmpty() && args.endsWith(" ")) {
-            ss = Arrays.copyOf(ss, ss.length + 1);
-            ss[ss.length - 1] = "";
-        }
-        return tabComplete(sender, new Args(ss));
-    }
-
-    @Override
-    public boolean testPermission(@NotNull CommandSource sender) {
-        return permission == null || permission.isEmpty() || sender.hasPermission(permission);
-    }
-
-    public String getUsage() {
-        if (usageMessage == null || usageMessage.isEmpty()) {
+    public @NotNull String getUsage() {
+        if (usage == null || usage.isEmpty()) {
             StringBuilder builder = new StringBuilder(getName());
-            VCommand parent = this.parent;
+            CommandCore parent = this.parent;
             while (parent != null) {
                 builder.insert(0, parent.getName() + " ");
                 parent = parent.parent;
             }
             builder.insert(0, "/");
-            usageMessage = builder.toString();
+            usage = builder.toString();
         }
-        return manager.trans(usageMessage).replace("{$id}", manager.getPlugin().getId());
+        return manager.trans(usage).replace("{$id}", plugin.getId());
     }
 
-    @Override
-    public @NotNull Text getUsage(@NotNull CommandSource sender) {
-        return Text.of(getUsage());
+    public @NotNull CommandCore setAliases(@NotNull List<String> aliases) {
+        this.aliases.clear();
+        this.aliases.addAll(aliases);
+        return this;
     }
 
-    @Override
-    public @NotNull Optional<Text> getShortDescription(@NotNull CommandSource source) {
-        return Optional.of(Text.of(getUsage()));
+    public @NotNull List<String> getAliases() {
+        return aliases;
     }
 
-    @Override
-    public @NotNull Optional<Text> getHelp(@NotNull CommandSource source) {
-        return Optional.of(Text.of(getUsage()));
+
+    public boolean testPermission(@NotNull ICommandSender sender) {
+        return permission == null || permission.isEmpty() || sender.hasPermission(permission);
     }
 
     @Override
@@ -450,9 +459,14 @@ public class VCommand implements CommandCallable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof VCommand) {
-            return name.equals(((VCommand) obj).name);
-        }
-        return false;
+        return obj instanceof CommandCore && name.equals(((CommandCore) obj).name);
+    }
+
+    public Collection<CommandCore> getSubs() {
+        return subs.values();
+    }
+
+    public Collection<String> getSubKeys() {
+        return subs.keySet();
     }
 }

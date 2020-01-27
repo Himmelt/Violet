@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.soraworld.hocon.node.Paths;
 import org.soraworld.hocon.util.Reflects;
-import org.soraworld.violet.manager.VManager;
+import org.soraworld.violet.manager.SpigotManager;
 import org.soraworld.violet.util.ListUtils;
 
 import java.lang.reflect.Field;
@@ -47,7 +47,7 @@ public class VCommand extends Command {
     /**
      * The Manager.
      */
-    protected VManager manager;
+    protected SpigotManager manager;
     /**
      * The Sub executor.
      */
@@ -78,7 +78,7 @@ public class VCommand extends Command {
      * @param parent     the parent
      * @param manager    the manager
      */
-    public VCommand(@NotNull String name, @Nullable String permission, boolean onlyPlayer, @Nullable VCommand parent, @NotNull VManager manager) {
+    public VCommand(@NotNull String name, @Nullable String permission, boolean onlyPlayer, @Nullable VCommand parent, @NotNull SpigotManager manager) {
         super(name);
         this.name = name;
         this.permission = permission;

@@ -5,12 +5,12 @@ import org.jetbrains.annotations.Nullable;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.command.BaseSubCmds;
 import org.soraworld.violet.command.VCommand;
+import org.soraworld.violet.core.ManagerCore;
 import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.inject.EventListener;
 import org.soraworld.violet.inject.Inject;
-import org.soraworld.violet.inject.MainManager;
-import org.soraworld.violet.manager.IManager;
-import org.soraworld.violet.manager.VManager;
+import org.soraworld.violet.inject.Manager;
+import org.soraworld.violet.manager.SpongeManager;
 import org.soraworld.violet.util.ChatColor;
 import org.soraworld.violet.util.ClassUtils;
 import org.spongepowered.api.Sponge;
@@ -36,7 +36,7 @@ import java.util.List;
 /**
  * @author Himmelt
  */
-public class SpongePlugin<M extends VManager> implements IPlugin<M> {
+public class SpongePlugin implements IPlugin {
 
     @javax.inject.Inject
     @ConfigDir(sharedRoot = false)
@@ -44,7 +44,7 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
     @javax.inject.Inject
     protected PluginContainer container;
 
-    protected M manager;
+    protected SpongeManager manager;
     protected Class<?> mainManagerClass;
     protected final HashSet<Class<?>> injectClasses = new HashSet<>();
     protected final HashSet<Class<?>> commandClasses = new HashSet<>();
@@ -54,14 +54,14 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
         container.getSource().ifPresent(path -> {
             File jarFile = path.toFile();
             if (jarFile.exists()) {
-                for (Class<?> clazz : ClassUtils.getClasses(jarFile, getClass().getPackage().getName(), getClass().getClassLoader())) {
+                for (Class<?> clazz : ClassUtils.scanClasses(jarFile, getClass().getPackage().getName(), getClass().getClassLoader())) {
                     if (clazz.getAnnotation(Command.class) != null) {
                         commandClasses.add(clazz);
                     }
                     if (clazz.getAnnotation(EventListener.class) != null) {
                         listenerClasses.add(clazz);
                     }
-                    if (clazz.getAnnotation(MainManager.class) != null) {
+                    if (clazz.getAnnotation(Manager.class) != null) {
                         mainManagerClass = clazz;
                     }
                     if (clazz.getAnnotation(Inject.class) != null) {
@@ -78,7 +78,7 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
         M manager = registerManager(path);
         if (manager == null) {
             Class<?> clazz = mainManagerClass;
-            if (clazz != null && IManager.class.isAssignableFrom(clazz)) {
+            if (clazz != null && ManagerCore.class.isAssignableFrom(clazz)) {
                 Sponge.getServer().getConsole().sendMessage(
                         Text.of("[" + getName() + "] Injecting @MainManager class - " + clazz.getName())
                 );
@@ -233,7 +233,7 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
     @Listener
     public void onDisable(GameStoppingServerEvent event) {
         if (manager != null) {
-            beforeDisable();
+            onPluginDisable();
             if (manager != null) {
                 manager.consoleKey("pluginDisabled", getId() + "-" + getVersion());
                 if (manager.canSaveOnDisable()) {
@@ -243,6 +243,7 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
         }
     }
 
+    @NotNull
     @Override
     public Path getRootPath() {
         if (path == null) {
@@ -252,6 +253,17 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
     }
 
     @Override
+    @NotNull
+    public final File getJarFile() {
+        Path jarPath = container.getSource().orElse(null);
+        return jarPath == null ? getFile() : jarPath.toFile();
+    }
+
+    private File getFile() {
+        //TODO
+        return new File("");
+    }
+
     public void beforeLoad() {
     }
 
@@ -276,7 +288,7 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
     }
 
     @Override
-    public M getManager() {
+    public SpongeManager getManager() {
         return manager;
     }
 

@@ -1,4 +1,4 @@
-package org.soraworld.violet.manager;
+package org.soraworld.violet.core;
 
 import org.jetbrains.annotations.NotNull;
 import org.soraworld.hocon.exception.SerializerException;
@@ -6,7 +6,9 @@ import org.soraworld.hocon.node.FileNode;
 import org.soraworld.hocon.node.Options;
 import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.Violet;
+import org.soraworld.violet.api.IConfig;
 import org.soraworld.violet.api.IPlugin;
+import org.soraworld.violet.manager.Translator;
 import org.soraworld.violet.serializers.UUIDSerializer;
 import org.soraworld.violet.text.JsonText;
 import org.soraworld.violet.util.ChatColor;
@@ -21,12 +23,11 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * The type Manager.
+ * 基础管理器核心.
  *
- * @param <T> the type parameter
  * @author Himmelt
  */
-public abstract class IManager<T extends IPlugin> {
+public final class ManagerCore {
 
     /**
      * 插件版本, 用于自动任务.
@@ -95,7 +96,7 @@ public abstract class IManager<T extends IPlugin> {
     /**
      * 插件实例.
      */
-    protected final T plugin;
+    protected final IPlugin plugin;
     /**
      * Hocon 配置选项.
      */
@@ -125,6 +126,8 @@ public abstract class IManager<T extends IPlugin> {
      */
     static Translator translator = null;
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss");
+    private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
+    private IConfig config;
 
     /**
      * 实例化管理器.
@@ -132,7 +135,7 @@ public abstract class IManager<T extends IPlugin> {
      * @param plugin 插件实例
      * @param path   配置文件路径
      */
-    public IManager(T plugin, Path path) {
+    public ManagerCore(IPlugin plugin, Path path) {
         this.path = path;
         this.plugin = plugin;
         this.options.setTranslator(Options.COMMENT, this::trans);
@@ -150,6 +153,10 @@ public abstract class IManager<T extends IPlugin> {
         if (!PLUGINS.contains(plugin)) {
             PLUGINS.add(plugin);
         }
+    }
+
+    public static void listPlugins() {
+
     }
 
     /**
@@ -203,6 +210,11 @@ public abstract class IManager<T extends IPlugin> {
      * @return the boolean
      */
     public boolean load() {
+
+        if (config != null) {
+            config.beforeLoad();
+        }
+
         if (Files.notExists(confile)) {
             setLang(DEF_LANG);
             save();
@@ -226,13 +238,17 @@ public abstract class IManager<T extends IPlugin> {
                     consoleKey(reExtract() ? "reExtracted" : "reExtractFailed");
                 }
             }
-            return true;
         } catch (Throwable e) {
             console(ChatColor.RED + "Config file load exception !!!");
             e.printStackTrace();
             reloadSuccess = false;
             return false;
         }
+
+        if (config != null) {
+            config.afterLoad();
+        }
+        return true;
     }
 
     /**
@@ -412,7 +428,7 @@ public abstract class IManager<T extends IPlugin> {
      *
      * @return the plugin
      */
-    public T getPlugin() {
+    public IPlugin getPlugin() {
         return plugin;
     }
 
@@ -430,7 +446,7 @@ public abstract class IManager<T extends IPlugin> {
      *
      * @return 是否可以保存配置 boolean
      */
-    public boolean canSaveOnDisable() {
+    public boolean isSaveOnDisable() {
         return saveOnDisable && reloadSuccess;
     }
 
@@ -515,19 +531,27 @@ public abstract class IManager<T extends IPlugin> {
      *
      * @return the chat color
      */
-    public abstract ChatColor defChatColor();
+    public ChatColor defChatColor();
 
     /**
      * Console.
      *
      * @param text the text
      */
-    public abstract void console(String text);
+    public void console(String text);
 
     /**
      * Broadcast.
      *
      * @param message the message
      */
-    public abstract void broadcast(String message);
+    public void broadcast(String message);
+
+    public void setConfig(IConfig config) {
+        this.config = config;
+    }
+
+    public IConfig getConfig() {
+        return config;
+    }
 }

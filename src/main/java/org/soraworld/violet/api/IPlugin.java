@@ -1,9 +1,9 @@
 package org.soraworld.violet.api;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.soraworld.violet.manager.IManager;
+import org.soraworld.violet.core.ManagerCore;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
@@ -11,10 +11,9 @@ import java.nio.file.Path;
 /**
  * The interface Plugin.
  *
- * @param <M> the type parameter
  * @author Himmelt
  */
-public interface IPlugin<M extends IManager> {
+public interface IPlugin {
 
     /**
      * Gets name.
@@ -53,12 +52,16 @@ public interface IPlugin<M extends IManager> {
      *
      * @return the root path
      */
+    @NotNull
     Path getRootPath();
 
     /**
-     * Before load.
+     * Get jar path path.
+     *
+     * @return the path
      */
-    void beforeLoad();
+    @NotNull
+    File getJarFile();
 
     /**
      * Is enabled boolean.
@@ -66,6 +69,18 @@ public interface IPlugin<M extends IManager> {
      * @return the boolean
      */
     boolean isEnabled();
+
+    /**
+     * On plugin load.
+     */
+    default void onPluginLoad() {
+    }
+
+    /**
+     * On plugin enable.
+     */
+    default void onPluginEnable() {
+    }
 
     /**
      * After enable.
@@ -76,22 +91,8 @@ public interface IPlugin<M extends IManager> {
     /**
      * Before disable.
      */
-    default void beforeDisable() {
+    default void onPluginDisable() {
     }
-
-    /**
-     * Gets manager.
-     *
-     * @return the manager
-     */
-    M getManager();
-
-    /**
-     * Sets manager.
-     *
-     * @param manager the manager
-     */
-    void setManager(M manager);
 
     /**
      * Gets asset stream.
@@ -113,39 +114,9 @@ public interface IPlugin<M extends IManager> {
         return getClass().getResource("/assets/" + assetsId() + '/' + path);
     }
 
-    /**
-     * Register manager m.
-     *
-     * @param path the path
-     * @return the m
-     */
-    @Nullable
-    default M registerManager(@NotNull Path path) {
-        return null;
-    }
+    IManager getManager();
 
-    /**
-     * Register inject class.
-     *
-     * @param clazz the clazz
-     */
-    void registerInjectClass(@NotNull Class<?> clazz);
+    ManagerCore getManagerCore();
 
-    /**
-     * Register inject classes.
-     */
-    default void registerInjectClasses() {
-    }
-
-    /**
-     * Register commands.
-     */
-    default void registerCommands() {
-    }
-
-    /**
-     * Register listeners.
-     */
-    default void registerListeners() {
-    }
+    ClassLoader getClassLoader();
 }

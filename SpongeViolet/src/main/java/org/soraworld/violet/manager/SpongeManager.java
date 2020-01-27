@@ -1,6 +1,7 @@
 package org.soraworld.violet.manager;
 
 import org.jetbrains.annotations.Nullable;
+import org.soraworld.violet.core.ManagerCore;
 import org.soraworld.violet.plugin.SpongePlugin;
 import org.soraworld.violet.text.JsonText;
 import org.soraworld.violet.util.ChatColor;
@@ -19,10 +20,12 @@ import java.nio.file.Path;
  *
  * @author Himmelt
  */
-public abstract class VManager extends IManager<SpongePlugin> {
+public abstract class SpongeManager {
 
-    public VManager(SpongePlugin plugin, Path path) {
-        super(plugin, path);
+    private final ManagerCore core;
+
+    public SpongeManager(SpongePlugin plugin, Path path) {
+        core = new ManagerCore(plugin, path);
     }
 
     public void asyncSave(@Nullable CommandSource sender) {
