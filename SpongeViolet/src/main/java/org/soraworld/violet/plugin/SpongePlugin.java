@@ -54,7 +54,7 @@ public class SpongePlugin<M extends VManager> implements IPlugin<M> {
         container.getSource().ifPresent(path -> {
             File jarFile = path.toFile();
             if (jarFile.exists()) {
-                for (Class<?> clazz : ClassUtils.getClasses(jarFile, getClass().getPackage().getName())) {
+                for (Class<?> clazz : ClassUtils.getClasses(jarFile, getClass().getPackage().getName(), getClass().getClassLoader())) {
                     if (clazz.getAnnotation(Command.class) != null) {
                         commandClasses.add(clazz);
                     }

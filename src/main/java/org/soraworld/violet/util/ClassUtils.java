@@ -11,7 +11,7 @@ import java.util.jar.JarFile;
  * @author Himmelt
  */
 public final class ClassUtils {
-    public static Set<Class<?>> getClasses(File jarFile, String packageName) {
+    public static Set<Class<?>> getClasses(File jarFile, String packageName, ClassLoader loader) {
         Set<Class<?>> classes = new HashSet<>();
         try {
             JarFile file = new JarFile(jarFile);
@@ -20,7 +20,7 @@ public final class ClassUtils {
                     JarEntry jarEntry = entry.nextElement();
                     String name = jarEntry.getName().replace("/", ".");
                     if (name.startsWith(packageName) && name.endsWith(".class")) {
-                        classes.add(Class.forName(name.substring(0, name.length() - 6)));
+                        classes.add(Class.forName(name.substring(0, name.length() - 6), false, loader));
                     }
                 } catch (Throwable e) {
                     System.out.println("!!!!! Package Classes scan Error: " + e.getLocalizedMessage());

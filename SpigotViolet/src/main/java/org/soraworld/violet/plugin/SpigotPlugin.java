@@ -59,7 +59,7 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
     private void scanJarPackageClasses() {
         File jarFile = getFile();
         if (jarFile.exists()) {
-            for (Class<?> clazz : ClassUtils.getClasses(jarFile, getClass().getPackage().getName())) {
+            for (Class<?> clazz : ClassUtils.getClasses(jarFile, getClass().getPackage().getName(), getClassLoader())) {
                 if (clazz.getAnnotation(Command.class) != null) {
                     commandClasses.add(clazz);
                 }
