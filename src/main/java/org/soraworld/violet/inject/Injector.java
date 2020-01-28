@@ -4,14 +4,32 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Himmelt
  */
 public final class Injector {
-    public static void inject(@NotNull Object instance, Object... values) {
+
+    private final List<Object> values = new ArrayList<>();
+
+    public void addValue(Object value) {
+        if (value != null) {
+            values.add(value);
+        }
+    }
+
+    public void addValues(Object... values) {
+        if (values != null) {
+            Collections.addAll(this.values, values);
+        }
+    }
+
+    public void inject(@NotNull Object instance) {
         if (instance instanceof Class<?>) {
-            inject((Class<?>) instance, values);
+            inject((Class<?>) instance);
         } else {
             Field[] fields = instance.getClass().getDeclaredFields();
             for (Field field : fields) {
@@ -36,7 +54,7 @@ public final class Injector {
         }
     }
 
-    public static void inject(@NotNull Class<?> clazz, Object... values) {
+    public void inject(@NotNull Class<?> clazz) {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             if (!Modifier.isStatic(field.getModifiers())) {

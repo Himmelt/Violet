@@ -5,6 +5,7 @@ import org.soraworld.violet.api.IConfig;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.asm.ClassInfo;
 import org.soraworld.violet.asm.PluginScanner;
+import org.soraworld.violet.command.CommandCore;
 import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.inject.Injector;
 import org.soraworld.violet.inject.Manager;
@@ -24,25 +25,18 @@ import java.util.function.Consumer;
 public final class PluginCore {
 
     private final IPlugin plugin;
-    private final ManagerCore manager;
     private final Set<ClassInfo> classes;
+    private final Injector injector = new Injector();
     private final TreeMap<Integer, List<Consumer<ClassInfo>>> injectorMap = new TreeMap<>();
+    private static final ArrayList<IPlugin> PLUGINS = new ArrayList<>();
 
     public PluginCore(@NotNull IPlugin plugin) {
         this.plugin = plugin;
-        this.manager = plugin.getManagerCore();
         classes = PluginScanner.scan(plugin.getJarFile());
+        if (!PLUGINS.contains(plugin)) {
+            PLUGINS.add(plugin);
+        }
     }
-
-/*
-    public void addClassInfo(@NotNull ClassInfo clazz) {
-        classes.add(clazz);
-    }
-
-    public void removeClassInfo(@NotNull ClassInfo clazz) {
-        classes.remove(clazz);
-    }
-*/
 
     /**
      * Add injector.
@@ -64,16 +58,14 @@ public final class PluginCore {
         }
     }
 
-    public void onLoad() {
-        Path rootPath = plugin.getRootPath();
-        ClassLoader loader = plugin.getClassLoader();
-        if (Files.notExists(rootPath)) {
-            try {
-                Files.createDirectories(rootPath);
-            } catch (Throwable e) {
-                e.printStackTrace();
-            }
-        }
+    private void injectValues() {
+        injector.addValue(plugin);
+        injector.addValue(this);
+        injector.addValue(plugin.getManager());
+        injector.addValue(manager);
+    }
+
+    private void addInjectors(ClassLoader loader, Path rootPath) {
         addInjector(0, info -> {
             if (info.hasAnnotation(Manager.class)) {
                 manager.console("Try construct @Manager -> " + info.getName());
@@ -105,8 +97,8 @@ public final class PluginCore {
                     Class<?> clazz = Class.forName(info.getName(), false, loader);
                     try {
                         Object instance = clazz.getConstructor().newInstance();
-                        Injector.inject(instance, plugin, plugin.getManager(), manager.getConfig());
-                        VCommand command = registerCommand(annotation);
+                        injector.inject(instance);
+                        CommandCore command = registerCommand(annotation);
                         if (command != null) {
                             command.extractSub(instance);
                             command.extractTab(instance);
@@ -124,30 +116,24 @@ public final class PluginCore {
                     e.printStackTrace();
                 }
             }
-
-            Command annotation = clazz.getAnnotation(Command.class);
-            if (annotation != null) {
-                try {
-                    Object instance = clazz.getConstructor().newInstance();
-                    injectIntoInstance(instance);
-                    VCommand command = registerCommand(annotation);
-                    if (command != null) {
-                        command.extractSub(instance);
-                        command.extractTab(instance);
-                        if (clazz != BaseSubCmds.class && command.getName().equalsIgnoreCase(getId())) {
-                            BaseSubCmds baseSubCmds = new BaseSubCmds();
-                            injectIntoInstance(baseSubCmds);
-                            command.extractSub(baseSubCmds);
-                            command.extractTab(baseSubCmds);
-                        }
-                    }
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-            }
         });
         addInjector(1, info -> {
+
         });
+    }
+
+    public void onLoad() {
+        injectValues();
+        Path rootPath = plugin.getRootPath();
+        ClassLoader loader = plugin.getClassLoader();
+        if (Files.notExists(rootPath)) {
+            try {
+                Files.createDirectories(rootPath);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
+        addInjectors(loader, rootPath);
         plugin.onPluginLoad();
     }
 

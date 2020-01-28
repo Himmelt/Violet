@@ -119,4 +119,6 @@ public interface IPlugin {
     ManagerCore getManagerCore();
 
     ClassLoader getClassLoader();
+
+    void addInjectInstance(Object instance);
 }

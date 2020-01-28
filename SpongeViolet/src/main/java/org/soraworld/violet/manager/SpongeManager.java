@@ -25,7 +25,7 @@ public abstract class SpongeManager {
     private final ManagerCore core;
 
     public SpongeManager(SpongePlugin plugin, Path path) {
-        core = new ManagerCore(plugin, path);
+        core = new ManagerCore(plugin, this, path);
     }
 
     public void asyncSave(@Nullable CommandSource sender) {

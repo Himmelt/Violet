@@ -24,7 +24,7 @@ public final class SpigotManager implements IManager {
     private final ManagerCore core;
 
     public SpigotManager(SpigotPlugin plugin, Path path) {
-        core = new ManagerCore(plugin, path);
+        core = new ManagerCore(plugin,this, path);
     }
 
     public void asyncSave(@Nullable CommandSender sender) {
