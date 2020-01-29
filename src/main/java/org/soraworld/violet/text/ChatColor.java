@@ -1,4 +1,4 @@
-package org.soraworld.violet.util;
+package org.soraworld.violet.text;
 
 import org.jetbrains.annotations.NotNull;
 

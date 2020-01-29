@@ -3,5 +3,5 @@ package org.soraworld.violet.api;
 /**
  * @author Himmelt
  */
-public interface IPlayer {
+public interface IPlayer extends ICommandSender {
 }

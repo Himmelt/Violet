@@ -3,7 +3,7 @@ package org.soraworld.violet.manager;
 import org.soraworld.violet.SpongeViolet;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.inject.Manager;
-import org.soraworld.violet.util.ChatColor;
+import org.soraworld.violet.text.ChatColor;
 import org.spongepowered.api.command.CommandSource;
 
 import java.nio.file.Path;

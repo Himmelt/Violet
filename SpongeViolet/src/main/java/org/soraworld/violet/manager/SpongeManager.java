@@ -1,10 +1,9 @@
 package org.soraworld.violet.manager;
 
 import org.jetbrains.annotations.Nullable;
-import org.soraworld.violet.core.ManagerCore;
 import org.soraworld.violet.plugin.SpongePlugin;
 import org.soraworld.violet.text.JsonText;
-import org.soraworld.violet.util.ChatColor;
+import org.soraworld.violet.text.ChatColor;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;

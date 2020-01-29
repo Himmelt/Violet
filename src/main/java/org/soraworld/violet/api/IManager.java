@@ -1,36 +1,24 @@
 package org.soraworld.violet.api;
 
+import java.util.function.Consumer;
+
 /**
  * The interface Manager.
  *
  * @author Himmelt
  */
 public interface IManager {
-    void consoleKey(String key, String... args);
-
     boolean load();
 
-    String getLang();
+    boolean save();
 
-    boolean setLang(String first);
+    void asyncSave(Consumer<Boolean> callback);
 
-    void sendKey(ICommandSender sender, String setLang, String lang);
+    void backup();
 
-    void asyncSave(Object o);
+    void asyncBackup(Consumer<Boolean> callback);
 
     boolean isDebug();
 
-    void setDebug(boolean b);
-
-    void sendKey(ICommandSender sender, String s);
-
-    boolean reExtract();
-
-    void asyncBackUp(ICommandSender sender);
-
-    void debug(Throwable e);
-
-    String mappingPerm(String perm);
-
-    String trans(String usage);
+    void setDebug(boolean debug);
 }

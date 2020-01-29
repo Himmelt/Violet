@@ -9,7 +9,6 @@ import org.jetbrains.annotations.Nullable;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.command.BaseSubCmds;
 import org.soraworld.violet.command.VCommand;
-import org.soraworld.violet.core.ManagerCore;
 import org.soraworld.violet.core.PluginCore;
 import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.inject.EventListener;
@@ -163,21 +162,12 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
     }
 
     @Override
-    public SpigotManager getManager() {
-        return manager;
-    }
-
-    @Override
-    public ManagerCore getManagerCore() {
-        return manager.getCore();
-    }
-
-    @Override
     @NotNull
     public final Path getRootPath() {
         return getDataFolder().toPath();
     }
 
+    @NotNull
     @Override
     public final File getJarFile() {
         return getFile();
@@ -192,7 +182,6 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
     @Nullable
     public VCommand registerCommand(@NotNull Command annotation) {
         String perm = annotation.perm();
-        perm = manager.mappingPerm(perm);
         VCommand command = new VCommand(annotation.name(), perm, annotation.onlyPlayer(), null, manager);
         command.setAliases(Arrays.asList(annotation.aliases()));
         command.setTabs(Arrays.asList(annotation.tabs()));
