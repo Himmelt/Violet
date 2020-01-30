@@ -49,6 +49,9 @@ hasUpdate = "插件有更新: "
 clickUpdate = "点击前往下载"
 
 comment {
+  type = {
+    general = "常规配置"
+  }
   lang = "显示语言"
   debug = "调试模式"
   version = "插件版本，用于自动任务，请勿修改 !!"
