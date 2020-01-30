@@ -3,9 +3,7 @@ package org.soraworld.violet.core;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.soraworld.hocon.exception.SerializerException;
-import org.soraworld.hocon.node.FileNode;
-import org.soraworld.hocon.node.Options;
-import org.soraworld.hocon.node.Setting;
+import org.soraworld.hocon.node.*;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.ICommandSender;
 import org.soraworld.violet.api.IConfig;
@@ -67,7 +65,7 @@ public final class PluginCore {
     private final Injector injector = new Injector();
     private HashMap<String, String> langMap = new HashMap<>();
     private final HashMap<String, IConfig> configs = new HashMap<>();
-    private final TreeMap<Integer, List<Consumer<ClassInfo>>> injectorMap = new TreeMap<>();
+    private final TreeMap<Integer, List<Consumer<ClassInfo>>> scannersMap = new TreeMap<>();
     private final AtomicBoolean asyncSaveLock = new AtomicBoolean(false);
     private final AtomicBoolean asyncBackLock = new AtomicBoolean(false);
 
@@ -151,7 +149,16 @@ public final class PluginCore {
         }
         try {
             rootNode.load(true, true);
-            rootNode.modify(this);
+            Node general = rootNode.get("general");
+            if (general instanceof NodeMap) {
+                ((NodeMap) general).modify(this);
+            }
+            configs.forEach((id, config) -> {
+                Node node = rootNode.get(id);
+                if (node instanceof NodeMap) {
+                    ((NodeMap) node).modify(config);
+                }
+            });
             if (!setLang(lang) && !"en_us".equalsIgnoreCase(lang)) {
                 setLang("en_us");
             }
@@ -179,7 +186,15 @@ public final class PluginCore {
         reloadSuccess = true;
         version = plugin.getVersion();
         try {
-            rootNode.extract(this);
+            NodeMap general = new NodeMap(options, trans("comment.type.general"));
+            general.extract(this);
+            rootNode.clear();
+            rootNode.set("general", general);
+            configs.forEach((id, config) -> {
+                NodeMap node = new NodeMap(options, trans("comment.type." + id));
+                node.extract(config);
+                rootNode.set(id, node);
+            });
             rootNode.save();
             return true;
         } catch (Throwable e) {
@@ -327,22 +342,25 @@ public final class PluginCore {
     public void afterLoad() {
     }
 
-    public void addInjector(int priority, @NotNull Consumer<ClassInfo> injector) {
+    public void addScanner(int priority, @NotNull Consumer<ClassInfo> scanner) {
         priority = Math.max(0, Math.min(10, priority));
-        injectorMap.computeIfAbsent(priority, i -> new ArrayList<>()).add(injector);
+        scannersMap.computeIfAbsent(priority, i -> new ArrayList<>()).add(scanner);
     }
 
-    public void inject() {
+    public void scan() {
         for (int i = 0; i <= 10; i++) {
-            List<Consumer<ClassInfo>> injectors = injectorMap.get(i);
-            if (injectors != null) {
-                classes.forEach(clazz -> injectors.forEach(injector -> injector.accept(clazz)));
+            List<Consumer<ClassInfo>> scanners = scannersMap.get(i);
+            if (scanners != null) {
+                classes.forEach(clazz -> scanners.forEach(scanner -> scanner.accept(clazz)));
             }
         }
     }
 
-    private void addInjectors(ClassLoader loader, Path rootPath) {
-        addInjector(0, info -> {
+    // 0 - 配置 (注入源/被注入)
+    // 1 - 命令 (被注入)
+    // 1 - 监听器 (被注入)
+    private void addScanners(ClassLoader loader, Path rootPath) {
+        addScanner(0, info -> {
             if (info.hasAnnotation(Config.class)) {
                 plugin.console("Try construct @Config -> " + info.getName());
                 try {
@@ -351,27 +369,25 @@ public final class PluginCore {
                         Config config = clazz.getAnnotation(Config.class);
                         if (configs.containsKey(config.id())) {
                             plugin.consoleKey("configIdExist", config.id());
+                        } else if (!config.id().matches("[a-zA-Z_0-9]+")) {
+                            plugin.consoleKey("illegalConfigId", config.id());
                         } else {
-                            for (Constructor<?> constructor : clazz.getConstructors()) {
-                                Class<?>[] params = constructor.getParameterTypes();
-                                if (params.length == 2 && IPlugin.class.isAssignableFrom(params[0]) && Path.class.equals(params[1])) {
-                                    constructor.setAccessible(true);
-                                    try {
-                                        configs.put(config.id(), (IConfig) constructor.newInstance(this, rootPath));
-                                        break;
-                                    } catch (Throwable e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
+                            injector.inject(clazz);
+                            Constructor<?> constructor = clazz.getConstructor();
+                            constructor.setAccessible(true);
+                            IConfig instance = (IConfig) constructor.newInstance();
+                            injector.inject(instance);
+                            injector.addValue(instance);
+                            configs.put(config.id(), instance);
+                            plugin.consoleKey("injectConfig", config.id());
                         }
                     }
-                } catch (ClassNotFoundException e) {
+                } catch (Throwable e) {
                     e.printStackTrace();
                 }
             }
         });
-        addInjector(1, info -> {
+        addScanner(1, info -> {
             if (info.hasAnnotation(Command.class)) {
                 plugin.console("Try construct @Command -> " + info.getName());
                 try {
@@ -401,7 +417,7 @@ public final class PluginCore {
                 }
             }
         });
-        addInjector(1, info -> {
+        addScanner(1, info -> {
             if (info.hasAnnotation(Inject.class)) {
                 try {
                     Class<?> clazz = Class.forName(info.getName(), false, loader);
@@ -422,12 +438,12 @@ public final class PluginCore {
                 e.printStackTrace();
             }
         }
-        addInjectors(plugin.getClass().getClassLoader(), rootPath);
+        addScanners(plugin.getClass().getClassLoader(), rootPath);
         plugin.onPluginLoad();
     }
 
     public void onEnable() {
-        inject();
+        scan();
         load();
         plugin.onPluginEnable();
         plugin.consoleKey("pluginEnabled", plugin.getId() + "-" + plugin.getVersion());
