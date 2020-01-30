@@ -10,4 +10,7 @@ import java.lang.annotation.*;
 @Documented
 public @interface Config {
     String id();
+
+    // TODO 单独文件，单独异步加载
+    boolean separate() default false;
 }
