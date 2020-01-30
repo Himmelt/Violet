@@ -5,10 +5,9 @@ import org.jetbrains.annotations.Nullable;
 import org.soraworld.hocon.node.Paths;
 import org.soraworld.hocon.util.Reflects;
 import org.soraworld.violet.api.ICommandSender;
-import org.soraworld.violet.api.IManager;
 import org.soraworld.violet.api.IPlayer;
 import org.soraworld.violet.api.IPlugin;
-import org.soraworld.violet.inject.Inject;
+import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.util.ListUtils;
 
 import java.lang.reflect.Field;
@@ -18,8 +17,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * The type V command.
- *
  * @author Himmelt
  */
 public final class CommandCore {
@@ -28,71 +25,38 @@ public final class CommandCore {
     private boolean exeOnlyPlayer = false;
     private boolean tabOnlyPlayer = false;
 
-    /**
-     * The Name.
-     */
-    protected String name;
-    /**
-     * The Permission.
-     */
+    private String name;
     protected String permission;
-    /**
-     * The Only player.
-     */
     protected boolean onlyPlayer;
-    /**
-     * The Parent.
-     */
     protected CommandCore parent;
-    /**
-     * The Sub executor.
-     */
     protected SubExecutor<ICommandSender> subExecutor;
-    /**
-     * The Tab executor.
-     */
     protected TabExecutor<ICommandSender> tabExecutor;
-    /**
-     * The Tabs.
-     */
     protected final List<String> tabs = new ArrayList<>();
-    /**
-     * The Aliases.
-     */
     protected final List<String> aliases = new ArrayList<>();
-    /**
-     * The Subs.
-     */
     protected final Map<String, CommandCore> subs = new LinkedHashMap<>();
     private String usage;
 
-    @Inject
-    private IManager manager;
-    @Inject
-    private IPlugin plugin;
+    private final IPlugin plugin;
+    private String description = "";
 
-    /**
-     * Instantiates a new V command.
-     *
-     * @param name       the name
-     * @param permission the permission
-     * @param onlyPlayer the only player
-     * @param parent     the parent
-     * @param manager    the manager
-     */
-    public CommandCore(@NotNull String name, @Nullable String permission, boolean onlyPlayer, @Nullable CommandCore parent, @NotNull IManager manager) {
+    public CommandCore(@NotNull IPlugin plugin, @NotNull String name, @Nullable String permission, boolean onlyPlayer, @Nullable CommandCore parent) {
+        this.plugin = plugin;
         this.name = name;
         this.permission = permission;
         this.onlyPlayer = onlyPlayer;
         this.parent = parent;
-        this.manager = manager;
+        this.usage = "";
     }
 
-    /**
-     * Add sub.
-     *
-     * @param sub the sub
-     */
+    public CommandCore(@NotNull IPlugin plugin, Command annotation) {
+        this.name = annotation.name();
+        this.permission = annotation.perm();
+        this.onlyPlayer = annotation.onlyPlayer();
+        this.usage = annotation.usage();
+        this.plugin = plugin;
+        this.parent = null;
+    }
+
     public void addSub(@NotNull CommandCore sub) {
         CommandCore old = subs.get(sub.getName());
         if (old != null) {
@@ -113,7 +77,7 @@ public final class CommandCore {
         }
         CommandCore sub = subs.get(paths.first());
         if (sub == null) {
-            sub = new CommandCore(paths.first(), null, false, this, manager);
+            sub = new CommandCore(plugin, paths.first(), null, false, this);
         }
         return sub.createSub(paths.next());
     }
@@ -125,11 +89,6 @@ public final class CommandCore {
         }
     }
 
-    /**
-     * Extract sub.
-     *
-     * @param instance the instance
-     */
     public void extractSub(@NotNull Object instance) {
         Field[] fields = instance.getClass().getDeclaredFields();
         if (fields.length == 0) {
@@ -140,12 +99,6 @@ public final class CommandCore {
         }
     }
 
-    /**
-     * Extract sub.
-     *
-     * @param instance the instance
-     * @param name     the name
-     */
     public void extractSub(@NotNull Object instance, @NotNull String name) {
         if (name.isEmpty()) {
             return;
@@ -154,8 +107,8 @@ public final class CommandCore {
             Field field = instance.getClass().getDeclaredField(name);
             tryAddSub(field, instance);
         } catch (Throwable e) {
-            manager.debug(e);
-            manager.consoleKey("extractNoSuchSub", instance.getClass().getName(), name);
+            plugin.debug(e);
+            plugin.consoleKey("extractNoSuchSub", instance.getClass().getName(), name);
         }
     }
 
@@ -169,7 +122,6 @@ public final class CommandCore {
         }
         Paths paths = new Paths(sub.path().isEmpty() ? field.getName().toLowerCase() : sub.path().replace(' ', '_').replace(':', '_'));
         String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
-        perm = manager.mappingPerm(perm);
 
         CommandCore command;
         if (!sub.virtual()) {
@@ -177,7 +129,7 @@ public final class CommandCore {
             try {
                 executor = (SubExecutor) field.get(instance);
             } catch (Throwable e) {
-                manager.debug(e);
+                plugin.debug(e);
             }
             if (executor == null) {
                 return;
@@ -207,11 +159,6 @@ public final class CommandCore {
         command.update();
     }
 
-    /**
-     * Extract tab.
-     *
-     * @param instance the instance
-     */
     public void extractTab(@NotNull Object instance) {
         Field[] fields = instance.getClass().getDeclaredFields();
         if (fields.length == 0) {
@@ -222,12 +169,6 @@ public final class CommandCore {
         }
     }
 
-    /**
-     * Extract tab.
-     *
-     * @param instance the instance
-     * @param name     the name
-     */
     public void extractTab(@NotNull Object instance, @NotNull String name) {
         if (name.isEmpty()) {
             return;
@@ -236,8 +177,8 @@ public final class CommandCore {
             Field field = instance.getClass().getDeclaredField(name);
             tryAddTab(field, instance);
         } catch (Throwable e) {
-            manager.debug(e);
-            manager.consoleKey("extractNoSuchTab", instance.getClass().getName(), name);
+            plugin.debug(e);
+            plugin.consoleKey("extractNoSuchTab", instance.getClass().getName(), name);
         }
     }
 
@@ -254,7 +195,7 @@ public final class CommandCore {
         try {
             executor = (TabExecutor) field.get(instance);
         } catch (Throwable e) {
-            manager.debug(e);
+            plugin.debug(e);
         }
         if (executor == null) {
             return;
@@ -279,31 +220,14 @@ public final class CommandCore {
         }
     }
 
-    /**
-     * Send usage.
-     *
-     * @param sender the sender
-     */
     public void sendUsage(ICommandSender sender) {
-        manager.sendKey(sender, "cmdUsage", getUsage());
+        sender.sendMessageKey("cmdUsage", getUsage());
     }
 
-    /**
-     * Gets sub.
-     *
-     * @param name the name
-     * @return the sub
-     */
     public CommandCore getSub(String name) {
         return subs.get(name);
     }
 
-    /**
-     * Gets sub.
-     *
-     * @param paths the paths
-     * @return the sub
-     */
     public CommandCore getSub(Paths paths) {
         if (paths.empty()) {
             return this;
@@ -315,43 +239,21 @@ public final class CommandCore {
         return null;
     }
 
-    /**
-     * Gets parent.
-     *
-     * @return the parent
-     */
     public CommandCore getParent() {
         return parent;
     }
 
-    /**
-     * Sets tabs.
-     *
-     * @param tabs the tabs
-     */
     public void setTabs(List<String> tabs) {
         this.tabs.clear();
         this.tabs.addAll(tabs);
     }
 
-    /**
-     * Gets tabs.
-     *
-     * @return the tabs
-     */
     public List<String> getTabs() {
         return new ArrayList<>(tabs);
     }
 
     /* ---------------------------------------- modify start -------------------------------------------- */
 
-    /**
-     * Execute.
-     * 执行器非空时，参数优先为子命令
-     *
-     * @param sender the sender
-     * @param args   the args
-     */
     public void execute(ICommandSender sender, Args args) {
         if (testPermission(sender)) {
             if (!onlyPlayer || sender instanceof IPlayer) {
@@ -367,41 +269,26 @@ public final class CommandCore {
                         if (!exeOnlyPlayer || sender instanceof IPlayer) {
                             subExecutor.execute(this, sender, args);
                         } else {
-                            manager.sendKey(sender, "onlyPlayer");
+                            sender.sendMessageKey("onlyPlayer");
                         }
                     } else {
-                        manager.sendKey(sender, "noCommandPerm", exePermission);
+                        sender.sendMessageKey("noCommandPerm", exePermission);
                     }
                 } else {
                     sendUsage(sender);
                 }
             } else {
-                manager.sendKey(sender, "onlyPlayer");
+                sender.sendMessageKey("onlyPlayer");
             }
         } else {
-            manager.sendKey(sender, "noCommandPerm", permission);
+            sender.sendMessageKey("noCommandPerm", permission);
         }
     }
 
-    /**
-     * Tab complete list.
-     *
-     * @param sender the sender
-     * @param args   the args
-     * @return the list
-     */
     public List<String> tabComplete(ICommandSender sender, Args args) {
         return tabComplete(sender, args, false);
     }
 
-    /**
-     * Tab complete list.
-     *
-     * @param sender       the sender
-     * @param args         the args
-     * @param skipExecutor the skip executor
-     * @return the list
-     */
     public List<String> tabComplete(ICommandSender sender, Args args, boolean skipExecutor) {
         if (!skipExecutor && tabExecutor != null && (!tabOnlyPlayer || sender instanceof IPlayer)) {
             return tabExecutor.complete(this, sender, args);
@@ -434,7 +321,7 @@ public final class CommandCore {
             builder.insert(0, "/");
             usage = builder.toString();
         }
-        return manager.trans(usage).replace("{$id}", plugin.getId());
+        return plugin.trans(usage).replace("{$id}", plugin.getId());
     }
 
     public @NotNull CommandCore setAliases(@NotNull List<String> aliases) {
@@ -468,5 +355,9 @@ public final class CommandCore {
 
     public Collection<String> getSubKeys() {
         return subs.keySet();
+    }
+
+    public @NotNull String getDescription() {
+        return description;
     }
 }

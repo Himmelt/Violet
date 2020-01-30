@@ -1,12 +1,17 @@
 package org.soraworld.violet.api;
 
 import org.jetbrains.annotations.NotNull;
+import org.soraworld.violet.command.CommandCore;
 
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.List;
 
+/**
+ * @author Himmelt
+ */
 public interface IPlugin extends IManager, IMessenger, I18n, IScheduler {
 
     String getName();
@@ -21,11 +26,9 @@ public interface IPlugin extends IManager, IMessenger, I18n, IScheduler {
 
     String getVersion();
 
-    @NotNull
-    Path getRootPath();
+    @NotNull Path getRootPath();
 
-    @NotNull
-    File getJarFile();
+    @NotNull File getJarFile();
 
     boolean isEnabled();
 
@@ -49,7 +52,11 @@ public interface IPlugin extends IManager, IMessenger, I18n, IScheduler {
         return getClass().getResource("/assets/" + assetsId() + '/' + path);
     }
 
-    ClassLoader getClassLoader();
+    void registerListener(@NotNull Object listener);
 
-    void addInjectInstance(Object instance);
+    boolean registerCommand(@NotNull CommandCore core);
+
+    boolean registerCommand(@NotNull Object command, String... aliases);
+
+    boolean registerCommand(@NotNull Object command, @NotNull List<String> aliases);
 }

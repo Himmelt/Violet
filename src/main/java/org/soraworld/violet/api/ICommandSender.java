@@ -1,18 +1,24 @@
 package org.soraworld.violet.api;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.soraworld.violet.text.ChatType;
 
 /**
  * @author Himmelt
  */
 public interface ICommandSender {
-    boolean hasPermission(String permission);
+    boolean hasPermission(@Nullable String permission);
 
-    void sendMessage(String message);
+    void sendChat(@NotNull String message);
 
-    void sendMessageKey(String key, Object... args);
+    void sendChat(@NotNull ChatType type, @NotNull String message);
 
-    void sendMessage(ChatType type, String message);
+    void sendMessage(@NotNull String message);
 
-    void sendMessageKey(ChatType type, String key, Object... args);
+    void sendMessageKey(@NotNull String key, Object... args);
+
+    void sendMessage(@NotNull ChatType type, String message);
+
+    void sendMessageKey(@NotNull ChatType type, @NotNull String key, Object... args);
 }

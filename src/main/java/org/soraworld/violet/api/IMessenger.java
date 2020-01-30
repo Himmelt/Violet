@@ -6,7 +6,8 @@ import org.jetbrains.annotations.NotNull;
  * @author Himmelt
  */
 public interface IMessenger {
-    void console(String message);
+
+    void console(@NotNull String message);
 
     void consoleKey(String key, Object... args);
 
@@ -18,13 +19,17 @@ public interface IMessenger {
 
     void consoleLogKey(@NotNull String key, Object... args);
 
-    void broadcast(String message);
+    void broadcast(@NotNull String message);
 
-    void broadcastKey(String message);
+    void broadcastKey(@NotNull String key,Object... args);
 
-    void debug(String message);
+    void debug(@NotNull String message);
 
-    void debug(Throwable e);
+    void debug(@NotNull Throwable e);
 
-    void debugKey(String key, Object... args);
+    void debugKey(@NotNull String key, Object... args);
+
+    void notifyOps(@NotNull String message);
+
+    void notifyOpsKey(@NotNull String key, Object... args);
 }

@@ -45,7 +45,7 @@ public final class PluginScanner {
                     VioletVisitor visitor = new VioletVisitor();
                     reader.accept(visitor, ClassReader.SKIP_CODE);
                     ClassInfo clazz = visitor.getInfo();
-                    if (filter.test(clazz)) {
+                    if (filter == null || filter.test(clazz)) {
                         set.add(clazz);
                     }
                 } catch (IOException e) {

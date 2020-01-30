@@ -1,14 +1,16 @@
 package org.soraworld.violet.api;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * @author Himmelt
  */
 public interface IScheduler {
-    void runTask(Runnable task);
+    void runTask(@NotNull Runnable task);
 
-    void runTaskAsync(Runnable task);
+    void runTaskAsync(@NotNull Runnable task);
 
-    void runTaskLater(Runnable task, long delay);
+    void runTaskLater(@NotNull Runnable task, long delay);
 
-    void runTaskAsyncLater(Runnable task, long delay);
+    void runTaskLaterAsync(@NotNull Runnable task, long delay);
 }

@@ -42,8 +42,7 @@ noSuchSubCmd = "No sub command named %s."
 commandRegFailed = "Command %s register to plugin %s failed."
 nullCommandMap = "&cCommandMap reflection failed !!!!!"
 
-hasUpdate = "Plugin can Update: "
-clickUpdate = "Click To Download."
+configIdExist = ""
 
 comment {
   lang = "Display Language"

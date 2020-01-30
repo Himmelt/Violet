@@ -1,5 +1,7 @@
 package org.soraworld.violet.api;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.function.Consumer;
 
 /**
@@ -12,11 +14,11 @@ public interface IManager {
 
     boolean save();
 
-    void asyncSave(Consumer<Boolean> callback);
+    void asyncSave(@Nullable Consumer<Boolean> callback);
 
-    void backup();
+    boolean backup();
 
-    void asyncBackup(Consumer<Boolean> callback);
+    void asyncBackup(@Nullable Consumer<Boolean> callback);
 
     boolean isDebug();
 

@@ -11,7 +11,7 @@ import java.util.Set;
 /**
  * @author Himmelt
  */
-public class VioletVisitor extends ClassVisitor {
+public final class VioletVisitor extends ClassVisitor {
 
     private String name;
     private int access;

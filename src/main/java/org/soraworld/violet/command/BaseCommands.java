@@ -2,7 +2,6 @@ package org.soraworld.violet.command;
 
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.ICommandSender;
-import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.core.PluginCore;
 import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.inject.Inject;
@@ -14,11 +13,11 @@ import java.util.LinkedHashSet;
 /**
  * @author Himmelt
  */
-@Command(name = Violet.PLUGIN_ID, usage = "/violet lang|save|debug|reload|rextract|help|plugins ")
+@Command(name = Violet.PLUGIN_ID, usage = "/violet lang|save|debug|reload|extract|help|plugins ")
 public final class BaseCommands {
 
     @Inject
-    private IPlugin plugin;
+    private PluginCore plugin;
 
     @Sub(perm = "admin", tabs = {"zh_cn", "en_us"}, usage = "usage.lang")
     public final SubExecutor<ICommandSender> lang = (cmd, sender, args) -> {
@@ -45,9 +44,7 @@ public final class BaseCommands {
                 sub.execute(sender, args.next());
             }
         } else {
-            plugin.asyncSave(result -> {
-
-            });
+            plugin.asyncSave(result -> sender.sendMessageKey(result ? "configSaved" : "configSaveFailed"));
         }
     };
 
@@ -67,13 +64,11 @@ public final class BaseCommands {
         }
     };
 
-    @Sub(perm = "admin", usage = "usage.rextract")
-    public final SubExecutor<ICommandSender> rextract = (cmd, sender, args) -> sender.sendMessageKey(plugin.extract() ? "reExtracted" : "reExtractFailed");
+    @Sub(perm = "admin", usage = "usage.extract")
+    public final SubExecutor<ICommandSender> extract = (cmd, sender, args) -> sender.sendMessageKey(plugin.extract() ? "extracted" : "extractFailed");
 
     @Sub(perm = "admin", usage = "usage.backup")
-    public final SubExecutor<ICommandSender> backup = (cmd, sender, args) -> plugin.asyncBackup(result -> {
-
-    });
+    public final SubExecutor<ICommandSender> backup = (cmd, sender, args) -> plugin.asyncBackup(result -> sender.sendMessageKey(result ? "backupSuccess" : "backupFailed"));
 
     @Sub
     public final SubExecutor<ICommandSender> help = (cmd, sender, args) -> {
@@ -97,7 +92,5 @@ public final class BaseCommands {
     public final TabExecutor<ICommandSender> tab_help = (cmd, sender, args) -> args.size() > 1 ? new ArrayList<>() : ListUtils.getMatchList(args.first(), cmd.getSubKeys());
 
     @Sub(parent = Violet.PLUGIN_ID, perm = "admin", usage = "usage.plugins")
-    public final SubExecutor<ICommandSender> plugins = (cmd, sender, args) -> {
-        PluginCore.listPlugins();
-    };
+    public final SubExecutor<ICommandSender> plugins = (cmd, sender, args) -> PluginCore.listPlugins(sender);
 }

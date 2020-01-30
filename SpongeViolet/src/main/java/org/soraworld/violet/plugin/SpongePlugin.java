@@ -2,38 +2,39 @@ package org.soraworld.violet.plugin;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IPlugin;
-import org.soraworld.violet.command.BaseSubCmds;
-import org.soraworld.violet.command.VCommand;
-import org.soraworld.violet.inject.Command;
-import org.soraworld.violet.inject.EventListener;
-import org.soraworld.violet.inject.Inject;
-import org.soraworld.violet.inject.Manager;
-import org.soraworld.violet.manager.SpongeManager;
-import org.soraworld.violet.text.ChatColor;
+import org.soraworld.violet.command.CommandCore;
+import org.soraworld.violet.command.SpongeCommand;
+import org.soraworld.violet.core.PluginCore;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
+import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * @author Himmelt
  */
+@Plugin(
+        id = Violet.PLUGIN_ID,
+        name = Violet.PLUGIN_NAME,
+        version = Violet.PLUGIN_VERSION,
+        authors = {"Himmelt"},
+        url = "https://github.com/Himmelt/Violet",
+        description = "Violet Plugin Library."
+)
 public class SpongePlugin implements IPlugin {
 
     @javax.inject.Inject
@@ -41,209 +42,27 @@ public class SpongePlugin implements IPlugin {
     protected Path path;
     @javax.inject.Inject
     protected PluginContainer container;
-
-    protected SpongeManager manager;
-    protected Class<?> mainManagerClass;
-    protected final HashSet<Class<?>> injectClasses = new HashSet<>();
-    protected final HashSet<Class<?>> commandClasses = new HashSet<>();
-    protected final HashSet<Class<?>> listenerClasses = new HashSet<>();
-
-    private void scanJarPackageClasses() {
-        container.getSource().ifPresent(path -> {
-            File jarFile = path.toFile();
-            if (jarFile.exists()) {
-                for (Class<?> clazz : ClassUtils.scanClasses(jarFile, getClass().getPackage().getName(), getClass().getClassLoader())) {
-                    if (clazz.getAnnotation(Command.class) != null) {
-                        commandClasses.add(clazz);
-                    }
-                    if (clazz.getAnnotation(EventListener.class) != null) {
-                        listenerClasses.add(clazz);
-                    }
-                    if (clazz.getAnnotation(Manager.class) != null) {
-                        mainManagerClass = clazz;
-                    }
-                    if (clazz.getAnnotation(Inject.class) != null) {
-                        injectClasses.add(clazz);
-                    }
-                }
-            } else {
-                Sponge.getServer().getConsole().sendMessage(Text.of(ChatColor.RED + "Plugin Jar File NOT exist !!!"));
-            }
-        });
-    }
-
-    private void injectMainManager(@NotNull Path path) {
-        M manager = registerManager(path);
-        if (manager == null) {
-            Class<?> clazz = mainManagerClass;
-            if (clazz != null && ManagerCore.class.isAssignableFrom(clazz)) {
-                Sponge.getServer().getConsole().sendMessage(
-                        Text.of("[" + getName() + "] Injecting @MainManager class - " + clazz.getName())
-                );
-                Constructor[] constructors = clazz.getConstructors();
-                for (Constructor constructor : constructors) {
-                    Class<?>[] params = constructor.getParameterTypes();
-                    if (params.length == 2 && IPlugin.class.isAssignableFrom(params[0]) && Path.class.equals(params[1])) {
-                        constructor.setAccessible(true);
-                        try {
-                            manager = (M) constructor.newInstance(this, path);
-                            break;
-                        } catch (Throwable e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-        }
-        if (manager != null) {
-            setManager(manager);
-            injectClasses.forEach(this::injectIntoStatic);
-        } else {
-            Sponge.getServer().getConsole().sendMessage(Text.of(ChatColor.RED + getName() + " CANT register or inject main manager !!!"));
-        }
-    }
-
-    private void injectCommands() {
-        for (Class<?> clazz : commandClasses) {
-            Command annotation = clazz.getAnnotation(Command.class);
-            if (annotation != null) {
-                try {
-                    Object instance = clazz.getConstructor().newInstance();
-                    injectIntoInstance(instance);
-                    VCommand command = registerCommand(annotation);
-                    if (command != null) {
-                        command.extractSub(instance);
-                        command.extractTab(instance);
-                        if (clazz != BaseSubCmds.class && command.getName().equalsIgnoreCase(getId())) {
-                            BaseSubCmds baseSubCmds = new BaseSubCmds();
-                            injectIntoInstance(baseSubCmds);
-                            command.extractSub(baseSubCmds);
-                            command.extractTab(baseSubCmds);
-                        }
-                    }
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private void injectListeners() {
-        for (Class<?> clazz : listenerClasses) {
-            EventListener listener = clazz.getAnnotation(EventListener.class);
-            if (listener != null) {
-                try {
-                    Object instance = clazz.getConstructor().newInstance();
-                    injectIntoInstance(instance);
-                    registerListener(instance);
-                } catch (Throwable e) {
-                    getManager().console("CANT construct instance for " + clazz.getName() + " .");
-                }
-            }
-        }
-    }
-
-    private void injectIntoStatic(@NotNull Class<?> clazz) {
-        Field[] fields = clazz.getDeclaredFields();
-        for (Field field : fields) {
-            if (!Modifier.isStatic(field.getModifiers())) {
-                continue;
-            }
-            Inject inject = field.getAnnotation(Inject.class);
-            if (inject != null) {
-                field.setAccessible(true);
-                if (field.getType().isAssignableFrom(manager.getClass())) {
-                    try {
-                        field.set(null, manager);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                } else if (field.getType().isAssignableFrom(getClass())) {
-                    try {
-                        field.set(null, this);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-    }
-
-    private void injectIntoInstance(@NotNull Object instance) {
-        Field[] fields = instance.getClass().getDeclaredFields();
-        for (Field field : fields) {
-            if (Modifier.isStatic(field.getModifiers())) {
-                continue;
-            }
-            Inject inject = field.getAnnotation(Inject.class);
-            if (inject != null) {
-                field.setAccessible(true);
-                if (field.getType().isAssignableFrom(manager.getClass())) {
-                    try {
-                        field.set(instance, manager);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                } else if (field.getType().isAssignableFrom(getClass())) {
-                    try {
-                        field.set(instance, this);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-    }
+    private final PluginCore core = new PluginCore(this);
 
     @Listener
     public void onLoad(GamePreInitializationEvent event) {
-        beforeLoad();
-        scanJarPackageClasses();
-        registerInjectClasses();
-        Path path = getRootPath();
-        if (Files.notExists(path)) {
-            try {
-                Files.createDirectories(path);
-            } catch (Throwable e) {
-                e.printStackTrace();
-            }
-        }
-        injectMainManager(path);
+        core.onLoad();
     }
 
     @Listener
     public void onEnable(GameInitializationEvent event) {
-        if (manager != null) {
-            manager.beforeLoad();
-            manager.load();
-            manager.afterLoad();
-            injectCommands();
-            registerCommands();
-            injectListeners();
-            registerListeners();
-            manager.consoleKey("pluginEnabled", getId() + "-" + getVersion());
-            afterEnable();
-        } else {
-            Sponge.getServer().getConsole().sendMessage(Text.of(ChatColor.RED + "Plugin " + getId() + " enable failed !!!!"));
-        }
+        // TODO makesure sync for spigot , worlds load ??
+        core.onEnable();
     }
 
     @Listener
     public void onDisable(GameStoppingServerEvent event) {
-        if (manager != null) {
-            onPluginDisable();
-            if (manager != null) {
-                manager.consoleKey("pluginDisabled", getId() + "-" + getVersion());
-                if (manager.canSaveOnDisable()) {
-                    manager.consoleKey(manager.save() ? "configSaved" : "configSaveFailed");
-                }
-            }
-        }
+        core.onDisable();
     }
 
-    @NotNull
+
     @Override
-    public Path getRootPath() {
+    public final @NotNull Path getRootPath() {
         if (path == null) {
             path = new File("config", getId()).toPath();
         }
@@ -251,8 +70,7 @@ public class SpongePlugin implements IPlugin {
     }
 
     @Override
-    @NotNull
-    public final File getJarFile() {
+    public final @NotNull File getJarFile() {
         Path jarPath = container.getSource().orElse(null);
         return jarPath == null ? getFile() : jarPath.toFile();
     }
@@ -260,9 +78,6 @@ public class SpongePlugin implements IPlugin {
     private File getFile() {
         //TODO
         return new File("");
-    }
-
-    public void beforeLoad() {
     }
 
     @Override
@@ -286,48 +101,168 @@ public class SpongePlugin implements IPlugin {
     }
 
     @Override
-    public SpongeManager getManager() {
-        return manager;
-    }
-
-    @Override
-    public void setManager(M manager) {
-        this.manager = manager;
-    }
-
-    @Override
-    public void registerInjectClass(@NotNull Class<?> clazz) {
-        if (clazz.getAnnotation(Command.class) != null) {
-            commandClasses.add(clazz);
-        }
-        if (clazz.getAnnotation(EventListener.class) != null) {
-            listenerClasses.add(clazz);
-        }
-        if (clazz.getAnnotation(Inject.class) != null) {
-            injectClasses.add(clazz);
-        }
-    }
-
     public void registerListener(@NotNull Object listener) {
         Sponge.getEventManager().registerListeners(this, listener);
     }
 
-    @Nullable
-    public VCommand registerCommand(@NotNull Command annotation) {
-        String perm = annotation.perm();
-        perm = manager.mappingPerm(perm);
-        VCommand command = new VCommand(annotation.name(), perm, annotation.onlyPlayer(), null, manager);
-        command.setAliases(Arrays.asList(annotation.aliases()));
-        command.setTabs(Arrays.asList(annotation.tabs()));
-        command.setUsage(annotation.usage());
-        return registerCommand(command) ? command : null;
+    @Override
+    public boolean registerCommand(@NotNull CommandCore core) {
+        return registerCommand(new SpongeCommand(core), core.getAliases());
     }
 
-    public boolean registerCommand(@NotNull VCommand command) {
-        List<String> aliases = new ArrayList<>();
-        aliases.add(command.getName());
-        aliases.addAll(command.getAliases());
-        Sponge.getCommandManager().register(this, command, aliases);
-        return true;
+    @Override
+    public boolean registerCommand(@NotNull Object command, String... aliases) {
+        if (command instanceof CommandCallable) {
+            return Sponge.getCommandManager().register(this, (CommandCallable) command, aliases).isPresent();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean registerCommand(@NotNull Object command, @NotNull List<String> aliases) {
+        if (command instanceof CommandCallable) {
+            return Sponge.getCommandManager().register(this, (CommandCallable) command, aliases).isPresent();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean setLang(String lang) {
+        return core.setLang(lang);
+    }
+
+    @Override
+    public String getLang() {
+        return core.getLang();
+    }
+
+    @Override
+    public String trans(@NotNull String key, Object... args) {
+        return core.trans(key, args);
+    }
+
+    @Override
+    public boolean extract() {
+        return core.extract();
+    }
+
+    @Override
+    public boolean load() {
+        return core.load();
+    }
+
+    @Override
+    public boolean save() {
+        return core.save();
+    }
+
+    @Override
+    public void asyncSave(@Nullable Consumer<Boolean> callback) {
+        core.asyncSave(callback);
+    }
+
+    @Override
+    public boolean backup() {
+        return core.backup();
+    }
+
+    @Override
+    public void asyncBackup(@Nullable Consumer<Boolean> callback) {
+        core.asyncBackup(callback);
+    }
+
+    @Override
+    public boolean isDebug() {
+        return core.isDebug();
+    }
+
+    @Override
+    public void setDebug(boolean debug) {
+        core.setDebug(debug);
+    }
+
+    @Override
+    public void console(@NotNull String message) {
+        Sponge.getServer().getConsole().sendMessage(Text.of(core.getChatHead() + message));
+    }
+
+    @Override
+    public void consoleKey(String key, Object... args) {
+        console(core.getChatHead() + core.trans(key, args));
+    }
+
+    @Override
+    public void log(@NotNull String text) {
+        console(text);
+    }
+
+    @Override
+    public void logKey(@NotNull String key, Object... args) {
+        consoleKey(key, args);
+    }
+
+    @Override
+    public void consoleLog(@NotNull String text) {
+        console(text);
+    }
+
+    @Override
+    public void consoleLogKey(@NotNull String key, Object... args) {
+        consoleKey(key, args);
+    }
+
+    @Override
+    public void broadcast(@NotNull String message) {
+        Sponge.getServer().getBroadcastChannel().send(Text.of(core.getChatHead() + message));
+    }
+
+    @Override
+    public void broadcastKey(@NotNull String key, Object... args) {
+        Sponge.getServer().getBroadcastChannel().send(Text.of(core.getChatHead() + core.trans(key, args)));
+    }
+
+    @Override
+    public void debug(@NotNull String message) {
+
+    }
+
+    @Override
+    public void debug(@NotNull Throwable e) {
+
+    }
+
+    @Override
+    public void debugKey(@NotNull String key, Object... args) {
+
+    }
+
+    @Override
+    public void notifyOps(@NotNull String message) {
+
+    }
+
+    @Override
+    public void notifyOpsKey(@NotNull String key, Object... args) {
+
+    }
+
+    @Override
+    public void runTask(@NotNull Runnable task) {
+        Sponge.getScheduler().createSyncExecutor(this).execute(task);
+    }
+
+    @Override
+    public void runTaskAsync(@NotNull Runnable task) {
+        Sponge.getScheduler().createAsyncExecutor(this).execute(task);
+    }
+
+    @Override
+    public void runTaskLater(@NotNull Runnable task, long delay) {
+        Sponge.getScheduler().createSyncExecutor(this).schedule(task, delay * 50, TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public void runTaskLaterAsync(@NotNull Runnable task, long delay) {
+        Sponge.getScheduler().createAsyncExecutor(this).schedule(task, delay * 50, TimeUnit.MILLISECONDS);
     }
 }
