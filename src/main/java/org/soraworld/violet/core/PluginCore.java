@@ -10,8 +10,8 @@ import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.asm.ClassInfo;
 import org.soraworld.violet.asm.PluginScanner;
 import org.soraworld.violet.command.BaseCommands;
+import org.soraworld.violet.command.Cmd;
 import org.soraworld.violet.command.CommandCore;
-import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.inject.Config;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.inject.Injector;
@@ -21,7 +21,6 @@ import org.soraworld.violet.text.ChatColor;
 import org.soraworld.violet.text.JsonText;
 import org.soraworld.violet.util.FileUtils;
 
-import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -60,7 +59,7 @@ public final class PluginCore {
     private final IPlugin plugin;
     private final Options options = Options.build();
     private final Injector injector = new Injector();
-    private HashMap<String, String> langMap = new HashMap<>();
+    private final HashMap<String, String> langMap = new HashMap<>();
     private final HashMap<String, Object> internalConfigs = new HashMap<>();
     private final HashMap<String, Object> externalConfigs = new HashMap<>();
     private final TreeMap<Integer, List<Consumer<ClassInfo>>> scannersMap = new TreeMap<>();
@@ -274,7 +273,8 @@ public final class PluginCore {
         HashMap<String, String> temp = loadLangMap(lang);
         if (!temp.isEmpty()) {
             this.lang = lang;
-            langMap = temp;
+            langMap.clear();
+            langMap.putAll(temp);
             String head = langMap.get("chatHead");
             if (head != null && !head.isEmpty()) {
                 setHead(head);
@@ -313,14 +313,6 @@ public final class PluginCore {
             }
         }
         return text;
-    }
-
-    public Path getRootPath() {
-        return rootPath;
-    }
-
-    public boolean canSaveOnDisable() {
-        return saveOnDisable && reloadSuccess;
     }
 
     public String defChatHead() {
@@ -387,9 +379,7 @@ public final class PluginCore {
                                 plugin.consoleKey("externalConfigIdExist", id);
                             } else {
                                 injector.inject(clazz);
-                                Constructor<?> constructor = clazz.getConstructor();
-                                constructor.setAccessible(true);
-                                Object instance = constructor.newInstance();
+                                Object instance = clazz.newInstance();
                                 injector.inject(instance);
                                 injector.addValue(instance);
                                 externalConfigs.put(id, instance);
@@ -400,9 +390,7 @@ public final class PluginCore {
                                 plugin.consoleKey("internalConfigIdExist", id);
                             } else {
                                 injector.inject(clazz);
-                                Constructor<?> constructor = clazz.getConstructor();
-                                constructor.setAccessible(true);
-                                Object instance = constructor.newInstance();
+                                Object instance = clazz.newInstance();
                                 injector.inject(instance);
                                 injector.addValue(instance);
                                 internalConfigs.put(id, instance);
@@ -418,15 +406,15 @@ public final class PluginCore {
             }
         });
         addScanner(1, info -> {
-            if (info.hasAnnotation(Command.class)) {
-                plugin.console("Try construct @Command -> " + info.getName());
+            if (info.hasAnnotation(Cmd.class)) {
+                plugin.console("Try construct @Cmd -> " + info.getName());
                 try {
                     Class<?> clazz = Class.forName(info.getName(), false, loader);
-                    Command annotation = clazz.getAnnotation(Command.class);
+                    Cmd cmd = clazz.getAnnotation(Cmd.class);
                     try {
-                        Object instance = clazz.getConstructor().newInstance();
+                        Object instance = clazz.newInstance();
                         injector.inject(instance);
-                        CommandCore core = new CommandCore(plugin, annotation);
+                        CommandCore core = new CommandCore(plugin, cmd);
                         if (plugin.registerCommand(core)) {
                             core.extractSub(instance);
                             core.extractTab(instance);
@@ -489,5 +477,9 @@ public final class PluginCore {
 
     public String getChatHead() {
         return colorHead;
+    }
+
+    public static IPlugin getPlugin(@NotNull String id) {
+        return PLUGINS.stream().filter(p -> p.getId().equals(id)).findAny().orElse(null);
     }
 }

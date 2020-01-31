@@ -7,7 +7,6 @@ import org.soraworld.hocon.util.Reflects;
 import org.soraworld.violet.api.ICommandSender;
 import org.soraworld.violet.api.IPlayer;
 import org.soraworld.violet.api.IPlugin;
-import org.soraworld.violet.inject.Command;
 import org.soraworld.violet.util.ListUtils;
 
 import java.lang.reflect.Field;
@@ -21,51 +20,64 @@ import java.util.stream.Collectors;
  */
 public final class CommandCore {
 
-    private String exePermission = null;
-    private boolean exeOnlyPlayer = false;
-    private boolean tabOnlyPlayer = false;
-
-    private String name;
-    protected String permission;
-    protected boolean onlyPlayer;
-    protected CommandCore parent;
-    protected SubExecutor<ICommandSender> subExecutor;
-    protected TabExecutor<ICommandSender> tabExecutor;
-    protected final List<String> tabs = new ArrayList<>();
-    protected final List<String> aliases = new ArrayList<>();
-    protected final Map<String, CommandCore> subs = new LinkedHashMap<>();
-    private String usage;
-
-    private final IPlugin plugin;
+    private String perm = null;
+    private String usage = "";
     private String description = "";
+    private boolean ingame = false;
+    private SubExecutor<ICommandSender> executor;
+    private TabExecutor<ICommandSender> tabcutor;
 
-    public CommandCore(@NotNull IPlugin plugin, @NotNull String name, @Nullable String permission, boolean onlyPlayer, @Nullable CommandCore parent) {
-        this.plugin = plugin;
+    private final String name;
+    private final IPlugin plugin;
+    private final CommandCore parent;
+    private final List<String> tabs = new ArrayList<>();
+    private final List<String> aliases = new ArrayList<>();
+    private final Map<String, CommandCore> subs = new LinkedHashMap<>();
+
+    private CommandCore(@NotNull IPlugin plugin, @NotNull String name, @Nullable CommandCore parent) {
         this.name = name;
-        this.permission = permission;
-        this.onlyPlayer = onlyPlayer;
         this.parent = parent;
-        this.usage = "";
+        this.plugin = plugin;
     }
 
-    public CommandCore(@NotNull IPlugin plugin, Command annotation) {
-        this.name = annotation.name();
-        this.permission = annotation.perm();
-        this.onlyPlayer = annotation.onlyPlayer();
-        this.usage = annotation.usage();
-        this.plugin = plugin;
+    public CommandCore(@NotNull IPlugin plugin, @NotNull Cmd cmd) {
+        this.name = cmd.name();
+        this.perm = cmd.admin() ? plugin.getId() + ".admin" : cmd.perm().isEmpty() ? null : cmd.perm();
+        this.ingame = cmd.ingame();
+        this.tabs.addAll(Arrays.asList(cmd.tabs()));
+        this.aliases.addAll(Arrays.asList(cmd.aliases()));
+        this.aliases.removeIf(name::equalsIgnoreCase);
         this.parent = null;
+        this.plugin = plugin;
+        this.usage = cmd.usage();
+        this.description = cmd.description();
+    }
+
+    public @NotNull String getName() {
+        return name;
+    }
+
+    public @NotNull String getUsage() {
+        return plugin.trans(usage).replace("{$id}", plugin.getId());
+    }
+
+    public @NotNull String getDescription() {
+        return plugin.trans(description);
+    }
+
+    public @NotNull List<String> getAliases() {
+        return aliases;
     }
 
     public void addSub(@NotNull CommandCore sub) {
         CommandCore old = subs.get(sub.getName());
-        if (old != null) {
-            subs.entrySet().removeIf(entry -> entry.getValue() == old);
-            if (old != sub) {
+        if (old != sub) {
+            if (old != null) {
+                subs.entrySet().removeIf(entry -> entry.getValue() == old);
                 old.subs.forEach(sub.subs::putIfAbsent);
             }
+            subs.put(sub.getName(), sub);
         }
-        subs.put(sub.getName(), sub);
         for (String alias : sub.getAliases()) {
             subs.putIfAbsent(alias, sub);
         }
@@ -77,7 +89,7 @@ public final class CommandCore {
         }
         CommandCore sub = subs.get(paths.first());
         if (sub == null) {
-            sub = new CommandCore(plugin, paths.first(), null, false, this);
+            sub = new CommandCore(plugin, paths.first(), this);
         }
         return sub.createSub(paths.next());
     }
@@ -113,50 +125,48 @@ public final class CommandCore {
     }
 
     private void tryAddSub(@NotNull Field field, @NotNull Object instance) {
-        Sub sub = field.getAnnotation(Sub.class);
+        Cmd sub = field.getAnnotation(Cmd.class);
         if (sub == null || Modifier.isStatic(field.getModifiers())) {
             return;
         }
-        if (!sub.parent().isEmpty() && !sub.parent().equalsIgnoreCase(getName())) {
+        if (!sub.plugin().isEmpty() && !sub.plugin().equalsIgnoreCase(plugin.getId())) {
             return;
         }
-        Paths paths = new Paths(sub.path().isEmpty() ? field.getName().toLowerCase() : sub.path().replace(' ', '_').replace(':', '_'));
-        String perm = sub.perm().isEmpty() ? null : sub.perm().replace(' ', '_').replace(':', '_');
+        String perm = sub.admin() ? plugin.getId() + ".admin" : sub.perm().isEmpty() ? null : sub.perm();
 
-        CommandCore command;
-        if (!sub.virtual()) {
-            SubExecutor<ICommandSender> executor = null;
-            try {
-                executor = (SubExecutor) field.get(instance);
-            } catch (Throwable e) {
-                plugin.debug(e);
-            }
-            if (executor == null) {
-                return;
-            }
-            Type[] params = Reflects.getActualTypes(SubExecutor.class, executor.getClass());
-            if (params == null || params.length != 1 || !Reflects.isAssignableFrom(ICommandSender.class, params[0])) {
-                return;
-            }
-
-            if (".".equals(sub.path())) {
-                this.subExecutor = executor;
-                this.exePermission = perm;
-                this.exeOnlyPlayer = sub.onlyPlayer() || Reflects.isAssignableFrom(IPlayer.class, params[0]);
-                return;
-            }
-            command = createSub(paths);
-            command.subExecutor = executor;
-            command.onlyPlayer = command.onlyPlayer || sub.onlyPlayer() || Reflects.isAssignableFrom(IPlayer.class, params[0]);
-        } else {
-            command = createSub(paths);
-            command.onlyPlayer = command.onlyPlayer || sub.onlyPlayer();
+        SubExecutor<ICommandSender> executor = null;
+        try {
+            executor = (SubExecutor) field.get(instance);
+        } catch (Throwable e) {
+            plugin.debug(e);
         }
-        command.permission = perm;
-        command.tabs.addAll(Arrays.asList(sub.tabs()));
-        command.aliases.addAll(Arrays.asList(sub.aliases()));
-        command.usage = sub.usage();
-        command.update();
+        if (executor == null) {
+            return;
+        }
+        Type[] params = Reflects.getActualTypes(SubExecutor.class, executor.getClass());
+        if (params == null || params.length != 1 || !Reflects.isAssignableFrom(ICommandSender.class, params[0])) {
+            return;
+        }
+
+        if (".".equals(sub.name())) {
+            this.perm = perm;
+            this.usage = sub.usage().isEmpty() ? "usage." + name : sub.usage();
+            this.ingame = sub.ingame() || Reflects.isAssignableFrom(IPlayer.class, params[0]);
+            this.description = sub.description().isEmpty() ? "description." + name : sub.description();
+            this.executor = executor;
+            this.tabs.addAll(Arrays.asList(sub.tabs()));
+        } else {
+            CommandCore cmd = createSub(new Paths(sub.name().isEmpty() ? field.getName().toLowerCase() : sub.name()));
+            cmd.perm = perm;
+            cmd.usage = sub.usage().isEmpty() ? "usage." + cmd.name : sub.usage();
+            cmd.ingame = sub.ingame() || Reflects.isAssignableFrom(IPlayer.class, params[0]);
+            cmd.description = sub.description().isEmpty() ? "description." + cmd.name : sub.description();
+            cmd.executor = executor;
+            cmd.tabs.addAll(Arrays.asList(sub.tabs()));
+            cmd.aliases.addAll(Arrays.asList(sub.aliases()));
+            cmd.aliases.removeIf(cmd.name::equalsIgnoreCase);
+            cmd.update();
+        }
     }
 
     public void extractTab(@NotNull Object instance) {
@@ -187,7 +197,7 @@ public final class CommandCore {
         if (tab == null || Modifier.isStatic(field.getModifiers())) {
             return;
         }
-        if (!tab.parent().isEmpty() && !tab.parent().equalsIgnoreCase(getName())) {
+        if (!tab.plugin().isEmpty() && !tab.plugin().equalsIgnoreCase(plugin.getId())) {
             return;
         }
 
@@ -207,16 +217,14 @@ public final class CommandCore {
         }
 
         if (".".equals(tab.path())) {
-            this.tabExecutor = executor;
-            this.tabOnlyPlayer = Reflects.isAssignableFrom(IPlayer.class, params[0]);
+            this.tabcutor = executor;
             return;
         }
 
         Paths paths = new Paths(tab.path().isEmpty() ? field.getName().toLowerCase() : tab.path().replace(' ', '_').replace(':', '_'));
         CommandCore command = getSub(paths);
         if (command != null) {
-            command.tabExecutor = executor;
-            command.tabOnlyPlayer = Reflects.isAssignableFrom(IPlayer.class, params[0]);
+            command.tabcutor = executor;
         }
     }
 
@@ -252,47 +260,35 @@ public final class CommandCore {
         return new ArrayList<>(tabs);
     }
 
-    /* ---------------------------------------- modify start -------------------------------------------- */
-
-    public void execute(ICommandSender sender, Args args) {
-        if (testPermission(sender)) {
-            if (!onlyPlayer || sender instanceof IPlayer) {
-                if (args.notEmpty()) {
-                    CommandCore sub = subs.get(args.first());
-                    if (sub != null) {
-                        sub.execute(sender, args.next());
-                        return;
-                    }
-                }
-                if (subExecutor != null) {
-                    if (exePermission == null || exePermission.isEmpty() || sender.hasPermission(exePermission)) {
-                        if (!exeOnlyPlayer || sender instanceof IPlayer) {
-                            subExecutor.execute(this, sender, args);
-                        } else {
-                            sender.sendMessageKey("onlyPlayer");
-                        }
-                    } else {
-                        sender.sendMessageKey("noCommandPerm", exePermission);
-                    }
+    public void execute(@NotNull ICommandSender sender, @NotNull Args args) {
+        CommandCore sub = subs.get(args.first());
+        if (sub != null) {
+            sub.execute(sender, args.next());
+            return;
+        }
+        if (executor != null) {
+            if (testPermission(sender)) {
+                if (!ingame || sender instanceof IPlayer) {
+                    executor.execute(this, sender, args);
                 } else {
-                    sendUsage(sender);
+                    sender.sendMessageKey("onlyPlayer");
                 }
             } else {
-                sender.sendMessageKey("onlyPlayer");
+                sender.sendMessageKey("noCommandPerm", perm);
             }
         } else {
-            sender.sendMessageKey("noCommandPerm", permission);
+            sendUsage(sender);
         }
     }
 
-    public List<String> tabComplete(ICommandSender sender, Args args) {
-        return tabComplete(sender, args, false);
+    public List<String> tabComplete(ICommandSender sender, @NotNull Args args) {
+        if (tabcutor != null && (!ingame || sender instanceof IPlayer)) {
+            return tabcutor.complete(this, sender, args);
+        }
+        return tabComplete0(sender, args);
     }
 
-    public List<String> tabComplete(ICommandSender sender, Args args, boolean skipExecutor) {
-        if (!skipExecutor && tabExecutor != null && (!tabOnlyPlayer || sender instanceof IPlayer)) {
-            return tabExecutor.complete(this, sender, args);
-        }
+    public List<String> tabComplete0(ICommandSender sender, @NotNull Args args) {
         String first = args.first();
         if (args.size() == 1) {
             return ListUtils.getMatchList(first, !tabs.isEmpty() ? tabs : subs.keySet().stream().filter(s -> subs.get(s).testPermission(sender)).collect(Collectors.toList()));
@@ -304,39 +300,8 @@ public final class CommandCore {
         return new ArrayList<>();
     }
 
-    /* ---------------------------------------- origin start -------------------------------------------- */
-
-    public @NotNull String getName() {
-        return name;
-    }
-
-    public @NotNull String getUsage() {
-        if (usage == null || usage.isEmpty()) {
-            StringBuilder builder = new StringBuilder(getName());
-            CommandCore parent = this.parent;
-            while (parent != null) {
-                builder.insert(0, parent.getName() + " ");
-                parent = parent.parent;
-            }
-            builder.insert(0, "/");
-            usage = builder.toString();
-        }
-        return plugin.trans(usage).replace("{$id}", plugin.getId());
-    }
-
-    public @NotNull CommandCore setAliases(@NotNull List<String> aliases) {
-        this.aliases.clear();
-        this.aliases.addAll(aliases);
-        return this;
-    }
-
-    public @NotNull List<String> getAliases() {
-        return aliases;
-    }
-
-
     public boolean testPermission(@NotNull ICommandSender sender) {
-        return permission == null || permission.isEmpty() || sender.hasPermission(permission);
+        return perm == null || perm.isEmpty() || sender.hasPermission(perm);
     }
 
     @Override
@@ -355,9 +320,5 @@ public final class CommandCore {
 
     public Collection<String> getSubKeys() {
         return subs.keySet();
-    }
-
-    public @NotNull String getDescription() {
-        return description;
     }
 }

@@ -4,7 +4,8 @@ import java.lang.annotation.*;
 
 
 /**
- * 静态注入的字段不能在静态初始化块中用，类加载时尚未注入.
+ * 选择性加载的类不应使用该注解，此注解会在插件加载时触发类加载。
+ *
  * @author Himmelt
  */
 @Retention(RetentionPolicy.RUNTIME)

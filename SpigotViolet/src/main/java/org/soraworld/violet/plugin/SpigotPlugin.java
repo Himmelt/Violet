@@ -66,14 +66,12 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
     }
 
     @Override
-    @NotNull
-    public final Path getRootPath() {
+    public final @NotNull Path getRootPath() {
         return getDataFolder().toPath();
     }
 
-    @NotNull
     @Override
-    public final File getJarFile() {
+    public final @NotNull File getJarFile() {
         return getFile();
     }
 

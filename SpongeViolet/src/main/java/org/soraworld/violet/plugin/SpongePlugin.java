@@ -20,6 +20,7 @@ import org.spongepowered.api.text.Text;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -107,7 +108,9 @@ public class SpongePlugin implements IPlugin {
 
     @Override
     public boolean registerCommand(@NotNull CommandCore core) {
-        return registerCommand(new SpongeCommand(core), core.getAliases());
+        ArrayList<String> aliases = new ArrayList<>(core.getAliases());
+        aliases.add(0, core.getName());
+        return registerCommand(new SpongeCommand(core), aliases);
     }
 
     @Override

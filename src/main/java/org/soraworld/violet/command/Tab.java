@@ -9,7 +9,7 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 @Documented
 public @interface Tab {
-    String parent() default "";
+    String plugin() default "";
 
     /**
      * 命令树, 用 . 分隔

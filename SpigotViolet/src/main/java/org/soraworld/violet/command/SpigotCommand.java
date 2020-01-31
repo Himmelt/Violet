@@ -17,7 +17,7 @@ public class SpigotCommand extends Command {
     private final CommandCore core;
 
     public SpigotCommand(@NotNull CommandCore core) {
-        super(core.getName(), core.getUsage(), core.getUsage(), core.getAliases());
+        super(core.getName(), core.getDescription(), core.getUsage(), core.getAliases());
         this.core = core;
     }
 
