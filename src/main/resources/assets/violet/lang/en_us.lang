@@ -63,7 +63,7 @@ usage {
   save = "/{$id} save            Save config to file"
   debug = "/{$id} debug           Switch DEBUG mode"
   reload = "/{$id} reload          Reload config from file"
-  rextract = "/{$id} rextract         Re extract lang files from jar"
+  extract = "/{$id} extract         Extract lang files from jar"
   backup = "/{$id} backup          Backup all files in config folder"
   plugins = "/{$id} plugins          List all violet-plugins"
 }

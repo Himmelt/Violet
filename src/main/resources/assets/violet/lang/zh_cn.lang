@@ -70,7 +70,7 @@ usage {
   save = "/{$id} save           保存配置文件"
   debug = "/{$id} debug          切换调试模式"
   reload = "/{$id} reload         重载配置文件"
-  rextract = "/{$id} rextract        重新提取语言文件"
+  extract = "/{$id} extract        提取语言文件"
   backup = "/{$id} backup         备份配置文件夹内的全部内容"
   plugins = "/{$id} plugins         列出全部继承 Violet 的插件"
 }
