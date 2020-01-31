@@ -6,7 +6,6 @@ import org.soraworld.hocon.exception.SerializerException;
 import org.soraworld.hocon.node.*;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.ICommandSender;
-import org.soraworld.violet.api.IConfig;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.asm.ClassInfo;
 import org.soraworld.violet.asm.PluginScanner;
@@ -31,6 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 public final class PluginCore {
 
@@ -56,21 +56,20 @@ public final class PluginCore {
     private ChatColor color = ChatColor.WHITE;
 
     /* ---------------------------- Final Properties ---------------------------- */
-    private final Path confile;
     private final Path rootPath;
     private final IPlugin plugin;
-    private final FileNode rootNode;
-    private final Set<ClassInfo> classes = new HashSet<>();
     private final Options options = Options.build();
     private final Injector injector = new Injector();
     private HashMap<String, String> langMap = new HashMap<>();
-    private final HashMap<String, IConfig> configs = new HashMap<>();
+    private final HashMap<String, Object> internalConfigs = new HashMap<>();
+    private final HashMap<String, Object> externalConfigs = new HashMap<>();
     private final TreeMap<Integer, List<Consumer<ClassInfo>>> scannersMap = new TreeMap<>();
     private final AtomicBoolean asyncSaveLock = new AtomicBoolean(false);
     private final AtomicBoolean asyncBackLock = new AtomicBoolean(false);
 
     /* ---------------------------- Statics ---------------------------- */
     private static final ArrayList<IPlugin> PLUGINS = new ArrayList<>();
+    private static final Pattern CONFIG_ID = Pattern.compile("[a-zA-Z_0-9]+");
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss");
     private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
 
@@ -81,7 +80,6 @@ public final class PluginCore {
         this.injector.addValue(this);
         this.injector.addValue(plugin);
         this.rootPath = plugin.getRootPath();
-        this.classes.addAll(PluginScanner.scan(plugin.getJarFile()));
         this.options.setTranslator(Options.COMMENT, this::trans);
         this.options.setTranslator(Options.READ, ChatColor::colorize);
         this.options.setTranslator(Options.WRITE, ChatColor::fakerize);
@@ -90,8 +88,6 @@ public final class PluginCore {
         } catch (SerializerException e) {
             e.printStackTrace();
         }
-        this.confile = rootPath.resolve(plugin.getId().replace(' ', '_') + ".conf");
-        this.rootNode = new FileNode(confile.toFile(), options);
         setHead(defChatHead());
         if (!PLUGINS.contains(plugin)) {
             PLUGINS.add(plugin);
@@ -142,18 +138,20 @@ public final class PluginCore {
     }
 
     public boolean load() {
+        Path confile = rootPath.resolve(plugin.getId() + ".conf");
         if (Files.notExists(confile)) {
             setLang(lang);
             save();
             return true;
         }
         try {
+            FileNode rootNode = new FileNode(confile.toFile(), options);
             rootNode.load(true, true);
             Node general = rootNode.get("general");
             if (general instanceof NodeMap) {
                 ((NodeMap) general).modify(this);
             }
-            configs.forEach((id, config) -> {
+            internalConfigs.forEach((id, config) -> {
                 Node node = rootNode.get(id);
                 if (node instanceof NodeMap) {
                     ((NodeMap) node).modify(config);
@@ -186,16 +184,31 @@ public final class PluginCore {
         reloadSuccess = true;
         version = plugin.getVersion();
         try {
+            Path confile = rootPath.resolve(plugin.getId() + ".conf");
+            FileNode rootNode = new FileNode(confile.toFile(), options);
             NodeMap general = new NodeMap(options, trans("comment.type.general"));
             general.extract(this);
-            rootNode.clear();
             rootNode.set("general", general);
-            configs.forEach((id, config) -> {
+            internalConfigs.forEach((id, config) -> {
                 NodeMap node = new NodeMap(options, trans("comment.type." + id));
                 node.extract(config);
                 rootNode.set(id, node);
             });
             rootNode.save();
+            externalConfigs.forEach((id, config) -> {
+                if (!id.equalsIgnoreCase(plugin.getId())) {
+                    try {
+                        FileNode node = new FileNode(rootPath.resolve(id + ".conf").toFile(), options);
+                        node.addHead(trans("comment.type." + id));
+                        node.extract(config);
+                        node.save();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    plugin.consoleKey("illegalConfigId", id);
+                }
+            });
             return true;
         } catch (Throwable e) {
             plugin.console(ChatColor.RED + "Config file save exception !!!");
@@ -348,6 +361,7 @@ public final class PluginCore {
     }
 
     public void scan() {
+        Set<ClassInfo> classes = PluginScanner.scan(plugin.getJarFile());
         for (int i = 0; i <= 10; i++) {
             List<Consumer<ClassInfo>> scanners = scannersMap.get(i);
             if (scanners != null) {
@@ -365,22 +379,38 @@ public final class PluginCore {
                 plugin.console("Try construct @Config -> " + info.getName());
                 try {
                     Class<?> clazz = Class.forName(info.getName(), false, loader);
-                    if (clazz != null && IConfig.class.isAssignableFrom(clazz)) {
-                        Config config = clazz.getAnnotation(Config.class);
-                        if (configs.containsKey(config.id())) {
-                            plugin.consoleKey("configIdExist", config.id());
-                        } else if (!config.id().matches("[a-zA-Z_0-9]+")) {
-                            plugin.consoleKey("illegalConfigId", config.id());
+                    Config config = clazz.getAnnotation(Config.class);
+                    String id = config.id();
+                    if (!id.equalsIgnoreCase(plugin.getId()) && CONFIG_ID.matcher(id).matches()) {
+                        if (config.separate()) {
+                            if (externalConfigs.containsKey(id)) {
+                                plugin.consoleKey("externalConfigIdExist", id);
+                            } else {
+                                injector.inject(clazz);
+                                Constructor<?> constructor = clazz.getConstructor();
+                                constructor.setAccessible(true);
+                                Object instance = constructor.newInstance();
+                                injector.inject(instance);
+                                injector.addValue(instance);
+                                externalConfigs.put(id, instance);
+                                plugin.consoleKey("injectExternalConfig", id);
+                            }
                         } else {
-                            injector.inject(clazz);
-                            Constructor<?> constructor = clazz.getConstructor();
-                            constructor.setAccessible(true);
-                            IConfig instance = (IConfig) constructor.newInstance();
-                            injector.inject(instance);
-                            injector.addValue(instance);
-                            configs.put(config.id(), instance);
-                            plugin.consoleKey("injectConfig", config.id());
+                            if (internalConfigs.containsKey(id)) {
+                                plugin.consoleKey("internalConfigIdExist", id);
+                            } else {
+                                injector.inject(clazz);
+                                Constructor<?> constructor = clazz.getConstructor();
+                                constructor.setAccessible(true);
+                                Object instance = constructor.newInstance();
+                                injector.inject(instance);
+                                injector.addValue(instance);
+                                internalConfigs.put(id, instance);
+                                plugin.consoleKey("injectExternalConfig", id);
+                            }
                         }
+                    } else {
+                        plugin.consoleKey("illegalConfigId", id);
                     }
                 } catch (Throwable e) {
                     e.printStackTrace();
@@ -452,7 +482,7 @@ public final class PluginCore {
     public void onDisable() {
         plugin.onPluginDisable();
         plugin.consoleKey("pluginDisabled", plugin.getId() + "-" + plugin.getVersion());
-        if (saveOnDisable) {
+        if (saveOnDisable && reloadSuccess) {
             plugin.consoleKey(save() ? "configSaved" : "configSaveFailed");
         }
     }
