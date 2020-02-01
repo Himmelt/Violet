@@ -7,6 +7,8 @@ import org.soraworld.hocon.util.Reflects;
 import org.soraworld.violet.api.ICommandSender;
 import org.soraworld.violet.api.IPlayer;
 import org.soraworld.violet.api.IPlugin;
+import org.soraworld.violet.inject.Cmd;
+import org.soraworld.violet.inject.Tab;
 import org.soraworld.violet.util.ListUtils;
 
 import java.lang.reflect.Field;
@@ -41,7 +43,7 @@ public final class CommandCore {
     }
 
     public CommandCore(@NotNull IPlugin plugin, @NotNull Cmd cmd) {
-        this.name = cmd.name();
+        this.name = cmd.name().toLowerCase();
         this.perm = cmd.admin() ? plugin.getId() + ".admin" : cmd.perm().isEmpty() ? null : cmd.perm();
         this.ingame = cmd.ingame();
         this.tabs.addAll(Arrays.asList(cmd.tabs()));
@@ -156,7 +158,7 @@ public final class CommandCore {
             this.executor = executor;
             this.tabs.addAll(Arrays.asList(sub.tabs()));
         } else {
-            CommandCore cmd = createSub(new Paths(sub.name().isEmpty() ? field.getName().toLowerCase() : sub.name()));
+            CommandCore cmd = createSub(new Paths(sub.name().isEmpty() ? field.getName().toLowerCase() : sub.name().toLowerCase()));
             cmd.perm = perm;
             cmd.usage = sub.usage().isEmpty() ? "usage." + cmd.name : sub.usage();
             cmd.ingame = sub.ingame() || Reflects.isAssignableFrom(IPlayer.class, params[0]);
@@ -197,34 +199,31 @@ public final class CommandCore {
         if (tab == null || Modifier.isStatic(field.getModifiers())) {
             return;
         }
-        if (!tab.plugin().isEmpty() && !tab.plugin().equalsIgnoreCase(plugin.getId())) {
-            return;
-        }
 
-        TabExecutor<ICommandSender> executor = null;
+        TabExecutor<ICommandSender> tabcutor = null;
         try {
-            executor = (TabExecutor) field.get(instance);
+            tabcutor = (TabExecutor) field.get(instance);
         } catch (Throwable e) {
             plugin.debug(e);
         }
-        if (executor == null) {
+        if (tabcutor == null) {
             return;
         }
 
-        Type[] params = Reflects.getActualTypes(TabExecutor.class, executor.getClass());
+        Type[] params = Reflects.getActualTypes(TabExecutor.class, tabcutor.getClass());
         if (params == null || params.length != 1 || !Reflects.isAssignableFrom(ICommandSender.class, params[0])) {
             return;
         }
 
         if (".".equals(tab.path())) {
-            this.tabcutor = executor;
+            this.tabcutor = tabcutor;
             return;
         }
 
-        Paths paths = new Paths(tab.path().isEmpty() ? field.getName().toLowerCase() : tab.path().replace(' ', '_').replace(':', '_'));
+        Paths paths = new Paths(tab.path().isEmpty() ? field.getName().toLowerCase() : tab.path().toLowerCase());
         CommandCore command = getSub(paths);
         if (command != null) {
-            command.tabcutor = executor;
+            command.tabcutor = tabcutor;
         }
     }
 

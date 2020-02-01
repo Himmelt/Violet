@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @author Himmelt
  */
-public interface IPlugin extends IManager, IMessenger, I18n, IScheduler {
+public interface IPlugin extends IMessenger, IScheduler, I18n {
 
     String getName();
 

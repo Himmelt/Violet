@@ -1,4 +1,4 @@
-package org.soraworld.violet.command;
+package org.soraworld.violet.inject;
 
 import java.lang.annotation.*;
 
@@ -24,4 +24,6 @@ public @interface Cmd {
     String usage() default "";
 
     String description() default "";
+
+    String mcversion() default "";
 }

@@ -1,6 +1,7 @@
-package org.soraworld.violet.inject;
+package org.soraworld.violet.core;
 
 import org.jetbrains.annotations.NotNull;
+import org.soraworld.violet.inject.Inject;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

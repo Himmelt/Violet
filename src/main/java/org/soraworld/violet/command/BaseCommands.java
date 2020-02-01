@@ -3,7 +3,9 @@ package org.soraworld.violet.command;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.ICommandSender;
 import org.soraworld.violet.core.PluginCore;
+import org.soraworld.violet.inject.Cmd;
 import org.soraworld.violet.inject.Inject;
+import org.soraworld.violet.inject.Tab;
 import org.soraworld.violet.util.ListUtils;
 
 import java.util.ArrayList;

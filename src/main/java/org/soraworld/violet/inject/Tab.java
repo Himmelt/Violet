@@ -6,7 +6,8 @@ import java.lang.annotation.*;
  * @author Himmelt
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target(ElementType.FIELD)
 @Documented
-public @interface Manager {
+public @interface Tab {
+    String path() default "";
 }

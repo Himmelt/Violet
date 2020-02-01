@@ -11,6 +11,7 @@ import java.lang.annotation.*;
 public @interface Config {
     String id();
 
-    // TODO 单独文件，单独异步加载
     boolean separate() default false;
+
+    String mcversion() default "";
 }

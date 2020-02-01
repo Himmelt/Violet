@@ -12,4 +12,5 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE, ElementType.FIELD})
 @Documented
 public @interface Inject {
+    String mcversion() default "";
 }

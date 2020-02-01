@@ -1,4 +1,4 @@
-package org.soraworld.violet.manager;
+package org.soraworld.violet.core;
 
 import org.jetbrains.annotations.NotNull;
 
