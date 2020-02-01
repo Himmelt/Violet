@@ -39,6 +39,10 @@ public final class McVersion {
         this.sponge = sponge;
     }
 
+    public McVersion(int major, int minor, int patch, int craft, boolean bukkit, boolean sponge) {
+        this((byte) major, (byte) minor, (byte) patch, (byte) craft, bukkit, sponge);
+    }
+
     public int value() {
         return value;
     }

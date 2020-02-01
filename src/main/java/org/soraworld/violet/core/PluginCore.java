@@ -10,8 +10,8 @@ import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.asm.ClassInfo;
 import org.soraworld.violet.asm.PluginScanner;
 import org.soraworld.violet.command.BaseCommands;
-import org.soraworld.violet.inject.Cmd;
 import org.soraworld.violet.command.CommandCore;
+import org.soraworld.violet.inject.Cmd;
 import org.soraworld.violet.inject.Config;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.serializers.UUIDSerializer;
@@ -89,14 +89,14 @@ public final class PluginCore {
         if (!PLUGINS.contains(plugin)) {
             PLUGINS.add(plugin);
         }
-        if (plugin.getId().equalsIgnoreCase(Violet.PLUGIN_ID)) {
+        if (plugin.id().equalsIgnoreCase(Violet.PLUGIN_ID)) {
             translator = (lang, key) -> langMaps.computeIfAbsent(lang, this::loadLangMap).get(key);
         }
     }
 
     public static void listPlugins(ICommandSender sender) {
         for (IPlugin plugin : PLUGINS) {
-            sender.sendMessageKey("pluginInfo", plugin.getId(), plugin.getVersion());
+            sender.sendMessageKey("pluginInfo", plugin.id(), plugin.version());
         }
     }
 
@@ -135,7 +135,7 @@ public final class PluginCore {
     }
 
     public boolean load() {
-        Path confile = rootPath.resolve(plugin.getId() + ".conf");
+        Path confile = rootPath.resolve(plugin.id() + ".conf");
         if (Files.notExists(confile)) {
             setLang(lang);
             save();
@@ -143,6 +143,7 @@ public final class PluginCore {
         }
         try {
             FileNode rootNode = new FileNode(confile.toFile(), options);
+            // TODO keepcomments 是否无效了，由于重新构建了FileNode
             rootNode.load(true, true);
             Node general = rootNode.get("general");
             if (general instanceof NodeMap) {
@@ -159,8 +160,8 @@ public final class PluginCore {
             }
             setDebug(debug);
             reloadSuccess = true;
-            if (!plugin.getVersion().equalsIgnoreCase(version)) {
-                plugin.consoleKey("versionChanged", version, plugin.getVersion());
+            if (!plugin.version().equalsIgnoreCase(version)) {
+                plugin.consoleKey("versionChanged", version, plugin.version());
                 if (autoBackUp) {
                     plugin.consoleKey(backup() ? "backupSuccess" : "backupFailed");
                 }
@@ -179,9 +180,9 @@ public final class PluginCore {
 
     public boolean save() {
         reloadSuccess = true;
-        version = plugin.getVersion();
+        version = plugin.version();
         try {
-            Path confile = rootPath.resolve(plugin.getId() + ".conf");
+            Path confile = rootPath.resolve(plugin.id() + ".conf");
             FileNode rootNode = new FileNode(confile.toFile(), options);
             NodeMap general = new NodeMap(options, trans("comment.type.general"));
             general.extract(this);
@@ -193,7 +194,7 @@ public final class PluginCore {
             });
             rootNode.save();
             externalConfigs.forEach((id, config) -> {
-                if (!id.equalsIgnoreCase(plugin.getId())) {
+                if (!id.equalsIgnoreCase(plugin.id())) {
                     try {
                         FileNode node = new FileNode(rootPath.resolve(id + ".conf").toFile(), options);
                         node.addHead(trans("comment.type." + id));
@@ -297,7 +298,7 @@ public final class PluginCore {
         String text = null;
         if (langMap.containsKey(key)) {
             text = langMap.get(key);
-        } else if (!plugin.getId().equalsIgnoreCase(Violet.PLUGIN_ID) && translator != null) {
+        } else if (!plugin.id().equalsIgnoreCase(Violet.PLUGIN_ID) && translator != null) {
             text = translator.trans(lang, key);
         }
         if (text == null || text.isEmpty()) {
@@ -314,11 +315,11 @@ public final class PluginCore {
     }
 
     public String defChatHead() {
-        return "[" + plugin.getName() + "] ";
+        return "[" + plugin.name() + "] ";
     }
 
     public String defAdminPerm() {
-        return plugin.getId() + ".admin";
+        return plugin.id() + ".admin";
     }
 
     public void debugKey(String key, Object... args) {
@@ -371,7 +372,7 @@ public final class PluginCore {
                     Class<?> clazz = Class.forName(info.getName(), false, loader);
                     Config config = clazz.getAnnotation(Config.class);
                     String id = config.id();
-                    if (!id.equalsIgnoreCase(plugin.getId()) && CONFIG_ID.matcher(id).matches()) {
+                    if (!id.equalsIgnoreCase(plugin.id()) && CONFIG_ID.matcher(id).matches()) {
                         if (config.separate()) {
                             if (externalConfigs.containsKey(id)) {
                                 plugin.consoleKey("externalConfigIdExist", id);
@@ -416,7 +417,7 @@ public final class PluginCore {
                         if (plugin.registerCommand(core)) {
                             core.extractSub(instance);
                             core.extractTab(instance);
-                            if (clazz != BaseCommands.class && core.getName().equalsIgnoreCase(plugin.getId())) {
+                            if (clazz != BaseCommands.class && core.getName().equalsIgnoreCase(plugin.id())) {
                                 BaseCommands base = new BaseCommands();
                                 injector.inject(base);
                                 core.extractSub(base);
@@ -462,12 +463,12 @@ public final class PluginCore {
         scan();
         load();
         plugin.onPluginEnable();
-        plugin.consoleKey("pluginEnabled", plugin.getId() + "-" + plugin.getVersion());
+        plugin.consoleKey("pluginEnabled", plugin.id() + "-" + plugin.version());
     }
 
     public void onDisable() {
         plugin.onPluginDisable();
-        plugin.consoleKey("pluginDisabled", plugin.getId() + "-" + plugin.getVersion());
+        plugin.consoleKey("pluginDisabled", plugin.id() + "-" + plugin.version());
         if (saveOnDisable && reloadSuccess) {
             plugin.consoleKey(save() ? "configSaved" : "configSaveFailed");
         }
@@ -478,6 +479,10 @@ public final class PluginCore {
     }
 
     public static IPlugin getPlugin(@NotNull String id) {
-        return PLUGINS.stream().filter(p -> p.getId().equals(id)).findAny().orElse(null);
+        return PLUGINS.stream().filter(p -> p.id().equals(id)).findAny().orElse(null);
+    }
+
+    public static List<IPlugin> getPlugins() {
+        return new ArrayList<>(PLUGINS);
     }
 }

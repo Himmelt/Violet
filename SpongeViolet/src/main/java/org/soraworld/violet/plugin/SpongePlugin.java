@@ -1,7 +1,6 @@
 package org.soraworld.violet.plugin;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.command.CommandCore;
@@ -23,7 +22,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 /**
  * @author Himmelt
@@ -65,7 +63,7 @@ public class SpongePlugin implements IPlugin {
     @Override
     public final @NotNull Path getRootPath() {
         if (path == null) {
-            path = new File("config", getId()).toPath();
+            path = new File("config", id()).toPath();
         }
         return path;
     }
@@ -82,17 +80,22 @@ public class SpongePlugin implements IPlugin {
     }
 
     @Override
-    public String getId() {
+    public String id() {
         return container.getId();
     }
 
     @Override
-    public String getName() {
+    public String bStatsId() {
+        return id().equals(Violet.PLUGIN_ID) ? "3176" : "";
+    }
+
+    @Override
+    public String name() {
         return container.getName();
     }
 
     @Override
-    public String getVersion() {
+    public String version() {
         return container.getVersion().orElse("x.y.z");
     }
 
@@ -149,40 +152,35 @@ public class SpongePlugin implements IPlugin {
         return core.extract();
     }
 
-    @Override
+/*
     public boolean load() {
         return core.load();
     }
 
-    @Override
     public boolean save() {
         return core.save();
     }
 
-    @Override
     public void asyncSave(@Nullable Consumer<Boolean> callback) {
         core.asyncSave(callback);
     }
 
-    @Override
     public boolean backup() {
         return core.backup();
     }
 
-    @Override
     public void asyncBackup(@Nullable Consumer<Boolean> callback) {
         core.asyncBackup(callback);
     }
 
-    @Override
     public boolean isDebug() {
         return core.isDebug();
     }
 
-    @Override
     public void setDebug(boolean debug) {
         core.setDebug(debug);
     }
+*/
 
     @Override
     public void console(@NotNull String message) {

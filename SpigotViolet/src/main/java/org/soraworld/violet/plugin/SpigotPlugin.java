@@ -6,7 +6,7 @@ import org.bukkit.command.CommandMap;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.command.CommandCore;
 import org.soraworld.violet.command.SpigotCommand;
@@ -17,7 +17,6 @@ import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * @author Himmelt
@@ -46,7 +45,7 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
     }
 
     @Override
-    public final String getVersion() {
+    public final String version() {
         return getDescription().getVersion();
     }
 
@@ -93,7 +92,7 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
             if (aliases.length > 0) {
                 ((Command) command).setAliases(Arrays.asList(aliases));
             }
-            return COMMAND_MAP != null && COMMAND_MAP.register(getId(), (Command) command);
+            return COMMAND_MAP != null && COMMAND_MAP.register(id(), (Command) command);
         }
         return false;
     }
@@ -104,22 +103,30 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
             if (aliases.size() > 0) {
                 ((Command) command).setAliases(aliases);
             }
-            return COMMAND_MAP != null && COMMAND_MAP.register(getId(), (Command) command);
+            return COMMAND_MAP != null && COMMAND_MAP.register(id(), (Command) command);
         }
         return false;
     }
 
     @Override
+    public String name() {
+        return getName();
+    }
+
+    @Override
+    public String bStatsId() {
+        return id().equals(Violet.PLUGIN_ID) ? "2429" : "";
+    }
+
+/*
     public boolean load() {
         return core.load();
     }
 
-    @Override
     public boolean save() {
         return core.save();
     }
 
-    @Override
     public void asyncSave(@Nullable Consumer<Boolean> callback) {
         core.asyncSave(callback);
     }
@@ -143,6 +150,7 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
     public void setDebug(boolean debug) {
         core.setDebug(debug);
     }
+*/
 
     @Override
     public void runTask(@NotNull Runnable task) {
@@ -163,7 +171,6 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
     public void runTaskLaterAsync(@NotNull Runnable task, long delay) {
         Bukkit.getScheduler().runTaskLaterAsynchronously(this, task, delay);
     }
-
 
     @Override
     public void broadcastKey(@NotNull String key, Object... args) {

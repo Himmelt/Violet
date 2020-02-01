@@ -44,7 +44,7 @@ public final class CommandCore {
 
     public CommandCore(@NotNull IPlugin plugin, @NotNull Cmd cmd) {
         this.name = cmd.name().toLowerCase();
-        this.perm = cmd.admin() ? plugin.getId() + ".admin" : cmd.perm().isEmpty() ? null : cmd.perm();
+        this.perm = cmd.admin() ? plugin.id() + ".admin" : cmd.perm().isEmpty() ? null : cmd.perm();
         this.ingame = cmd.ingame();
         this.tabs.addAll(Arrays.asList(cmd.tabs()));
         this.aliases.addAll(Arrays.asList(cmd.aliases()));
@@ -60,7 +60,7 @@ public final class CommandCore {
     }
 
     public @NotNull String getUsage() {
-        return plugin.trans(usage).replace("{$id}", plugin.getId());
+        return plugin.trans(usage).replace("{$id}", plugin.id());
     }
 
     public @NotNull String getDescription() {
@@ -131,10 +131,10 @@ public final class CommandCore {
         if (sub == null || Modifier.isStatic(field.getModifiers())) {
             return;
         }
-        if (!sub.plugin().isEmpty() && !sub.plugin().equalsIgnoreCase(plugin.getId())) {
+        if (!sub.plugin().isEmpty() && !sub.plugin().equalsIgnoreCase(plugin.id())) {
             return;
         }
-        String perm = sub.admin() ? plugin.getId() + ".admin" : sub.perm().isEmpty() ? null : sub.perm();
+        String perm = sub.admin() ? plugin.id() + ".admin" : sub.perm().isEmpty() ? null : sub.perm();
 
         SubExecutor<ICommandSender> executor = null;
         try {

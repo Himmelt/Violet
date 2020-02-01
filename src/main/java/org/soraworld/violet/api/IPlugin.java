@@ -8,23 +8,26 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author Himmelt
  */
 public interface IPlugin extends IMessenger, IScheduler, I18n {
 
-    String getName();
+    String name();
 
-    default String getId() {
-        return getName().toLowerCase().replace(' ', '_');
+    default String id() {
+        return name().toLowerCase().replace(' ', '_');
     }
+
+    String bStatsId();
 
     default String assetsId() {
-        return getId();
+        return id();
     }
 
-    String getVersion();
+    String version();
 
     @NotNull Path getRootPath();
 
