@@ -6,6 +6,7 @@ import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.command.CommandCore;
 import org.soraworld.violet.command.SpongeCommand;
 import org.soraworld.violet.core.PluginCore;
+import org.soraworld.violet.util.FileUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.config.ConfigDir;
@@ -71,12 +72,7 @@ public class SpongePlugin implements IPlugin {
     @Override
     public final @NotNull File getJarFile() {
         Path jarPath = container.getSource().orElse(null);
-        return jarPath == null ? getFile() : jarPath.toFile();
-    }
-
-    private File getFile() {
-        //TODO
-        return new File("");
+        return jarPath == null ? FileUtils.getJarPath(getClass()).toFile() : jarPath.toFile();
     }
 
     @Override

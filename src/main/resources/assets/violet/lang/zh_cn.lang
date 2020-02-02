@@ -45,8 +45,8 @@ nullCommandMap = "&cCommandMap 反射失败 !!!!!"
 backupSuccess = "配置文件夹备份成功."
 backupFailed = "配置文件夹备份失败."
 
-hasUpdate = "插件有更新: "
-clickUpdate = "点击前往下载"
+illegalConfigId = "非法的配置id, 请使用字母数字下划线组成."
+configIdEqualsPluginId = "外部配置id不能与插件id一致."
 
 comment {
   type = {

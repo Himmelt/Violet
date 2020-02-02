@@ -19,7 +19,7 @@ public final class Violet {
     public static final String PLUGIN_VERSION = "2.5.0";
 
     public static final McVersion MC_VERSION;
-    // TODO hocon 增加对类静态字段的支持。修改对象是 class
+    // TODO hocon 增加对类静态字段的支持。修改对象是 class, 避免 final 常量优化
     @Setting(path = "serverId")
     public static final UUID SERVER_UUID = UUID.randomUUID();
 

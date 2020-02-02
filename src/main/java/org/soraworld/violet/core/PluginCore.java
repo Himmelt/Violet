@@ -14,6 +14,7 @@ import org.soraworld.violet.command.CommandCore;
 import org.soraworld.violet.inject.Cmd;
 import org.soraworld.violet.inject.Config;
 import org.soraworld.violet.inject.Inject;
+import org.soraworld.violet.log.Logger;
 import org.soraworld.violet.serializers.UUIDSerializer;
 import org.soraworld.violet.text.ChatColor;
 import org.soraworld.violet.text.JsonText;
@@ -44,6 +45,8 @@ public final class PluginCore {
     protected boolean autoBackUp = true;
     @Setting
     protected boolean saveOnDisable = true;
+    @Setting
+    private final HashSet<String> backupExcludes = new HashSet<>();
 
     /* ---------------------------- Temp Properties ---------------------------- */
     private String plainHead;
@@ -64,12 +67,13 @@ public final class PluginCore {
     private final AtomicBoolean asyncSaveLock = new AtomicBoolean(false);
     private final AtomicBoolean asyncBackLock = new AtomicBoolean(false);
 
+    private final Logger logger;
+
     /* ---------------------------- Statics ---------------------------- */
     private static final ArrayList<IPlugin> PLUGINS = new ArrayList<>();
     private static final Pattern CONFIG_ID = Pattern.compile("[a-zA-Z_0-9]+");
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss");
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
     private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
-
     private static Translator translator;
 
     public PluginCore(@NotNull IPlugin plugin) {
@@ -77,6 +81,10 @@ public final class PluginCore {
         this.injector.addValue(this);
         this.injector.addValue(plugin);
         this.rootPath = plugin.getRootPath();
+
+        this.logger = new Logger(plugin);
+        logger.log("test log");
+
         this.options.setTranslator(Options.COMMENT, this::trans);
         this.options.setTranslator(Options.READ, ChatColor::colorize);
         this.options.setTranslator(Options.WRITE, ChatColor::fakerize);
@@ -204,7 +212,7 @@ public final class PluginCore {
                         e.printStackTrace();
                     }
                 } else {
-                    plugin.consoleKey("illegalConfigId", id);
+                    plugin.consoleKey("configIdEqualsPluginId", id);
                 }
             });
             return true;
@@ -231,10 +239,13 @@ public final class PluginCore {
     }
 
     public boolean backup() {
-        Path target = rootPath.resolve("backup/" + DATE_FORMAT.format(new Date()) + ".zip");
+        Path target = rootPath.resolve("backup").resolve(DATE_FORMAT.format(new Date()) + ".zip");
         return FileUtils.zipArchivePath(rootPath, target, p -> {
-            String name = rootPath.relativize(p).toString().toLowerCase();
-            return !name.startsWith("backup");
+            String path = rootPath.relativize(p).toString().toLowerCase();
+            if (path.endsWith("/")) {
+                path = path.substring(0, path.length() - 1);
+            }
+            return !"backup".equals(path) && !backupExcludes.contains(path);
         });
     }
 
@@ -372,9 +383,11 @@ public final class PluginCore {
                     Class<?> clazz = Class.forName(info.getName(), false, loader);
                     Config config = clazz.getAnnotation(Config.class);
                     String id = config.id();
-                    if (!id.equalsIgnoreCase(plugin.id()) && CONFIG_ID.matcher(id).matches()) {
+                    if (CONFIG_ID.matcher(id).matches()) {
                         if (config.separate()) {
-                            if (externalConfigs.containsKey(id)) {
+                            if (id.equalsIgnoreCase(plugin.id())) {
+                                plugin.consoleKey("configIdEqualsPluginId", id);
+                            } else if (externalConfigs.containsKey(id)) {
                                 plugin.consoleKey("externalConfigIdExist", id);
                             } else {
                                 injector.inject(clazz);

@@ -24,7 +24,6 @@ import java.util.List;
 public class SpigotPlugin extends JavaPlugin implements IPlugin {
 
     private final PluginCore core = new PluginCore(this);
-
     private static final CommandMap COMMAND_MAP;
 
     static {
