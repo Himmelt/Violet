@@ -81,10 +81,7 @@ public final class PluginCore {
         this.injector.addValue(this);
         this.injector.addValue(plugin);
         this.rootPath = plugin.getRootPath();
-
-        this.logger = new Logger(plugin);
-        logger.log("test log");
-
+        this.logger = new Logger(rootPath.resolve("logs"));
         this.options.setTranslator(Options.COMMENT, this::trans);
         this.options.setTranslator(Options.READ, ChatColor::colorize);
         this.options.setTranslator(Options.WRITE, ChatColor::fakerize);
@@ -349,6 +346,10 @@ public final class PluginCore {
         if (debug) {
             e.printStackTrace();
         }
+    }
+
+    public void log(String text) {
+        this.logger.log(text);
     }
 
     public void beforeLoad() {
