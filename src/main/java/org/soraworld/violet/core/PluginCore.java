@@ -30,6 +30,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
+import static org.soraworld.violet.Violet.MC_VERSION;
+
 public final class PluginCore {
 
     /* ---------------------------- Settings ---------------------------- */
@@ -75,6 +77,10 @@ public final class PluginCore {
     private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
     private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
     private static Translator translator;
+
+    static {
+        System.out.println("[Violet] Server is running at " + MC_VERSION.toString());
+    }
 
     public PluginCore(@NotNull IPlugin plugin) {
         this.plugin = plugin;

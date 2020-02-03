@@ -8,12 +8,17 @@ sourceCompatibility = targetCompatibility = 1.8
 repositories {
     maven { url 'https://maven.aliyun.com/repository/public/' }
     jcenter()
+    maven { url 'https://repo.spongepowered.org/maven' }
     maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/' }
+    maven { url 'https://hub.spigotmc.org/nexus/content/groups/public/' }
+    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
 }
 
 dependencies {
     compile 'org.ow2.asm:asm:5.2'
     compile 'org.soraworld:hocon:1.2.2-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'
+    compileOnly 'org.spongepowered:spongeapi:7.2.0-SNAPSHOT'
 }
 
 subprojects {

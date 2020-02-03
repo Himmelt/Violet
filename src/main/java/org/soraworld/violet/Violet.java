@@ -1,10 +1,14 @@
 package org.soraworld.violet;
 
 
+import org.bukkit.Bukkit;
 import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.inject.Config;
+import org.soraworld.violet.util.Reflects;
 import org.soraworld.violet.version.McVersion;
+import org.spongepowered.api.Sponge;
 
+import java.lang.reflect.Method;
 import java.util.UUID;
 
 /**
@@ -24,8 +28,30 @@ public final class Violet {
     public static final UUID SERVER_UUID = UUID.randomUUID();
 
     static {
-        McVersion version = new McVersion(1, 7, 10, 4, false, false);
-        // TODO
-        MC_VERSION = version;
+        boolean bukkit = false, sponge = false;
+        try {
+            Class<?> clazz = Class.forName("org.bukkit.Bukkit");
+            bukkit = clazz != null;
+        } catch (Throwable ignored) {
+        }
+        try {
+            Class<?> clazz = Class.forName("org.spongepowered.api.Sponge");
+            sponge = clazz != null;
+        } catch (Throwable ignored) {
+        }
+        String version = "";
+        if (bukkit) {
+            version = Bukkit.getServer().getVersion();
+            version = version.substring(version.indexOf("(MC:") + 4, version.length() - 1);
+        } else if (sponge) {
+            Object server = Sponge.getServer();
+            try {
+                Method getMcVersion = Reflects.getMethod(server.getClass(), "getMinecraftVersion", "func_71249_w", "B");
+                version = (String) getMcVersion.invoke(server);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
+        MC_VERSION = McVersion.parse(version.trim());
     }
 }

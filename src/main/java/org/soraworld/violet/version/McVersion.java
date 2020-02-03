@@ -2,6 +2,7 @@ package org.soraworld.violet.version;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
 /**
@@ -13,34 +14,95 @@ public final class McVersion {
     private final byte patch;
     private final byte craft;
     private final int value;
-    private final boolean bukkit;
-    private final boolean sponge;
 
-    public McVersion(byte major, byte minor, byte patch, byte craft) {
-        this.major = major;
-        this.minor = minor;
-        this.patch = patch;
-        this.craft = craft;
-        this.value = craft & 0xff | (patch & 0xff) << 8 | (minor & 0xff) << 16 | (major & 0xff) << 24;
-        this.bukkit = false;
-        this.sponge = false;
-    }
+    public static final McVersion UNKNOWN = new McVersion(0, 0, 0, 0);
+    public static final McVersion v1_7_10 = new McVersion(1, 7, 10, 4);
+    public static final McVersion v1_8 = new McVersion(1, 8, 0, 1);
+    public static final McVersion v1_8_1 = new McVersion(1, 8, 1, 1);
+    public static final McVersion v1_8_2 = new McVersion(1, 8, 2, 1);
+    public static final McVersion v1_8_3 = new McVersion(1, 8, 3, 2);
+    public static final McVersion v1_8_4 = new McVersion(1, 8, 4, 1);
+    public static final McVersion v1_8_5 = new McVersion(1, 8, 5, 1);
+    public static final McVersion v1_8_6 = new McVersion(1, 8, 6, 1);
+    public static final McVersion v1_8_7 = new McVersion(1, 8, 7, 1);
+    public static final McVersion v1_8_8 = new McVersion(1, 8, 8, 1);
+    public static final McVersion v1_8_9 = new McVersion(1, 8, 9, 1);
+    public static final McVersion v1_9 = new McVersion(1, 9, 0, 1);
+    public static final McVersion v1_9_1 = new McVersion(1, 9, 1, 1);
+    public static final McVersion v1_9_2 = new McVersion(1, 9, 2, 1);
+    public static final McVersion v1_9_3 = new McVersion(1, 9, 3, 1);
+    public static final McVersion v1_9_4 = new McVersion(1, 9, 4, 1);
+    public static final McVersion v1_10 = new McVersion(1, 10, 0, 1);
+    public static final McVersion v1_10_1 = new McVersion(1, 10, 1, 1);
+    public static final McVersion v1_10_2 = new McVersion(1, 10, 2, 1);
+    public static final McVersion v1_11 = new McVersion(1, 11, 0, 1);
+    public static final McVersion v1_11_1 = new McVersion(1, 11, 1, 1);
+    public static final McVersion v1_11_2 = new McVersion(1, 11, 2, 1);
+    public static final McVersion v1_12 = new McVersion(1, 12, 0, 1);
+    public static final McVersion v1_12_1 = new McVersion(1, 12, 1, 1);
+    public static final McVersion v1_12_2 = new McVersion(1, 12, 2, 1);
+    public static final McVersion v1_13 = new McVersion(1, 13, 0, 1);
+    public static final McVersion v1_13_1 = new McVersion(1, 13, 1, 1);
+    public static final McVersion v1_13_2 = new McVersion(1, 13, 2, 1);
+    public static final McVersion v1_14 = new McVersion(1, 14, 0, 1);
+    public static final McVersion v1_14_1 = new McVersion(1, 14, 1, 1);
+    public static final McVersion v1_14_2 = new McVersion(1, 14, 2, 1);
+    public static final McVersion v1_14_3 = new McVersion(1, 14, 3, 1);
+    public static final McVersion v1_14_4 = new McVersion(1, 14, 4, 1);
+    public static final McVersion v1_15 = new McVersion(1, 15, 0, 1);
+    public static final McVersion v1_15_1 = new McVersion(1, 15, 1, 1);
+    public static final McVersion v1_15_2 = new McVersion(1, 15, 2, 1);
 
+    private static final HashMap<Integer, McVersion> MC_VERSIONS = new HashMap<>();
     private static final Pattern VERSION_ALONE = Pattern.compile("(\\d+\\.){1,3}\\d+");
     private static final Pattern VERSION_RANGE = Pattern.compile("[\\[(](\\d+\\.){1,3}\\d+,(\\d+\\.){1,3}\\d+[])]");
 
-    public McVersion(byte major, byte minor, byte patch, byte craft, boolean bukkit, boolean sponge) {
-        this.major = major;
-        this.minor = minor;
-        this.patch = patch;
-        this.craft = craft;
-        this.value = craft & 0xff | (patch & 0xff) << 8 | (minor & 0xff) << 16 | (major & 0xff) << 24;
-        this.bukkit = bukkit;
-        this.sponge = sponge;
+    static {
+        MC_VERSIONS.put(UNKNOWN.value, UNKNOWN);
+        MC_VERSIONS.put(v1_7_10.value, v1_7_10);
+        MC_VERSIONS.put(v1_8.value, v1_8);
+        MC_VERSIONS.put(v1_8_1.value, v1_8_1);
+        MC_VERSIONS.put(v1_8_2.value, v1_8_2);
+        MC_VERSIONS.put(v1_8_3.value, v1_8_3);
+        MC_VERSIONS.put(v1_8_4.value, v1_8_4);
+        MC_VERSIONS.put(v1_8_5.value, v1_8_5);
+        MC_VERSIONS.put(v1_8_6.value, v1_8_6);
+        MC_VERSIONS.put(v1_8_7.value, v1_8_7);
+        MC_VERSIONS.put(v1_8_8.value, v1_8_8);
+        MC_VERSIONS.put(v1_8_9.value, v1_8_9);
+        MC_VERSIONS.put(v1_9.value, v1_9);
+        MC_VERSIONS.put(v1_9_1.value, v1_9_1);
+        MC_VERSIONS.put(v1_9_2.value, v1_9_2);
+        MC_VERSIONS.put(v1_9_3.value, v1_9_3);
+        MC_VERSIONS.put(v1_9_4.value, v1_9_4);
+        MC_VERSIONS.put(v1_10.value, v1_10);
+        MC_VERSIONS.put(v1_10_1.value, v1_10_1);
+        MC_VERSIONS.put(v1_10_2.value, v1_10_2);
+        MC_VERSIONS.put(v1_11.value, v1_11);
+        MC_VERSIONS.put(v1_11_1.value, v1_11_1);
+        MC_VERSIONS.put(v1_11_2.value, v1_11_2);
+        MC_VERSIONS.put(v1_12.value, v1_12);
+        MC_VERSIONS.put(v1_12_1.value, v1_12_1);
+        MC_VERSIONS.put(v1_12_2.value, v1_12_2);
+        MC_VERSIONS.put(v1_13.value, v1_13);
+        MC_VERSIONS.put(v1_13_1.value, v1_13_1);
+        MC_VERSIONS.put(v1_13_2.value, v1_13_2);
+        MC_VERSIONS.put(v1_14.value, v1_14);
+        MC_VERSIONS.put(v1_14_1.value, v1_14_1);
+        MC_VERSIONS.put(v1_14_2.value, v1_14_2);
+        MC_VERSIONS.put(v1_14_3.value, v1_14_3);
+        MC_VERSIONS.put(v1_14_4.value, v1_14_4);
+        MC_VERSIONS.put(v1_15.value, v1_15);
+        MC_VERSIONS.put(v1_15_1.value, v1_15_1);
+        MC_VERSIONS.put(v1_15_2.value, v1_15_2);
     }
 
-    public McVersion(int major, int minor, int patch, int craft, boolean bukkit, boolean sponge) {
-        this((byte) major, (byte) minor, (byte) patch, (byte) craft, bukkit, sponge);
+    public McVersion(int major, int minor, int patch, int craft) {
+        this.major = (byte) major;
+        this.minor = (byte) minor;
+        this.patch = (byte) patch;
+        this.craft = (byte) craft;
+        this.value = this.patch & 0xff | (this.minor & 0xff) << 8 | (this.major & 0xff) << 16;
     }
 
     public int value() {
@@ -63,12 +125,24 @@ public final class McVersion {
         return craft;
     }
 
-    public boolean isBukkit() {
-        return bukkit;
+    public boolean match(int major) {
+        return this.major == major;
     }
 
-    public boolean isSponge() {
-        return sponge;
+    public boolean match(int major, int minor) {
+        return this.major == major && this.minor == minor;
+    }
+
+    public boolean match(int major, int minor, int patch) {
+        return this.major == major && this.minor == minor && this.patch == patch;
+    }
+
+    public boolean match(@NotNull McVersion version) {
+        return this.major == version.major && this.minor == version.minor && this.patch == version.patch;
+    }
+
+    public boolean matchCraft(int major, int minor, int craft) {
+        return this.major == major && this.minor == minor && this.craft == craft;
     }
 
     public boolean match(@NotNull String version) {
@@ -113,6 +187,22 @@ public final class McVersion {
                 this.minor == minor && this.patch < patch || this.patch == patch && this.craft <= craft;
     }
 
+    public boolean higher(@NotNull McVersion version) {
+        return this.value > version.value;
+    }
+
+    public boolean higherEquals(@NotNull McVersion version) {
+        return this.value >= version.value;
+    }
+
+    public boolean lower(@NotNull McVersion version) {
+        return this.value < version.value;
+    }
+
+    public boolean lowerEquals(@NotNull McVersion version) {
+        return this.value <= version.value;
+    }
+
     @Override
     public int hashCode() {
         return value;
@@ -123,7 +213,12 @@ public final class McVersion {
         return obj instanceof McVersion && value == ((McVersion) obj).value;
     }
 
-    private static McVersion parse(@NotNull String text) {
+    @Override
+    public String toString() {
+        return "" + major + "." + minor + "." + patch + "." + craft;
+    }
+
+    public static McVersion parse(@NotNull String text) {
         String[] ss = text.split("\\.");
         int length = ss.length;
         byte major = 0, minor = 0, patch = 0, craft = 0;
@@ -133,13 +228,13 @@ public final class McVersion {
         if (length >= 2) {
             minor = Byte.parseByte(ss[1]);
         }
-
         if (length >= 3) {
             patch = Byte.parseByte(ss[2]);
         }
         if (length >= 4) {
             craft = Byte.parseByte(ss[3]);
         }
-        return new McVersion(major, minor, patch, craft);
+        McVersion version = new McVersion(major, minor, patch, craft);
+        return MC_VERSIONS.computeIfAbsent(version.value, val -> version);
     }
 }
