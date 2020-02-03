@@ -49,6 +49,11 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
     }
 
     @Override
+    public @NotNull PluginCore getCore() {
+        return core;
+    }
+
+    @Override
     public final void onLoad() {
         core.onLoad();
     }
@@ -117,40 +122,6 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
         return id().equals(Violet.PLUGIN_ID) ? "2429" : "";
     }
 
-/*
-    public boolean load() {
-        return core.load();
-    }
-
-    public boolean save() {
-        return core.save();
-    }
-
-    public void asyncSave(@Nullable Consumer<Boolean> callback) {
-        core.asyncSave(callback);
-    }
-
-    @Override
-    public boolean backup() {
-        return core.backup();
-    }
-
-    @Override
-    public void asyncBackup(@Nullable Consumer<Boolean> callback) {
-        core.asyncBackup(callback);
-    }
-
-    @Override
-    public boolean isDebug() {
-        return core.isDebug();
-    }
-
-    @Override
-    public void setDebug(boolean debug) {
-        core.setDebug(debug);
-    }
-*/
-
     @Override
     public void runTask(@NotNull Runnable task) {
         Bukkit.getScheduler().runTask(this, task);
@@ -188,7 +159,7 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
 
     @Override
     public void log(@NotNull String text) {
-
+        core.log(text);
     }
 
     @Override
@@ -204,9 +175,7 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
 
     @Override
     public void consoleLogKey(@NotNull String key, Object... args) {
-        String text = trans(key, args);
-        console(text);
-        log(text);
+        consoleLog(trans(key, args));
     }
 
     @Override

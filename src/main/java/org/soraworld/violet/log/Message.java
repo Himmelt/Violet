@@ -2,14 +2,14 @@ package org.soraworld.violet.log;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * @author Himmelt
  */
 final class Message {
     final String text;
-    final Date date = new Date();
+    final LocalDateTime time = LocalDateTime.now();
 
     Message(@NotNull String text) {
         this.text = text;

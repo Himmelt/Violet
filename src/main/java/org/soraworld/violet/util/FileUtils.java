@@ -81,8 +81,17 @@ public class FileUtils {
 
     public static Path getJarPath(@NotNull Class<?> clazz) {
         String path = clazz.getProtectionDomain().getCodeSource().getLocation().getFile();
-        // TODO test && remove
-        System.out.println(path);
+        if (path.startsWith("file:")) {
+            path = path.substring(5);
+        }
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        int index = path.lastIndexOf(".jar!");
+        if (index > 0) {
+            path = path.substring(0, index + 4);
+        }
+        path = path.replaceAll("/\\./", "/");
         return Paths.get(path);
     }
 }

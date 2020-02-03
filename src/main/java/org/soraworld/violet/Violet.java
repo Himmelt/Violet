@@ -1,11 +1,11 @@
 package org.soraworld.violet;
 
-
 import org.bukkit.Bukkit;
 import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.inject.Config;
 import org.soraworld.violet.util.Reflects;
 import org.soraworld.violet.version.McVersion;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 
 import java.lang.reflect.Method;
@@ -23,12 +23,17 @@ public final class Violet {
     public static final String PLUGIN_VERSION = "2.5.0";
 
     public static final McVersion MC_VERSION;
+    public static final boolean BUKKIT, SPONGE, ONLINE_MODE;
+    public static final String SPONGE_IMPL;
     // TODO hocon 增加对类静态字段的支持。修改对象是 class, 避免 final 常量优化
+    @Setting
+    private static boolean enableStats = true;
     @Setting(path = "serverId")
     public static final UUID SERVER_UUID = UUID.randomUUID();
 
     static {
-        boolean bukkit = false, sponge = false;
+        String spongeImpl = "";
+        boolean bukkit = false, sponge = false, onlineMode = false;
         try {
             Class<?> clazz = Class.forName("org.bukkit.Bukkit");
             bukkit = clazz != null;
@@ -41,8 +46,9 @@ public final class Violet {
         }
         String version = "";
         if (bukkit) {
-            version = Bukkit.getServer().getVersion();
+            version = Bukkit.getVersion();
             version = version.substring(version.indexOf("(MC:") + 4, version.length() - 1);
+            onlineMode = Bukkit.getOnlineMode();
         } else if (sponge) {
             Object server = Sponge.getServer();
             try {
@@ -51,7 +57,17 @@ public final class Violet {
             } catch (Throwable e) {
                 e.printStackTrace();
             }
+            onlineMode = Sponge.getServer().getOnlineMode();
+            spongeImpl = Sponge.getPlatform().getContainer(Platform.Component.IMPLEMENTATION).getName();
         }
+        BUKKIT = bukkit;
+        SPONGE = sponge;
+        ONLINE_MODE = onlineMode;
+        SPONGE_IMPL = spongeImpl;
         MC_VERSION = McVersion.parse(version.trim());
+    }
+
+    public static boolean enableStats() {
+        return enableStats;
     }
 }

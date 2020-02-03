@@ -15,6 +15,7 @@ public final class McVersion {
     private final byte craft;
     private final int value;
 
+    // TODO correct all versions' craft version
     public static final McVersion UNKNOWN = new McVersion(0, 0, 0, 0);
     public static final McVersion v1_7_10 = new McVersion(1, 7, 10, 4);
     public static final McVersion v1_8 = new McVersion(1, 8, 0, 1);
@@ -215,7 +216,7 @@ public final class McVersion {
 
     @Override
     public String toString() {
-        return "" + major + "." + minor + "." + patch + "." + craft;
+        return "" + major + "." + minor + "." + patch;
     }
 
     public static McVersion parse(@NotNull String text) {

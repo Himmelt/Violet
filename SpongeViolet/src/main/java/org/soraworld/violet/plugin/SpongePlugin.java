@@ -18,6 +18,7 @@ import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -37,12 +38,16 @@ import java.util.concurrent.TimeUnit;
 )
 public class SpongePlugin implements IPlugin {
 
-    @javax.inject.Inject
-    @ConfigDir(sharedRoot = false)
-    protected Path path;
-    @javax.inject.Inject
-    protected PluginContainer container;
-    private final PluginCore core = new PluginCore(this);
+    protected final Path path;
+    protected final PluginContainer container;
+    protected final PluginCore core;
+
+    @Inject
+    public SpongePlugin(@ConfigDir(sharedRoot = false) Path path, PluginContainer container) {
+        this.path = path;
+        this.container = container;
+        this.core = new PluginCore(this);
+    }
 
     @Listener
     public void onLoad(GamePreInitializationEvent event) {
@@ -63,9 +68,6 @@ public class SpongePlugin implements IPlugin {
 
     @Override
     public final @NotNull Path getRootPath() {
-        if (path == null) {
-            path = new File("config", id()).toPath();
-        }
         return path;
     }
 
@@ -93,6 +95,11 @@ public class SpongePlugin implements IPlugin {
     @Override
     public String version() {
         return container.getVersion().orElse("x.y.z");
+    }
+
+    @Override
+    public @NotNull PluginCore getCore() {
+        return core;
     }
 
     @Override
@@ -148,36 +155,6 @@ public class SpongePlugin implements IPlugin {
         return core.extract();
     }
 
-/*
-    public boolean load() {
-        return core.load();
-    }
-
-    public boolean save() {
-        return core.save();
-    }
-
-    public void asyncSave(@Nullable Consumer<Boolean> callback) {
-        core.asyncSave(callback);
-    }
-
-    public boolean backup() {
-        return core.backup();
-    }
-
-    public void asyncBackup(@Nullable Consumer<Boolean> callback) {
-        core.asyncBackup(callback);
-    }
-
-    public boolean isDebug() {
-        return core.isDebug();
-    }
-
-    public void setDebug(boolean debug) {
-        core.setDebug(debug);
-    }
-*/
-
     @Override
     public void console(@NotNull String message) {
         Sponge.getServer().getConsole().sendMessage(Text.of(core.getChatHead() + message));
@@ -185,27 +162,28 @@ public class SpongePlugin implements IPlugin {
 
     @Override
     public void consoleKey(String key, Object... args) {
-        console(core.getChatHead() + core.trans(key, args));
+        console(core.trans(key, args));
     }
 
     @Override
     public void log(@NotNull String text) {
-        console(text);
+        core.log(text);
     }
 
     @Override
     public void logKey(@NotNull String key, Object... args) {
-        consoleKey(key, args);
+        core.log(core.trans(key, args));
     }
 
     @Override
     public void consoleLog(@NotNull String text) {
         console(text);
+        log(text);
     }
 
     @Override
     public void consoleLogKey(@NotNull String key, Object... args) {
-        consoleKey(key, args);
+        consoleLog(core.trans(key, args));
     }
 
     @Override
@@ -220,17 +198,17 @@ public class SpongePlugin implements IPlugin {
 
     @Override
     public void debug(@NotNull String message) {
-
+        core.debug(message);
     }
 
     @Override
     public void debug(@NotNull Throwable e) {
-
+        core.debug(e);
     }
 
     @Override
     public void debugKey(@NotNull String key, Object... args) {
-
+        core.debugKey(key, args);
     }
 
     @Override

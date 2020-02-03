@@ -22,6 +22,6 @@ processResources {
     inputs.property "version", project.version
     from(sourceSets.main.resources.srcDirs) {
         include 'plugin.yml'
-        expand 'version': project.version
+        expand 'version': project.version.replaceAll("-SNAPSHOT", "")
     }
 }

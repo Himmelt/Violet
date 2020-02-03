@@ -9,11 +9,8 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.time.format.DateTimeFormatter;
+import java.util.concurrent.*;
 import java.util.regex.Pattern;
 
 /**
@@ -26,8 +23,8 @@ public final class Logger {
     private final Object lock = new Object();
     private final ArrayBlockingQueue<Message> queue = new ArrayBlockingQueue<>(1000);
     private static final Pattern TRUE_COLOR_PATTERN = Pattern.compile("(?i)\u00A7[0-9a-fk-or]");
-    private static final DateFormat TIME_FORMAT = new SimpleDateFormat("[HH:mm:ss.SSS] ");
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @SuppressWarnings("InfiniteLoopStatement")
     public Logger(@NotNull final Path path) {
@@ -38,14 +35,18 @@ public final class Logger {
                 e.printStackTrace();
             }
         }
-        ExecutorService service = Executors.newSingleThreadExecutor();
+        ExecutorService service = new ThreadPoolExecutor(1, 1, 10, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1), task -> {
+            Thread thread = Executors.defaultThreadFactory().newThread(task);
+            thread.setName("Logger");
+            return thread;
+        });
         service.execute(() -> {
             while (true) {
                 if (!queue.isEmpty()) {
                     Message msg = queue.poll();
                     if (msg != null) {
                         try {
-                            String logFile = DATE_FORMAT.format(msg.date) + ".log";
+                            String logFile = DATE_FORMAT.format(msg.time) + ".log";
                             if (!logFile.equalsIgnoreCase(lastFile)) {
                                 if (writer != null) {
                                     writer.flush();
@@ -58,7 +59,7 @@ public final class Logger {
                                 writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path.resolve(lastFile).toFile(), true), StandardCharsets.UTF_8));
                             }
                             if (msg.text != null) {
-                                writer.write(TIME_FORMAT.format(msg.date) + TRUE_COLOR_PATTERN.matcher(msg.text).replaceAll(""));
+                                writer.write("[" + TIME_FORMAT.format(msg.time) + "] " + TRUE_COLOR_PATTERN.matcher(msg.text).replaceAll(""));
                                 writer.newLine();
                             }
                         } catch (Throwable e) {

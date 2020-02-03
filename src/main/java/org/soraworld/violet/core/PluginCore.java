@@ -9,6 +9,7 @@ import org.soraworld.violet.api.ICommandSender;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.asm.ClassInfo;
 import org.soraworld.violet.asm.PluginScanner;
+import org.soraworld.violet.bstats.Metrics;
 import org.soraworld.violet.command.BaseCommands;
 import org.soraworld.violet.command.CommandCore;
 import org.soraworld.violet.inject.Cmd;
@@ -23,30 +24,33 @@ import org.soraworld.violet.util.FileUtils;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import static org.soraworld.violet.Violet.MC_VERSION;
+import static org.soraworld.violet.Violet.SERVER_UUID;
 
 public final class PluginCore {
 
     /* ---------------------------- Settings ---------------------------- */
     @Setting
-    protected String version = "0.0.0";
+    private String version = "0.0.0";
     @Setting
-    protected String lang = Locale.CHINA.equals(Locale.getDefault()) ? "zh_cn" : "en_us";
+    private String lang = Locale.CHINA.equals(Locale.getDefault()) ? "zh_cn" : "en_us";
     @Setting
-    protected boolean debug = false;
+    private boolean debug = false;
     @Setting
-    protected boolean autoUpLang = true;
+    private boolean autoUpLang = true;
     @Setting
-    protected boolean autoBackUp = true;
+    private boolean autoBackUp = true;
     @Setting
-    protected boolean saveOnDisable = true;
+    private boolean saveOnDisable = true;
     @Setting
     private final HashSet<String> backupExcludes = new HashSet<>();
 
@@ -65,6 +69,8 @@ public final class PluginCore {
     private final HashMap<String, String> langMap = new HashMap<>();
     private final HashMap<String, Object> internalConfigs = new HashMap<>();
     private final HashMap<String, Object> externalConfigs = new HashMap<>();
+    private final CopyOnWriteArrayList<Runnable> enableActions = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<Runnable> disableActions = new CopyOnWriteArrayList<>();
     private final TreeMap<Integer, List<Consumer<ClassInfo>>> scannersMap = new TreeMap<>();
     private final AtomicBoolean asyncSaveLock = new AtomicBoolean(false);
     private final AtomicBoolean asyncBackLock = new AtomicBoolean(false);
@@ -74,12 +80,11 @@ public final class PluginCore {
     /* ---------------------------- Statics ---------------------------- */
     private static final ArrayList<IPlugin> PLUGINS = new ArrayList<>();
     private static final Pattern CONFIG_ID = Pattern.compile("[a-zA-Z_0-9]+");
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
     private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
-    private static Translator translator;
+    private static BiFunction<String, String, String> translator;
 
     static {
-        System.out.println("[Violet] Server is running at " + MC_VERSION.toString());
     }
 
     public PluginCore(@NotNull IPlugin plugin) {
@@ -101,6 +106,11 @@ public final class PluginCore {
             PLUGINS.add(plugin);
         }
         if (plugin.id().equalsIgnoreCase(Violet.PLUGIN_ID)) {
+            addEnableAction(() -> {
+                if (Violet.enableStats()) {
+                    new Metrics(plugin);
+                }
+            });
             translator = (lang, key) -> langMaps.computeIfAbsent(lang, this::loadLangMap).get(key);
         }
     }
@@ -242,7 +252,7 @@ public final class PluginCore {
     }
 
     public boolean backup() {
-        Path target = rootPath.resolve("backup").resolve(DATE_FORMAT.format(new Date()) + ".zip");
+        Path target = rootPath.resolve("backup").resolve(DATE_FORMAT.format(LocalDateTime.now()) + ".zip");
         return FileUtils.zipArchivePath(rootPath, target, p -> {
             String path = rootPath.relativize(p).toString().toLowerCase();
             if (path.endsWith("/")) {
@@ -313,7 +323,7 @@ public final class PluginCore {
         if (langMap.containsKey(key)) {
             text = langMap.get(key);
         } else if (!plugin.id().equalsIgnoreCase(Violet.PLUGIN_ID) && translator != null) {
-            text = translator.trans(lang, key);
+            text = translator.apply(lang, key);
         }
         if (text == null || text.isEmpty()) {
             return key;
@@ -330,10 +340,6 @@ public final class PluginCore {
 
     public String defChatHead() {
         return "[" + plugin.name() + "] ";
-    }
-
-    public String defAdminPerm() {
-        return plugin.id() + ".admin";
     }
 
     public void debugKey(String key, Object... args) {
@@ -379,9 +385,6 @@ public final class PluginCore {
         }
     }
 
-    // 0 - 配置 (注入源/被注入)
-    // 1 - 命令 (被注入)
-    // 1 - 监听器 (被注入)
     private void addScanners(ClassLoader loader, Path rootPath) {
         addScanner(0, info -> {
             if (info.hasAnnotation(Config.class)) {
@@ -483,15 +486,28 @@ public final class PluginCore {
         scan();
         load();
         plugin.onPluginEnable();
+        enableActions.forEach(Runnable::run);
         plugin.consoleKey("pluginEnabled", plugin.id() + "-" + plugin.version());
+        if (plugin.id().equalsIgnoreCase(Violet.PLUGIN_ID)) {
+            plugin.consoleLogKey("serverRunning", SERVER_UUID, MC_VERSION);
+        }
     }
 
     public void onDisable() {
         plugin.onPluginDisable();
+        disableActions.forEach(Runnable::run);
         plugin.consoleKey("pluginDisabled", plugin.id() + "-" + plugin.version());
         if (saveOnDisable && reloadSuccess) {
             plugin.consoleKey(save() ? "configSaved" : "configSaveFailed");
         }
+    }
+
+    public void addEnableAction(@NotNull Runnable action) {
+        enableActions.add(action);
+    }
+
+    public void addDisableAction(@NotNull Runnable action) {
+        disableActions.add(action);
     }
 
     public String getChatHead() {

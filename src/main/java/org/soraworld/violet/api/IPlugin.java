@@ -2,13 +2,13 @@ package org.soraworld.violet.api;
 
 import org.jetbrains.annotations.NotNull;
 import org.soraworld.violet.command.CommandCore;
+import org.soraworld.violet.core.PluginCore;
 
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * @author Himmelt
@@ -28,6 +28,8 @@ public interface IPlugin extends IMessenger, IScheduler, I18n {
     }
 
     String version();
+
+    @NotNull PluginCore getCore();
 
     @NotNull Path getRootPath();
 
@@ -53,6 +55,14 @@ public interface IPlugin extends IMessenger, IScheduler, I18n {
 
     default URL getAssetUrl(String path) {
         return getClass().getResource("/assets/" + assetsId() + '/' + path);
+    }
+
+    default void addEnableAction(@NotNull Runnable action) {
+        getCore().addEnableAction(action);
+    }
+
+    default void addDisableAction(@NotNull Runnable action) {
+        getCore().addDisableAction(action);
     }
 
     void registerListener(@NotNull Object listener);
