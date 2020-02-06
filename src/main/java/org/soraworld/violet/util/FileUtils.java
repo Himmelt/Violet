@@ -1,11 +1,14 @@
 package org.soraworld.violet.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -74,5 +77,21 @@ public class FileUtils {
         }
         bos.close();
         return bos.toByteArray();
+    }
+
+    public static Path getJarPath(@NotNull Class<?> clazz) {
+        String path = clazz.getProtectionDomain().getCodeSource().getLocation().getFile();
+        if (path.startsWith("file:")) {
+            path = path.substring(5);
+        }
+        if (path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        int index = path.lastIndexOf(".jar!");
+        if (index > 0) {
+            path = path.substring(0, index + 4);
+        }
+        path = path.replaceAll("/\\./", "/");
+        return Paths.get(path);
     }
 }

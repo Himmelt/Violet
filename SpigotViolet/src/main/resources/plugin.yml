@@ -1,7 +1,7 @@
 name: Violet
 version: ${version}
 author: Himmelt
-main: org.soraworld.violet.SpigotViolet
+main: org.soraworld.violet.plugin.SpigotPlugin
 website: https://github.com/Himmelt/Violet
 description: Violet Library Plugin.
 permissions:

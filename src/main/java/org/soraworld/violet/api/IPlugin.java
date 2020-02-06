@@ -1,151 +1,75 @@
 package org.soraworld.violet.api;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.soraworld.violet.manager.IManager;
+import org.soraworld.violet.command.CommandCore;
+import org.soraworld.violet.core.PluginCore;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
+import java.util.List;
 
 /**
- * The interface Plugin.
- *
- * @param <M> the type parameter
  * @author Himmelt
  */
-public interface IPlugin<M extends IManager> {
+public interface IPlugin extends IMessenger, IScheduler, I18n {
 
-    /**
-     * Gets name.
-     *
-     * @return the name
-     */
-    String getName();
+    String name();
 
-    /**
-     * Gets id.
-     *
-     * @return the id
-     */
-    default String getId() {
-        return getName().toLowerCase().replace(' ', '_');
+    default String id() {
+        return name().toLowerCase().replace(' ', '_');
     }
 
-    /**
-     * Assets id string.
-     *
-     * @return the string
-     */
+    String bStatsId();
+
     default String assetsId() {
-        return getId();
+        return id();
     }
 
-    /**
-     * Gets version.
-     *
-     * @return the version
-     */
-    String getVersion();
+    String version();
 
-    /**
-     * Gets root path.
-     *
-     * @return the root path
-     */
-    Path getRootPath();
+    @NotNull PluginCore getCore();
 
-    /**
-     * Before load.
-     */
-    void beforeLoad();
+    @NotNull Path getRootPath();
 
-    /**
-     * Is enabled boolean.
-     *
-     * @return the boolean
-     */
+    @NotNull File getJarFile();
+
     boolean isEnabled();
 
-    /**
-     * After enable.
-     */
+    default void onPluginLoad() {
+    }
+
+    default void onPluginEnable() {
+    }
+
     default void afterEnable() {
     }
 
-    /**
-     * Before disable.
-     */
-    default void beforeDisable() {
+    default void onPluginDisable() {
     }
 
-    /**
-     * Gets manager.
-     *
-     * @return the manager
-     */
-    M getManager();
-
-    /**
-     * Sets manager.
-     *
-     * @param manager the manager
-     */
-    void setManager(M manager);
-
-    /**
-     * Gets asset stream.
-     *
-     * @param path the path
-     * @return the asset stream
-     */
     default InputStream getAssetStream(String path) {
         return getClass().getResourceAsStream("/assets/" + assetsId() + '/' + path);
     }
 
-    /**
-     * Gets asset url.
-     *
-     * @param path the path
-     * @return the asset url
-     */
     default URL getAssetUrl(String path) {
         return getClass().getResource("/assets/" + assetsId() + '/' + path);
     }
 
-    /**
-     * Register manager m.
-     *
-     * @param path the path
-     * @return the m
-     */
-    @Nullable
-    default M registerManager(@NotNull Path path) {
-        return null;
+    default void addEnableAction(@NotNull Runnable action) {
+        getCore().addEnableAction(action);
     }
 
-    /**
-     * Register inject class.
-     *
-     * @param clazz the clazz
-     */
-    void registerInjectClass(@NotNull Class<?> clazz);
-
-    /**
-     * Register inject classes.
-     */
-    default void registerInjectClasses() {
+    default void addDisableAction(@NotNull Runnable action) {
+        getCore().addDisableAction(action);
     }
 
-    /**
-     * Register commands.
-     */
-    default void registerCommands() {
-    }
+    void registerListener(@NotNull Object listener);
 
-    /**
-     * Register listeners.
-     */
-    default void registerListeners() {
-    }
+    boolean registerCommand(@NotNull CommandCore core);
+
+    boolean registerCommand(@NotNull Object command, String... aliases);
+
+    boolean registerCommand(@NotNull Object command, @NotNull List<String> aliases);
 }

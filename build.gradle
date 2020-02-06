@@ -1,59 +1,29 @@
-import java.util.regex.Matcher
-import java.util.regex.Pattern
-
-buildscript {
-    repositories {
-        maven {
-            url = 'https://plugins.gradle.org/m2/'
-        }
-        maven {
-            url = 'https://maven.aliyun.com/repository/public/'
-        }
-    }
-    dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.7.2"
-    }
-}
-
 apply plugin: 'java'
+apply plugin: 'maven'
 
 group = 'org.soraworld'
-version = getVioletVersion().concat(isMasterBranch() ? '' : '-SNAPSHOT')
-
-println 'Current Branch  ' + gitBranch()
-println 'Current Version ' + project.version
-
-ext {
-    _BINTRAY_KEY = System.getenv('BINTRAY_KEY') != null ? System.getenv('BINTRAY_KEY') : BINTRAY_KEY
-    _BINTRAY_USER = System.getenv('BINTRAY_USER') != null ? System.getenv('BINTRAY_USER') : BINTRAY_USER
-    _REPO_KEY = isMasterBranch() ? 'oss-release-local' : 'oss-snapshot-local'
-    _PUBLISH_CFG = isMasterBranch() ? 'mavenRelease' : 'mavenSnapshot'
-}
+version = '2.5.0-SNAPSHOT'
 
 sourceCompatibility = targetCompatibility = 1.8
 
 repositories {
-    maven {
-        url = 'https://maven.aliyun.com/repository/public/'
-    }
+    maven { url 'https://maven.aliyun.com/repository/public/' }
     jcenter()
-    maven {
-        url = 'https://oss.jfrog.org/artifactory/oss-snapshot-local/'
-    }
+    maven { url 'https://repo.spongepowered.org/maven' }
+    maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/' }
+    maven { url 'https://hub.spigotmc.org/nexus/content/groups/public/' }
+    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
 }
 
 dependencies {
-    compile 'org.soraworld:hocon:1.2.2-SNAPSHOT'
-    testCompile 'junit:junit:4.12'
+    compile 'org.ow2.asm:asm:5.2'
+    compile 'org.soraworld:hocon:1.2.3-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'
+    compileOnly 'org.spongepowered:spongeapi:7.2.0-SNAPSHOT'
 }
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'maven'
-    apply plugin: 'maven-publish'
-    apply plugin: 'com.jfrog.bintray'
-    apply plugin: 'com.jfrog.artifactory'
 
     group rootProject.group
     version rootProject.version
@@ -65,136 +35,33 @@ subprojects {
     }
 
     repositories {
-        maven {
-            url = 'https://maven.aliyun.com/repository/public/'
-        }
+        maven { url 'https://maven.aliyun.com/repository/public/' }
         jcenter()
-        maven {
-            url = 'https://oss.jfrog.org/artifactory/oss-snapshot-local/'
-        }
+        maven { url 'https://repo.spongepowered.org/maven' }
+        maven { url 'https://oss.jfrog.org/artifactory/oss-snapshot-local/' }
+        maven { url 'https://hub.spigotmc.org/nexus/content/groups/public/' }
+        maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
     }
 
     configurations {
-        shadow
-        compile.extendsFrom(shadow)
+        shade
+        compile.extendsFrom(shade)
         shadeOnly
         compileOnly.extendsFrom(shadeOnly)
-    }
-
-    dependencies {
-        shadeOnly rootProject
-        shadow 'org.soraworld:hocon:1.2.2-SNAPSHOT'
-        testCompile 'junit:junit:4.12'
     }
 
     task sourcesJar(type: Jar) {
         classifier = 'sources'
         from sourceSets.main.allJava, rootProject.sourceSets.main.allJava
         includeEmptyDirs = false
-        exclude 'net/minecraft/server', 'org/bukkit/craftbukkit'
-    }
-
-    javadoc {
-        options.encoding = 'UTF-8'
-        options.charSet = 'UTF-8'
-        source = sourceSets.main.allJava
-        source += rootProject.sourceSets.main.allJava
-    }
-
-    task javadocJar(type: Jar, dependsOn: javadoc) {
-        classifier = 'javadoc'
-        from javadoc.destinationDir
-        includeEmptyDirs = false
-        exclude 'net/minecraft/server', 'org/bukkit/craftbukkit'
-    }
-
-    jar {
-        configurations.shadeOnly.copyRecursive().setTransitive(false).each {
-            artifact -> from(zipTree(artifact))
-        }
-        includeEmptyDirs = false
-        exclude 'net/minecraft/server', 'org/bukkit/craftbukkit'
-    }
-
-    task shadowJar(type: Jar) {
-        classifier = 'shadow'
-        from sourceSets.main.output, rootProject.sourceSets.main.output
-        configurations.shadow.copyRecursive().setTransitive(false).each {
-            artifact -> from(zipTree(artifact))
-        }
-        includeEmptyDirs = false
-        exclude 'net/minecraft/server', 'org/bukkit/craftbukkit'
     }
 
     artifacts {
         archives jar
-        archives javadocJar
         archives sourcesJar
-        archives shadowJar
-    }
-
-    bintray {
-        key = _BINTRAY_KEY
-        user = _BINTRAY_USER
-        publications = ['mavenRelease']
-        publish = true
-        override = true
-        pkg {
-            repo = 'Minecraft'
-            name = 'Violet'
-            licenses = ['MIT']
-            vcsUrl = 'https://github.com/Himmelt/Violet.git'
-            publicDownloadNumbers = true
-            version {
-                name = project.version
-                desc = 'Violet Plugin Library.'
-                released = new Date()
-            }
-        }
-    }
-
-    artifactory {
-        contextUrl = 'https://oss.jfrog.org/artifactory'
-        publish {
-            repository {
-                repoKey = _REPO_KEY
-                username = _BINTRAY_USER
-                password = _BINTRAY_KEY
-                maven = true
-            }
-            defaults {
-                publications(_PUBLISH_CFG)
-            }
-        }
     }
 }
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
-}
-
-static String getVioletVersion() {
-    Pattern pattern1 = Pattern.compile("PLUGIN_VERSION = \"[0-9].[0-9].[0-9]\"")
-    Pattern pattern2 = Pattern.compile("[0-9].[0-9].[0-9]")
-    Matcher matcher1 = pattern1.matcher(new File("src/main/java/org/soraworld/violet/Violet.java").newReader("UTF-8").text)
-    if (matcher1.find()) {
-        Matcher matcher2 = pattern2.matcher(matcher1.group())
-        if (matcher2.find()) return matcher2.group()
-    }
-    return "x.y.z"
-}
-
-static String gitBranch() {
-    def branch = System.getenv('CIRCLE_BRANCH')
-    if (branch != null) return branch.trim()
-    branch = System.getenv('TRAVIS_BRANCH')
-    if (branch != null) return branch.trim()
-    branch = 'unknown'
-    def info = 'git branch'.execute().text.trim()
-    info.eachLine { line -> if (line.contains('*')) branch = line.replace('*', '').trim() }
-    return branch
-}
-
-static boolean isMasterBranch() {
-    return gitBranch().equalsIgnoreCase('master')
 }

@@ -6,7 +6,7 @@ import java.util.StringJoiner;
  * 命令参数树
  * @author Himmelt
  */
-public class Args {
+public final class Args {
 
     private int current;
     private final int length;

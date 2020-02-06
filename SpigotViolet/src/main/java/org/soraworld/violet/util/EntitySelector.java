@@ -26,7 +26,6 @@ public class EntitySelector {
      * @param sender the sender
      * @return the player
      */
-
     public static Player matchNearestPlayer(CommandSender sender) {
         if (sender instanceof Player) {
             return (Player) sender;

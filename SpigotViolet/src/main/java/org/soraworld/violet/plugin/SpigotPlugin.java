@@ -1,42 +1,29 @@
 package org.soraworld.violet.plugin;
 
 import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.IPlugin;
-import org.soraworld.violet.command.BaseSubCmds;
-import org.soraworld.violet.command.VCommand;
-import org.soraworld.violet.inject.Command;
-import org.soraworld.violet.inject.EventListener;
-import org.soraworld.violet.inject.Inject;
-import org.soraworld.violet.inject.MainManager;
-import org.soraworld.violet.manager.IManager;
-import org.soraworld.violet.manager.VManager;
-import org.soraworld.violet.util.ChatColor;
-import org.soraworld.violet.util.ClassUtils;
+import org.soraworld.violet.command.CommandCore;
+import org.soraworld.violet.command.SpigotCommand;
+import org.soraworld.violet.core.PluginCore;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.List;
 
 /**
  * @author Himmelt
  */
-public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlugin<M> {
+public class SpigotPlugin extends JavaPlugin implements IPlugin {
 
-    protected M manager;
-    protected Class<?> mainManagerClass;
-    protected final HashSet<Class<?>> injectClasses = new HashSet<>();
-    protected final HashSet<Class<?>> commandClasses = new HashSet<>();
-    protected final HashSet<Class<?>> listenerClasses = new HashSet<>();
+    private final PluginCore core = new PluginCore(this);
     private static final CommandMap COMMAND_MAP;
 
     static {
@@ -56,262 +43,188 @@ public class SpigotPlugin<M extends VManager> extends JavaPlugin implements IPlu
         COMMAND_MAP = map;
     }
 
-    private void scanJarPackageClasses() {
-        File jarFile = getFile();
-        if (jarFile.exists()) {
-            for (Class<?> clazz : ClassUtils.getClasses(jarFile, getClass().getPackage().getName())) {
-                if (clazz.getAnnotation(Command.class) != null) {
-                    commandClasses.add(clazz);
-                }
-                if (clazz.getAnnotation(EventListener.class) != null) {
-                    listenerClasses.add(clazz);
-                }
-                if (clazz.getAnnotation(MainManager.class) != null) {
-                    mainManagerClass = clazz;
-                }
-                if (clazz.getAnnotation(Inject.class) != null) {
-                    injectClasses.add(clazz);
-                }
-            }
-        } else {
-            Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Plugin Jar File NOT exist !!!");
-        }
-    }
-
     @Override
-    public void registerInjectClass(@NotNull Class<?> clazz) {
-        if (clazz.getAnnotation(Command.class) != null) {
-            commandClasses.add(clazz);
-        }
-        if (clazz.getAnnotation(EventListener.class) != null) {
-            listenerClasses.add(clazz);
-        }
-        if (clazz.getAnnotation(Inject.class) != null) {
-            injectClasses.add(clazz);
-        }
-    }
-
-    private void injectMainManager(@NotNull Path path) {
-        M manager = registerManager(path);
-        if (manager == null) {
-            Class<?> clazz = mainManagerClass;
-            if (clazz != null && IManager.class.isAssignableFrom(clazz)) {
-                Bukkit.getConsoleSender().sendMessage(
-                        "[" + getName() + "] Injecting @MainManager class - " + clazz.getName()
-                );
-                Constructor[] constructors = clazz.getConstructors();
-                for (Constructor constructor : constructors) {
-                    Class<?>[] params = constructor.getParameterTypes();
-                    if (params.length == 2 && IPlugin.class.isAssignableFrom(params[0]) && Path.class.equals(params[1])) {
-                        constructor.setAccessible(true);
-                        try {
-                            manager = (M) constructor.newInstance(this, path);
-                            break;
-                        } catch (Throwable e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-        }
-        if (manager != null) {
-            setManager(manager);
-            injectClasses.forEach(this::injectIntoStatic);
-        } else {
-            Bukkit.getConsoleSender().sendMessage(ChatColor.RED + getName() + " CANT register or inject main manager !!!");
-        }
-    }
-
-    private void injectCommands() {
-        for (Class<?> clazz : commandClasses) {
-            Command annotation = clazz.getAnnotation(Command.class);
-            if (annotation != null) {
-                try {
-                    Object instance = clazz.getConstructor().newInstance();
-                    injectIntoInstance(instance);
-                    VCommand command = registerCommand(annotation);
-                    if (command != null) {
-                        command.extractSub(instance);
-                        command.extractTab(instance);
-                        if (clazz != BaseSubCmds.class && command.getName().equalsIgnoreCase(getId())) {
-                            BaseSubCmds baseSubCmds = new BaseSubCmds();
-                            injectIntoInstance(baseSubCmds);
-                            command.extractSub(baseSubCmds);
-                            command.extractTab(baseSubCmds);
-                        }
-                    }
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    private void injectListeners() {
-        for (Class<?> clazz : listenerClasses) {
-            EventListener listener = clazz.getAnnotation(EventListener.class);
-            if (listener != null) {
-                try {
-                    Object instance = clazz.getConstructor().newInstance();
-                    injectIntoInstance(instance);
-                    registerListener(instance);
-                } catch (Throwable e) {
-                    getManager().console("CANT construct instance for " + clazz.getName() + " .");
-                }
-            }
-        }
-    }
-
-    private void injectIntoStatic(@NotNull Class<?> clazz) {
-        IManager manager = getManager();
-        Field[] fields = clazz.getDeclaredFields();
-        for (Field field : fields) {
-            if (!Modifier.isStatic(field.getModifiers())) {
-                continue;
-            }
-            Inject inject = field.getAnnotation(Inject.class);
-            if (inject != null) {
-                field.setAccessible(true);
-                if (field.getType().isAssignableFrom(manager.getClass())) {
-                    try {
-                        field.set(null, manager);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                } else if (field.getType().isAssignableFrom(getClass())) {
-                    try {
-                        field.set(null, this);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-    }
-
-    private void injectIntoInstance(@NotNull Object instance) {
-        Field[] fields = instance.getClass().getDeclaredFields();
-        for (Field field : fields) {
-            if (Modifier.isStatic(field.getModifiers())) {
-                continue;
-            }
-            Inject inject = field.getAnnotation(Inject.class);
-            if (inject != null) {
-                field.setAccessible(true);
-                if (field.getType().isAssignableFrom(manager.getClass())) {
-                    try {
-                        field.set(instance, manager);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                } else if (field.getType().isAssignableFrom(getClass())) {
-                    try {
-                        field.set(instance, this);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public String getVersion() {
+    public final String version() {
         return getDescription().getVersion();
     }
 
     @Override
-    public void onLoad() {
-        beforeLoad();
-        scanJarPackageClasses();
-        registerInjectClasses();
-        Path path = getRootPath();
-        if (Files.notExists(path)) {
-            try {
-                Files.createDirectories(path);
-            } catch (Throwable e) {
-                e.printStackTrace();
-            }
-        }
-        injectMainManager(path);
+    public @NotNull PluginCore getCore() {
+        return core;
     }
 
     @Override
-    public void onEnable() {
-        if (manager != null) {
-            manager.beforeLoad();
-            manager.load();
-            manager.afterLoad();
-            injectCommands();
-            registerCommands();
-            injectListeners();
-            registerListeners();
-            manager.consoleKey("pluginEnabled", getId() + "-" + getVersion());
-            afterEnable();
-        } else {
-            Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "Plugin " + getId() + " enable failed !!!!");
-        }
+    public final void onLoad() {
+        core.onLoad();
     }
 
     @Override
-    public void onDisable() {
-        if (manager != null) {
-            beforeDisable();
-            if (manager != null) {
-                manager.consoleKey("pluginDisabled", getId() + "-" + getVersion());
-                if (manager.canSaveOnDisable()) {
-                    manager.consoleKey(manager.save() ? "configSaved" : "configSaveFailed");
-                }
-            }
-        }
+    public final void onEnable() {
+        core.onEnable();
     }
 
     @Override
-    public M getManager() {
-        return manager;
+    public final void onDisable() {
+        core.onDisable();
     }
 
     @Override
-    public void setManager(M manager) {
-        this.manager = manager;
-    }
-
-    @Override
-    public Path getRootPath() {
+    public final @NotNull Path getRootPath() {
         return getDataFolder().toPath();
     }
 
     @Override
-    public void beforeLoad() {
+    public final @NotNull File getJarFile() {
+        return getFile();
     }
 
-    public void registerListener(@NotNull Object listener) {
+    @Override
+    public final void registerListener(@NotNull Object listener) {
         if (listener instanceof Listener) {
             getServer().getPluginManager().registerEvents((Listener) listener, this);
         }
     }
 
-    @Nullable
-    public VCommand registerCommand(@NotNull Command annotation) {
-        String perm = annotation.perm();
-        perm = manager.mappingPerm(perm);
-        VCommand command = new VCommand(annotation.name(), perm, annotation.onlyPlayer(), null, manager);
-        command.setAliases(Arrays.asList(annotation.aliases()));
-        command.setTabs(Arrays.asList(annotation.tabs()));
-        command.setUsage(annotation.usage());
-        return registerCommand(command) ? command : null;
+    @Override
+    public boolean registerCommand(@NotNull CommandCore core) {
+        return registerCommand(new SpigotCommand(core));
     }
 
-    public boolean registerCommand(@NotNull VCommand command) {
-        if (COMMAND_MAP != null) {
-            if (COMMAND_MAP.register(getId(), command)) {
-                return true;
-            } else {
-                manager.consoleKey("commandRegFailed", command.getName(), getName());
+    @Override
+    public boolean registerCommand(@NotNull Object command, String... aliases) {
+        if (command instanceof Command) {
+            if (aliases.length > 0) {
+                ((Command) command).setAliases(Arrays.asList(aliases));
             }
-        } else {
-            manager.consoleKey("nullCommandMap");
+            return COMMAND_MAP != null && COMMAND_MAP.register(id(), (Command) command);
         }
         return false;
+    }
+
+    @Override
+    public boolean registerCommand(@NotNull Object command, @NotNull List<String> aliases) {
+        if (command instanceof Command) {
+            if (aliases.size() > 0) {
+                ((Command) command).setAliases(aliases);
+            }
+            return COMMAND_MAP != null && COMMAND_MAP.register(id(), (Command) command);
+        }
+        return false;
+    }
+
+    @Override
+    public String name() {
+        return getName();
+    }
+
+    @Override
+    public String bStatsId() {
+        return id().equals(Violet.PLUGIN_ID) ? "2429" : "";
+    }
+
+    @Override
+    public void runTask(@NotNull Runnable task) {
+        Bukkit.getScheduler().runTask(this, task);
+    }
+
+    @Override
+    public void runTaskAsync(@NotNull Runnable task) {
+        Bukkit.getScheduler().runTaskAsynchronously(this, task);
+    }
+
+    @Override
+    public void runTaskLater(@NotNull Runnable task, long delay) {
+        Bukkit.getScheduler().runTaskLater(this, task, delay);
+    }
+
+    @Override
+    public void runTaskLaterAsync(@NotNull Runnable task, long delay) {
+        Bukkit.getScheduler().runTaskLaterAsynchronously(this, task, delay);
+    }
+
+    @Override
+    public void broadcastKey(@NotNull String key, Object... args) {
+        broadcast(trans(key, args));
+    }
+
+    @Override
+    public void console(@NotNull String message) {
+        Bukkit.getConsoleSender().sendMessage(core.getChatHead() + message);
+    }
+
+    @Override
+    public void consoleKey(String key, Object... args) {
+        console(trans(key, args));
+    }
+
+    @Override
+    public void log(@NotNull String text) {
+        core.log(text);
+    }
+
+    @Override
+    public void logKey(@NotNull String key, Object... args) {
+        log(trans(key, args));
+    }
+
+    @Override
+    public void consoleLog(@NotNull String text) {
+        console(text);
+        log(text);
+    }
+
+    @Override
+    public void consoleLogKey(@NotNull String key, Object... args) {
+        consoleLog(trans(key, args));
+    }
+
+    @Override
+    public void broadcast(@NotNull String message) {
+
+    }
+
+    @Override
+    public void debug(@NotNull String message) {
+        core.debug(message);
+    }
+
+    @Override
+    public void debug(@NotNull Throwable e) {
+        core.debug(e);
+    }
+
+    @Override
+    public void debugKey(@NotNull String key, Object... args) {
+        core.debugKey(key, args);
+    }
+
+    @Override
+    public void notifyOps(@NotNull String message) {
+
+    }
+
+    @Override
+    public void notifyOpsKey(@NotNull String key, Object... args) {
+
+    }
+
+    @Override
+    public boolean setLang(String lang) {
+        return core.setLang(lang);
+    }
+
+    @Override
+    public String getLang() {
+        return core.getLang();
+    }
+
+    @Override
+    public String trans(@NotNull String key, Object... args) {
+        return core.trans(key, args);
+    }
+
+    @Override
+    public boolean extract() {
+        return core.extract();
     }
 }

@@ -2,6 +2,10 @@ plugins {
     id 'org.spongepowered.plugin' version '0.9.0'
 }
 
+sourceSets {
+    api
+}
+
 sponge {
     plugin {
         id = 'violet'
@@ -9,26 +13,16 @@ sponge {
 }
 
 dependencies {
-    compile 'org.spongepowered:spongeapi:7.1.0-SNAPSHOT'
+    shade 'org.soraworld:hocon:1.2.3-SNAPSHOT'
+    compileOnly rootProject
+    compileOnly sourceSets.api.output
+    compileOnly 'org.spongepowered:spongeapi:7.2.0-SNAPSHOT'
 }
 
-publishing {
-    publications {
-        mavenRelease(MavenPublication) {
-            from components.java
-            groupId = 'org.soraworld'
-            artifactId = 'violet-sponge'
-            version = project.version
-            artifact shadowJar
-            artifact sourcesJar
-            artifact javadocJar
-        }
-        mavenSnapshot(MavenPublication) {
-            from components.java
-            groupId = 'org.soraworld'
-            artifactId = 'violet-sponge'
-            version = project.version
-            artifact sourcesJar
-        }
+jar {
+    from sourceSets.main.output, rootProject.sourceSets.main.output
+    configurations.shade.copyRecursive().setTransitive(false).each {
+        artifact -> from(zipTree(artifact))
     }
+    includeEmptyDirs = false
 }
