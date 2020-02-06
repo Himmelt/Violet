@@ -25,7 +25,7 @@ public final class Violet {
     public static final McVersion MC_VERSION;
     public static final boolean BUKKIT, SPONGE, ONLINE_MODE;
     public static final String SPONGE_IMPL;
-    // TODO hocon 增加对类静态字段的支持。修改对象是 class, 避免 final 常量优化
+
     @Setting
     private static boolean enableStats = true;
     @Setting(path = "serverId")

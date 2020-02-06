@@ -156,8 +156,7 @@ public final class PluginCore {
         }
         try {
             FileNode rootNode = new FileNode(confile.toFile(), options);
-            // TODO keepcomments 是否无效了，由于重新构建了FileNode
-            rootNode.load(true, true);
+            rootNode.load();
             Node general = rootNode.get("general");
             if (general instanceof NodeMap) {
                 ((NodeMap) general).modify(this);
@@ -168,9 +167,19 @@ public final class PluginCore {
                     ((NodeMap) node).modify(config);
                 }
             });
-            // TODO
             externalConfigs.forEach((id, config) -> {
-
+                if (!id.equalsIgnoreCase(plugin.id())) {
+                    try {
+                        FileNode node = new FileNode(rootPath.resolve(id + ".conf").toFile(), options);
+                        node.load();
+                        node.modify(config);
+                    } catch (Exception e) {
+                        // TODO hint
+                        debug(e);
+                    }
+                } else {
+                    plugin.consoleKey("configIdEqualsPluginId", id);
+                }
             });
             if (!setLang(lang) && !"en_us".equalsIgnoreCase(lang)) {
                 setLang("en_us");
