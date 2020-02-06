@@ -13,7 +13,7 @@ sponge {
 }
 
 dependencies {
-    shade 'org.soraworld:hocon:1.2.2-SNAPSHOT'
+    shade 'org.soraworld:hocon:1.2.3-SNAPSHOT'
     compileOnly rootProject
     compileOnly sourceSets.api.output
     compileOnly 'org.spongepowered:spongeapi:7.2.0-SNAPSHOT'

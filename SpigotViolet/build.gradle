@@ -4,7 +4,7 @@ sourceSets {
 
 dependencies {
     shade 'org.ow2.asm:asm:5.2'
-    shade 'org.soraworld:hocon:1.2.2-SNAPSHOT'
+    shade 'org.soraworld:hocon:1.2.3-SNAPSHOT'
     compileOnly rootProject
     compileOnly sourceSets.api.output
     compileOnly 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'

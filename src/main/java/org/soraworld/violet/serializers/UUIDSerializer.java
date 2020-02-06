@@ -15,11 +15,7 @@ import java.util.UUID;
  *
  * @author Himmelt
  */
-public class UUIDSerializer extends TypeSerializer<UUID, NodeBase> {
-
-    public UUIDSerializer() throws SerializerException {
-    }
-
+public final class UUIDSerializer extends TypeSerializer<UUID, NodeBase> {
     @Override
     public @NotNull UUID deserialize(@NotNull Type fieldType, @NotNull NodeBase node) throws HoconException {
         try {
@@ -32,6 +28,6 @@ public class UUIDSerializer extends TypeSerializer<UUID, NodeBase> {
 
     @Override
     public @NotNull NodeBase serialize(@NotNull Type fieldType, @NotNull UUID value, @NotNull Options options) {
-        return new NodeBase(options, value);
+        return new NodeBase(options, value.toString());
     }
 }

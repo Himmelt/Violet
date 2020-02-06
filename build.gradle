@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'maven'
 
 group = 'org.soraworld'
 version = '2.5.0-SNAPSHOT'
@@ -16,7 +17,7 @@ repositories {
 
 dependencies {
     compile 'org.ow2.asm:asm:5.2'
-    compile 'org.soraworld:hocon:1.2.2-SNAPSHOT'
+    compile 'org.soraworld:hocon:1.2.3-SNAPSHOT'
     compileOnly 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'
     compileOnly 'org.spongepowered:spongeapi:7.2.0-SNAPSHOT'
 }

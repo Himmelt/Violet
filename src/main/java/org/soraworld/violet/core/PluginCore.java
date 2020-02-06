@@ -2,7 +2,6 @@ package org.soraworld.violet.core;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.soraworld.hocon.exception.SerializerException;
 import org.soraworld.hocon.node.*;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.ICommandSender;
@@ -84,23 +83,16 @@ public final class PluginCore {
     private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
     private static BiFunction<String, String, String> translator;
 
-    static {
-    }
-
     public PluginCore(@NotNull IPlugin plugin) {
         this.plugin = plugin;
         this.injector.addValue(this);
         this.injector.addValue(plugin);
         this.rootPath = plugin.getRootPath();
         this.logger = new Logger(rootPath.resolve("logs"));
+        this.options.registerType(new UUIDSerializer());
         this.options.setTranslator(Options.COMMENT, this::trans);
         this.options.setTranslator(Options.READ, ChatColor::colorize);
         this.options.setTranslator(Options.WRITE, ChatColor::fakerize);
-        try {
-            this.options.registerType(new UUIDSerializer());
-        } catch (SerializerException e) {
-            e.printStackTrace();
-        }
         setHead(defChatHead());
         if (!PLUGINS.contains(plugin)) {
             PLUGINS.add(plugin);
@@ -175,6 +167,10 @@ public final class PluginCore {
                 if (node instanceof NodeMap) {
                     ((NodeMap) node).modify(config);
                 }
+            });
+            // TODO
+            externalConfigs.forEach((id, config) -> {
+
             });
             if (!setLang(lang) && !"en_us".equalsIgnoreCase(lang)) {
                 setLang("en_us");
@@ -401,10 +397,15 @@ public final class PluginCore {
                                 plugin.consoleKey("externalConfigIdExist", id);
                             } else {
                                 injector.inject(clazz);
-                                Object instance = clazz.newInstance();
-                                injector.inject(instance);
-                                injector.addValue(instance);
-                                externalConfigs.put(id, instance);
+                                if (!config.clazz()) {
+                                    Object instance = clazz.newInstance();
+                                    injector.inject(instance);
+                                    injector.addValue(instance);
+                                    externalConfigs.put(id, instance);
+                                } else {
+                                    injector.addValue(clazz);
+                                    externalConfigs.put(id, clazz);
+                                }
                                 plugin.consoleKey("injectExternalConfig", id);
                             }
                         } else {
@@ -412,11 +413,16 @@ public final class PluginCore {
                                 plugin.consoleKey("internalConfigIdExist", id);
                             } else {
                                 injector.inject(clazz);
-                                Object instance = clazz.newInstance();
-                                injector.inject(instance);
-                                injector.addValue(instance);
-                                internalConfigs.put(id, instance);
-                                plugin.consoleKey("injectExternalConfig", id);
+                                if (!config.clazz()) {
+                                    Object instance = clazz.newInstance();
+                                    injector.inject(instance);
+                                    injector.addValue(instance);
+                                    internalConfigs.put(id, instance);
+                                } else {
+                                    injector.addValue(clazz);
+                                    internalConfigs.put(id, clazz);
+                                }
+                                plugin.consoleKey("injectInternalConfig", id);
                             }
                         }
                     } else {
