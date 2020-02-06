@@ -3,6 +3,8 @@ Violet Library Plugin
 # 紫罗兰
 紫罗兰 Spigot/Sponge 模板插件
 
+![Violet](https://github.com/Himmelt/Violet/workflows/Violet/badge.svg)
+
 ### 简介
 这是一个模板插件，可以省去部分重复工作，加速插件开发。
 
