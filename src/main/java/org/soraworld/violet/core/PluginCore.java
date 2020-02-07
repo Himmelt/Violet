@@ -33,7 +33,7 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import static org.soraworld.violet.Violet.MC_VERSION;
-import static org.soraworld.violet.Violet.SERVER_UUID;
+import static org.soraworld.violet.Violet.getServerId;
 
 public final class PluginCore {
 
@@ -77,7 +77,7 @@ public final class PluginCore {
     private final Logger logger;
 
     /* ---------------------------- Statics ---------------------------- */
-    private static final ArrayList<IPlugin> PLUGINS = new ArrayList<>();
+    private static final LinkedHashMap<String, IPlugin> PLUGINS = new LinkedHashMap<>();
     private static final Pattern CONFIG_ID = Pattern.compile("[a-zA-Z_0-9]+");
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
     private static HashMap<String, HashMap<String, String>> langMaps = new HashMap<>();
@@ -85,6 +85,7 @@ public final class PluginCore {
 
     public PluginCore(@NotNull IPlugin plugin) {
         this.plugin = plugin;
+        this.color = plugin.chatColor();
         this.injector.addValue(this);
         this.injector.addValue(plugin);
         this.rootPath = plugin.getRootPath();
@@ -95,8 +96,8 @@ public final class PluginCore {
         this.options.setTranslator(Options.READ, ChatColor::colorize);
         this.options.setTranslator(Options.WRITE, ChatColor::fakerize);
         setHead(defChatHead());
-        if (!PLUGINS.contains(plugin)) {
-            PLUGINS.add(plugin);
+        if (!PLUGINS.containsKey(plugin.id())) {
+            PLUGINS.put(plugin.id(), plugin);
         }
         if (plugin.id().equalsIgnoreCase(Violet.PLUGIN_ID)) {
             addEnableAction(() -> {
@@ -109,7 +110,7 @@ public final class PluginCore {
     }
 
     public static void listPlugins(ICommandSender sender) {
-        for (IPlugin plugin : PLUGINS) {
+        for (IPlugin plugin : PLUGINS.values()) {
             sender.sendMessageKey("pluginInfo", plugin.id(), plugin.version());
         }
     }
@@ -162,6 +163,7 @@ public final class PluginCore {
             if (general instanceof NodeMap) {
                 ((NodeMap) general).modify(this);
             }
+            setDebug(debug);
             internalConfigs.forEach((id, config) -> {
                 Node node = rootNode.get(id);
                 if (node instanceof NodeMap) {
@@ -185,7 +187,6 @@ public final class PluginCore {
             if (!setLang(lang) && !"en_us".equalsIgnoreCase(lang)) {
                 setLang("en_us");
             }
-            setDebug(debug);
             reloadSuccess = true;
             if (!plugin.version().equalsIgnoreCase(version)) {
                 plugin.consoleKey("versionChanged", version, plugin.version());
@@ -505,7 +506,7 @@ public final class PluginCore {
         enableActions.forEach(Runnable::run);
         plugin.consoleKey("pluginEnabled", plugin.id() + "-" + plugin.version());
         if (plugin.id().equalsIgnoreCase(Violet.PLUGIN_ID)) {
-            plugin.consoleLogKey("serverRunning", SERVER_UUID, MC_VERSION);
+            plugin.consoleLogKey("serverRunning", getServerId(), MC_VERSION);
         }
     }
 
@@ -531,10 +532,10 @@ public final class PluginCore {
     }
 
     public static IPlugin getPlugin(@NotNull String id) {
-        return PLUGINS.stream().filter(p -> p.id().equals(id)).findAny().orElse(null);
+        return PLUGINS.get(id);
     }
 
     public static List<IPlugin> getPlugins() {
-        return new ArrayList<>(PLUGINS);
+        return new ArrayList<>(PLUGINS.values());
     }
 }

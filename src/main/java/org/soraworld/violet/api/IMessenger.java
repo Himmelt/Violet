@@ -1,11 +1,14 @@
 package org.soraworld.violet.api;
 
 import org.jetbrains.annotations.NotNull;
+import org.soraworld.violet.text.ChatColor;
 
 /**
  * @author Himmelt
  */
 public interface IMessenger {
+
+    @NotNull ChatColor chatColor();
 
     void console(@NotNull String message);
 
@@ -21,7 +24,7 @@ public interface IMessenger {
 
     void broadcast(@NotNull String message);
 
-    void broadcastKey(@NotNull String key,Object... args);
+    void broadcastKey(@NotNull String key, Object... args);
 
     void debug(@NotNull String message);
 

@@ -37,8 +37,7 @@ invalidDouble = "参数不是有效双精度数."
 pluginInfo = "插件信息  id - &a%s&r  version - &e%s"
 bStatsSendFailed = "统计信息发送失败!"
 
-extractNoSuchSub = "&c类 %s 中没有名为 %s 且匹配签名的方法，lambda 提取失败."
-extractReflectError = "&c方法 %s 反射处理异常，请检查代码!"
+extractNoSuchSub = "&c类 %s 中没有名为 %s 的字段，lambda 提取失败."
 noSuchSubCmd = "没有名为 %s 的子命令."
 commandRegFailed = "命令 %s 向插件 %s 注册失败."
 nullCommandMap = "&cCommandMap 反射失败 !!!!!"
@@ -46,24 +45,27 @@ nullCommandMap = "&cCommandMap 反射失败 !!!!!"
 backupSuccess = "配置文件夹备份成功."
 backupFailed = "配置文件夹备份失败."
 
-illegalConfigId = "非法的配置id, 请使用字母数字下划线组成."
-configIdEqualsPluginId = "外部配置id不能与插件id一致."
+internalConfigIdExist = "内置配置 [%s] 已存在."
+externalConfigIdExist = "外部配置 [%s] 已存在."
+injectInternalConfig = "已扫描注入内置配置 [%s] ."
+injectExternalConfig = "已扫描注入外部配置 [%s] ."
+illegalConfigId = "非法的配置 [%s], 请使用字母数字下划线组成."
+configIdEqualsPluginId = "外部配置 [%s] 不能与插件id一致."
 
 comment {
-  type = {
+  type {
     general = "常规配置"
+    violet = "violet 专有配置"
   }
   lang = "显示语言"
   debug = "调试模式"
   version = "插件版本，用于自动任务，请勿修改 !!"
-  uuid = "Violet 插件唯一识别标志，用于插件统计."
   enableStats = "启用 Violet 插件统计."
   autoUpLang = "版本变化时，自动重新释放语言文件."
   autoBackUp = "版本变化时，自动备份全部配置文件."
-  checkUpdate = "是否检查更新."
+  serverId = "Violet 插件唯一识别标志, 用于统计等任务, 请勿修改."
   saveOnDisable = "在停用插件时执行保存配置文件(前提是配置文件最近一次加载成功)."
-  permMap = "自定义权限映射表，用于自定义更改权限字符串."
-  disableCmds = "禁用的子命令, 每个键对应一个字符串列表, 键为命令主名, 值为对应禁用的子命令.(重启生效)"
+  backupExcludes = "备份排除目录列表"
 }
 
 usage {

@@ -5,6 +5,7 @@ import org.soraworld.hocon.node.Setting;
 import org.soraworld.violet.inject.Config;
 import org.soraworld.violet.util.Reflects;
 import org.soraworld.violet.version.McVersion;
+import org.soraworld.violet.version.Version;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 
@@ -25,11 +26,12 @@ public final class Violet {
     public static final McVersion MC_VERSION;
     public static final boolean BUKKIT, SPONGE, ONLINE_MODE;
     public static final String SPONGE_IMPL;
+    public static final Version VIOLET_VERSION = Version.parse(PLUGIN_VERSION);
 
     @Setting
     private static boolean enableStats = true;
     @Setting(path = "serverId")
-    public static final UUID SERVER_UUID = UUID.randomUUID();
+    private static final UUID SERVER_UUID = UUID.randomUUID();
 
     static {
         String spongeImpl = "";
@@ -69,5 +71,9 @@ public final class Violet {
 
     public static boolean enableStats() {
         return enableStats;
+    }
+
+    public static UUID getServerId() {
+        return SERVER_UUID;
     }
 }

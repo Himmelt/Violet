@@ -3,6 +3,7 @@ package org.soraworld.violet.api;
 import org.jetbrains.annotations.NotNull;
 import org.soraworld.violet.command.CommandCore;
 import org.soraworld.violet.core.PluginCore;
+import org.soraworld.violet.version.Version;
 
 import java.io.File;
 import java.io.InputStream;
@@ -72,4 +73,6 @@ public interface IPlugin extends IMessenger, IScheduler, I18n {
     boolean registerCommand(@NotNull Object command, String... aliases);
 
     boolean registerCommand(@NotNull Object command, @NotNull List<String> aliases);
+
+    Version violetVersion();
 }

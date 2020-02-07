@@ -25,7 +25,7 @@ import java.util.zip.GZIPOutputStream;
 public class Metrics {
 
     private static final String BUKKIT_JSON = "{" +
-            "\"serverUUID\":\"" + Violet.SERVER_UUID + "\"," +
+            "\"serverUUID\":\"" + Violet.getServerId() + "\"," +
             "\"playerAmount\":%playerAmount%," +
             "\"onlineMode\":" + (Violet.ONLINE_MODE ? 1 : 0) + "," +
             "\"bukkitVersion\":\"" + Violet.MC_VERSION + "\"," +
@@ -36,7 +36,7 @@ public class Metrics {
             "\"coreCount\":" + Runtime.getRuntime().availableProcessors() + "," +
             "\"plugins\":[%pluginList%]}";
     private static final String SPONGE_JSON = "{" +
-            "\"serverUUID\":\"" + Violet.SERVER_UUID + "\"," +
+            "\"serverUUID\":\"" + Violet.getServerId() + "\"," +
             "\"playerAmount\":%playerAmount%," +
             "\"onlineMode\":" + (Violet.ONLINE_MODE ? 1 : 0) + "," +
             "\"minecraftVersion\":\"" + Violet.MC_VERSION + "\"," +

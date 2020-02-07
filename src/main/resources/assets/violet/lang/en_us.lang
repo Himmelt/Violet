@@ -20,11 +20,11 @@ noCommandPerm = "You need permission <&c%s&r> to execute this command."
 cmdUsage = "Usage %s"
 pluginEnabled = "Plugin &e%s&a Enabled&r."
 pluginDisabled = "Plugin &e%s&c Disabled&r."
-serverRunning = "插件正运行在UUID为 [&b%s&r] , MC版本为 [&a%s&r] 的服务器上."
+serverRunning = "Plugin is running at a server with UUID [&b%s&r] and MC version [&a%s&r] ."
 emptyLangMap = "&cLang file map is empty !!!"
 versionChanged = "Config file version changed, %s -> %s ."
-reExtracted = "&aRe extracted lang file."
-reExtractFailed = "&cRe extract lang file failed !!!"
+extracted = "&aExtracted lang file."
+extractFailed = "&cExtract lang file failed !!!"
 
 emptyHand = "Item in hand is empty."
 emptyArgs = "Empty arguments."
@@ -37,26 +37,35 @@ invalidDouble = "Argument is invalid double."
 pluginInfo = "Plugin info  id - &a%s&r  version - &e%s"
 bStatsSendFailed = "Stats data send failed!"
 
-extractNoSuchSub = "&cClass %s has no method %s witch matching signature, lambda extract failed."
-extractReflectError = "&cMethod %s reflect exception, please check your code !"
+extractNoSuchSub = "&cClass %s has no field %s witch matching name, lambda extract failed."
 noSuchSubCmd = "No sub command named %s."
 commandRegFailed = "Command %s register to plugin %s failed."
 nullCommandMap = "&cCommandMap reflection failed !!!!!"
 
-configIdExist = ""
+backupSuccess = "Backup success."
+backupFailed = "Backup failed."
+
+internalConfigIdExist = "Internal config [%s] exist."
+externalConfigIdExist = "External config [%s] exist."
+injectInternalConfig = "Scan and inject internal config [%s] ."
+injectExternalConfig = "Scan and inject external config [%s] ."
+illegalConfigId = "Illegal config id [%s], please use [a-zA-Z_]."
+configIdEqualsPluginId = "External config [%s] can't be same with plugin id."
 
 comment {
+  type {
+    general = "general settings"
+    violet = "violet settings"
+  }
   lang = "Display Language"
   debug = "Debug Mode"
   version = "Plugin Version, used for auto task, DON'T EDIT !!"
-  uuid = "Violet unique id，for stats."
   enableStats = "Enable Violet plugin stats."
   autoUpLang = "Auto re-extract lang file while version changed."
   autoBackUp = "Backup all config files while version changed."
-  checkUpdate = "Check update."
+  serverId = "Violet unique id，for stats, DON'T EDIT."
   saveOnDisable = "Save config file on disable plugin, precondition is last load action is success."
-  permMap = "Custom permissions mapping, using to customize permission string."
-  disableCmds = "Sub commands to disable, key is the name of the command, value is a list of disabled sub cmds.(need restart)"
+  backupExcludes = "Backup exclude dirs"
 }
 
 usage {
