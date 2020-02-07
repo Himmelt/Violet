@@ -90,6 +90,7 @@ public final class PluginCore {
         this.rootPath = plugin.getRootPath();
         this.logger = new Logger(rootPath.resolve("logs"));
         this.options.registerType(new UUIDSerializer());
+        this.options.setUseDefaultCommentKey(true);
         this.options.setTranslator(Options.COMMENT, this::trans);
         this.options.setTranslator(Options.READ, ChatColor::colorize);
         this.options.setTranslator(Options.WRITE, ChatColor::fakerize);
