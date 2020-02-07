@@ -3,13 +3,13 @@ package org.soraworld.violet.wrapper;
 import org.jetbrains.annotations.NotNull;
 import org.soraworld.violet.api.ICommandSender;
 import org.soraworld.violet.api.IPlayer;
-import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.core.PluginCore;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.text.ChatType;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.chat.ChatTypes;
 
 /**
  * @author Himmelt
@@ -18,88 +18,91 @@ import org.spongepowered.api.text.Text;
 public final class Wrapper {
 
     @Inject
-    private static IPlugin plugin;
-    @Inject
     private static PluginCore core;
 
     public static ICommandSender wrapper(@NotNull CommandSource sender) {
         if (sender instanceof Player) {
-            return new IPlayer() {
-
-                private final Player player = (Player) sender;
-
-                @Override
-                public boolean hasPermission(String permission) {
-                    return permission == null || permission.isEmpty() || sender.hasPermission(permission);
-                }
-
-                @Override
-                public void sendChat(@NotNull String message) {
-                    player.sendMessage(Text.of(message));
-                }
-
-                @Override
-                public void sendChat(@NotNull ChatType type, @NotNull String message) {
-
-                }
-
-                @Override
-                public void sendMessage(@NotNull String message) {
-                    player.sendMessage(Text.of(core.getChatHead() + message));
-                }
-
-                @Override
-                public void sendMessageKey(@NotNull String key, Object... args) {
-                    player.sendMessage(Text.of(core.getChatHead() + plugin.trans(key, args)));
-                }
-
-                @Override
-                public void sendMessage(@NotNull ChatType type, String message) {
-
-                }
-
-                @Override
-                public void sendMessageKey(@NotNull ChatType type, @NotNull String key, Object... args) {
-
-                }
-            };
+            return new WrapperPlayer((Player) sender);
         } else {
-            return new ICommandSender() {
-                @Override
-                public boolean hasPermission(String permission) {
-                    return permission == null || permission.isEmpty() || sender.hasPermission(permission);
-                }
+            return new WrapperCommandSender<>(sender);
+        }
+    }
 
-                @Override
-                public void sendChat(@NotNull String message) {
-                    sender.sendMessage(Text.of(message));
-                }
+    private static class WrapperCommandSender<T extends CommandSource> implements ICommandSender {
 
-                @Override
-                public void sendChat(@NotNull ChatType type, @NotNull String message) {
+        final T source;
 
-                }
+        public WrapperCommandSender(@NotNull T source) {
+            this.source = source;
+        }
 
-                @Override
-                public void sendMessage(@NotNull String message) {
-                    sender.sendMessage(Text.of(core.getChatHead() + message));
-                }
+        @Override
+        public boolean hasPermission(String permission) {
+            return permission == null || permission.isEmpty() || source.hasPermission(permission);
+        }
 
-                @Override
-                public void sendMessageKey(@NotNull String key, Object... args) {
-                    sender.sendMessage(Text.of(core.getChatHead() + plugin.trans(key, args)));
-                }
+        @Override
+        public void sendChat(@NotNull String message) {
+            source.sendMessage(Text.of(message));
+        }
 
-                @Override
-                public void sendMessage(@NotNull ChatType type, String message) {
+        @Override
+        public void sendMessage(@NotNull String message) {
+            source.sendMessage(Text.of(core.getChatHead() + message));
+        }
 
-                }
+        @Override
+        public void sendMessageKey(@NotNull String key, Object... args) {
+            source.sendMessage(Text.of(core.getChatHead() + core.trans(key, args)));
+        }
+    }
 
-                @Override
-                public void sendMessageKey(@NotNull ChatType type, @NotNull String key, Object... args) {
+    private static class WrapperPlayer extends WrapperCommandSender<Player> implements IPlayer {
 
-                }
-            };
+        public WrapperPlayer(@NotNull Player player) {
+            super(player);
+        }
+
+        @Override
+        public void sendChat(@NotNull ChatType type, @NotNull String message) {
+            switch (type) {
+                case ACTION_BAR:
+                    source.sendMessage(ChatTypes.ACTION_BAR, Text.of(message));
+                    break;
+                case SYSTEM:
+                    source.sendMessage(ChatTypes.SYSTEM, Text.of(message));
+                    break;
+                default:
+                    source.sendMessage(ChatTypes.CHAT, Text.of(message));
+            }
+        }
+
+        @Override
+        public void sendMessage(@NotNull ChatType type, String message) {
+            switch (type) {
+                case ACTION_BAR:
+                    source.sendMessage(ChatTypes.ACTION_BAR, Text.of(core.getChatHead() + message));
+                    break;
+                case SYSTEM:
+                    source.sendMessage(ChatTypes.SYSTEM, Text.of(core.getChatHead() + message));
+                    break;
+                default:
+                    source.sendMessage(ChatTypes.CHAT, Text.of(core.getChatHead() + message));
+            }
+        }
+
+        @Override
+        public void sendMessageKey(@NotNull ChatType type, @NotNull String key, Object... args) {
+            switch (type) {
+                case ACTION_BAR:
+                    source.sendMessage(ChatTypes.ACTION_BAR, Text.of(core.getChatHead() + core.trans(key, args)));
+                    break;
+                case SYSTEM:
+                    source.sendMessage(ChatTypes.SYSTEM, Text.of(core.getChatHead() + core.trans(key, args)));
+                    break;
+                default:
+                    source.sendMessage(ChatTypes.CHAT, Text.of(core.getChatHead() + core.trans(key, args)));
+            }
         }
     }
 }
