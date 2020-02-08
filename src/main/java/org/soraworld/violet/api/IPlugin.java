@@ -75,6 +75,7 @@ public interface IPlugin extends IMessenger, IScheduler, I18n {
 
     boolean registerCommand(@NotNull Object command, @NotNull List<String> aliases);
 
+    // TODO 应该用所需最低版本
     default Version violetVersion() {
         return Version.parse(Violet.PLUGIN_VERSION);
     }
