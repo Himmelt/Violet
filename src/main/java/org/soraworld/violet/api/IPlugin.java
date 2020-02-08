@@ -1,6 +1,7 @@
 package org.soraworld.violet.api;
 
 import org.jetbrains.annotations.NotNull;
+import org.soraworld.violet.Violet;
 import org.soraworld.violet.command.CommandCore;
 import org.soraworld.violet.core.PluginCore;
 import org.soraworld.violet.version.Version;
@@ -74,5 +75,7 @@ public interface IPlugin extends IMessenger, IScheduler, I18n {
 
     boolean registerCommand(@NotNull Object command, @NotNull List<String> aliases);
 
-    Version violetVersion();
+    default Version violetVersion() {
+        return Version.parse(Violet.PLUGIN_VERSION);
+    }
 }

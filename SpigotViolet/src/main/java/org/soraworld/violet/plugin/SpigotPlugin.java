@@ -11,8 +11,6 @@ import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.command.CommandCore;
 import org.soraworld.violet.command.SpigotCommand;
 import org.soraworld.violet.core.PluginCore;
-import org.soraworld.violet.text.ChatColor;
-import org.soraworld.violet.version.Version;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -121,11 +119,6 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
     }
 
     @Override
-    public Version violetVersion() {
-        return Violet.VIOLET_VERSION;
-    }
-
-    @Override
     public String name() {
         return getName();
     }
@@ -158,11 +151,6 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
     @Override
     public void broadcastKey(@NotNull String key, Object... args) {
         broadcast(trans(key, args));
-    }
-
-    @Override
-    public @NotNull ChatColor chatColor() {
-        return ChatColor.LIGHT_PURPLE;
     }
 
     @Override

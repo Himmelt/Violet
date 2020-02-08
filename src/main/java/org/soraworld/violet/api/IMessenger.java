@@ -8,17 +8,19 @@ import org.soraworld.violet.text.ChatColor;
  */
 public interface IMessenger {
 
-    @NotNull ChatColor chatColor();
+ default @NotNull ChatColor chatColor() {
+  return ChatColor.LIGHT_PURPLE;
+ }
 
-    void console(@NotNull String message);
+ void console(@NotNull String message);
 
-    void consoleKey(String key, Object... args);
+ void consoleKey(String key, Object... args);
 
-    void log(@NotNull String text);
+ void log(@NotNull String text);
 
-    void logKey(@NotNull String key, Object... args);
+ void logKey(@NotNull String key, Object... args);
 
-    void consoleLog(@NotNull String text);
+ void consoleLog(@NotNull String text);
 
     void consoleLogKey(@NotNull String key, Object... args);
 

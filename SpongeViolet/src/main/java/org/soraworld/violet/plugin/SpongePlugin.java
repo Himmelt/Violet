@@ -6,9 +6,7 @@ import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.command.CommandCore;
 import org.soraworld.violet.command.SpongeCommand;
 import org.soraworld.violet.core.PluginCore;
-import org.soraworld.violet.text.ChatColor;
 import org.soraworld.violet.util.FileUtils;
-import org.soraworld.violet.version.Version;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.config.ConfigDir;
@@ -141,11 +139,6 @@ public class SpongePlugin implements IPlugin {
     }
 
     @Override
-    public Version violetVersion() {
-        return Violet.VIOLET_VERSION;
-    }
-
-    @Override
     public boolean setLang(String lang) {
         return core.setLang(lang);
     }
@@ -163,11 +156,6 @@ public class SpongePlugin implements IPlugin {
     @Override
     public boolean extract() {
         return core.extract();
-    }
-
-    @Override
-    public @NotNull ChatColor chatColor() {
-        return ChatColor.LIGHT_PURPLE;
     }
 
     @Override
