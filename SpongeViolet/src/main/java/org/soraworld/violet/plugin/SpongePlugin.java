@@ -44,7 +44,7 @@ public class SpongePlugin implements IPlugin {
 
     @Inject
     public SpongePlugin(@ConfigDir(sharedRoot = false) Path path, PluginContainer container) {
-        if (!Violet.VIOLET_VERSION.compatible(violetVersion())) {
+        if (!Violet.VIOLET_VERSION.match(violetVersion())) {
             throw new RuntimeException("Plugin " + id() + " incompatible with server violet@" + Violet.VIOLET_VERSION + " , need violet@" + violetVersion());
         }
         this.path = path;
