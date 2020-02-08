@@ -14,6 +14,7 @@ import org.soraworld.violet.command.CommandCore;
 import org.soraworld.violet.inject.Cmd;
 import org.soraworld.violet.inject.Config;
 import org.soraworld.violet.inject.Inject;
+import org.soraworld.violet.inject.Listener;
 import org.soraworld.violet.log.Logger;
 import org.soraworld.violet.serializers.UUIDSerializer;
 import org.soraworld.violet.text.ChatColor;
@@ -90,6 +91,7 @@ public final class PluginCore {
         this.injector.addValue(plugin);
         this.rootPath = plugin.getRootPath();
         this.logger = new Logger(rootPath.resolve("logs"));
+        this.injector.addValue(this.logger);
         this.options.registerType(new UUIDSerializer());
         this.options.setUseDefaultCommentKey(true);
         this.options.setTranslator(Options.COMMENT, this::trans);
@@ -398,6 +400,7 @@ public final class PluginCore {
                 plugin.console("Try construct @Config -> " + info.getName());
                 try {
                     Class<?> clazz = Class.forName(info.getName(), false, loader);
+                    injector.inject(clazz);
                     Config config = clazz.getAnnotation(Config.class);
                     String id = config.id();
                     if (CONFIG_ID.matcher(id).matches()) {
@@ -449,6 +452,7 @@ public final class PluginCore {
                 plugin.console("Try construct @Cmd -> " + info.getName());
                 try {
                     Class<?> clazz = Class.forName(info.getName(), false, loader);
+                    injector.inject(clazz);
                     Cmd cmd = clazz.getAnnotation(Cmd.class);
                     try {
                         Object instance = clazz.newInstance();
@@ -475,7 +479,28 @@ public final class PluginCore {
             }
         });
         addScanner(1, info -> {
-            if (info.hasAnnotation(Inject.class)) {
+            if (info.hasAnnotation(Listener.class)) {
+                // TODO mcversion
+                //     if (MC_VERSION.match(listener.mcversion())){
+                // }
+                plugin.console("Try construct @Listener -> " + info.getName());
+                try {
+                    Class<?> clazz = Class.forName(info.getName(), false, loader);
+                    injector.inject(clazz);
+                    try {
+                        Object instance = clazz.newInstance();
+                        injector.inject(instance);
+                        plugin.registerListener(instance);
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        addScanner(2, info -> {
+            if (info.hasAnnotation(Inject.class) || info.hasAnnotation(Config.class) || info.hasAnnotation(Cmd.class) || info.hasAnnotation(Listener.class)) {
                 try {
                     Class<?> clazz = Class.forName(info.getName(), false, loader);
                     injector.inject(clazz);

@@ -20,12 +20,16 @@ public final class Wrapper {
     @Inject
     private static PluginCore core;
 
-    public static ICommandSender wrapper(@NotNull CommandSource sender) {
-        if (sender instanceof Player) {
-            return new WrapperPlayer((Player) sender);
+    public static ICommandSender wrapper(@NotNull CommandSource source) {
+        if (source instanceof Player) {
+            return new WrapperPlayer((Player) source);
         } else {
-            return new WrapperCommandSender<>(sender);
+            return new WrapperCommandSender<>(source);
         }
+    }
+
+    public static IPlayer wrapper(@NotNull Player source) {
+        return new WrapperPlayer(source);
     }
 
     private static class WrapperCommandSender<T extends CommandSource> implements ICommandSender {
@@ -74,6 +78,20 @@ public final class Wrapper {
                     break;
                 default:
                     source.sendMessage(ChatTypes.CHAT, Text.of(message));
+            }
+        }
+
+        @Override
+        public void sendChatKey(@NotNull ChatType type, @NotNull String key, Object... args) {
+            switch (type) {
+                case ACTION_BAR:
+                    source.sendMessage(ChatTypes.ACTION_BAR, Text.of(core.trans(key, args)));
+                    break;
+                case SYSTEM:
+                    source.sendMessage(ChatTypes.SYSTEM, Text.of(core.trans(key, args)));
+                    break;
+                default:
+                    source.sendMessage(ChatTypes.CHAT, Text.of(core.trans(key, args)));
             }
         }
 

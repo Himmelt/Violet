@@ -1,7 +1,5 @@
 package org.soraworld.violet.wrapper;
 
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -9,10 +7,8 @@ import org.soraworld.violet.api.ICommandSender;
 import org.soraworld.violet.api.IPlayer;
 import org.soraworld.violet.core.PluginCore;
 import org.soraworld.violet.inject.Inject;
+import org.soraworld.violet.nms.Helper;
 import org.soraworld.violet.text.ChatType;
-
-import static org.soraworld.violet.Violet.MC_VERSION;
-import static org.soraworld.violet.version.McVersion.v1_9_2;
 
 /**
  * @author Himmelt
@@ -23,12 +19,16 @@ public final class Wrapper {
     @Inject
     private static PluginCore core;
 
-    public static ICommandSender wrapper(@NotNull CommandSender sender) {
-        if (sender instanceof Player) {
-            return new WrapperPlayer((Player) sender);
+    public static ICommandSender wrapper(@NotNull CommandSender source) {
+        if (source instanceof Player) {
+            return new WrapperPlayer((Player) source);
         } else {
-            return new WrapperCommandSender<>(sender);
+            return new WrapperCommandSender<>(source);
         }
+    }
+
+    public static IPlayer wrapper(@NotNull Player source) {
+        return new WrapperPlayer(source);
     }
 
     private static class WrapperCommandSender<T extends CommandSender> implements ICommandSender {
@@ -68,56 +68,22 @@ public final class Wrapper {
 
         @Override
         public void sendChat(@NotNull ChatType type, @NotNull String message) {
-            if (MC_VERSION.lower(v1_9_2)) {
-                source.sendMessage(message);
-            } else {
-                switch (type) {
-                    case ACTION_BAR:
-                        source.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
-                        break;
-                    case SYSTEM:
-                        source.spigot().sendMessage(ChatMessageType.SYSTEM, new TextComponent(message));
-                        break;
-                    default:
-                        source.spigot().sendMessage(ChatMessageType.CHAT, new TextComponent(message));
-                }
-            }
+            Helper.sendChatPacket(source, type, message);
+        }
+
+        @Override
+        public void sendChatKey(@NotNull ChatType type, @NotNull String key, Object... args) {
+            Helper.sendChatPacket(source, type, core.trans(key, args));
         }
 
         @Override
         public void sendMessage(@NotNull ChatType type, String message) {
-            if (MC_VERSION.lower(v1_9_2)) {
-                source.sendMessage(message);
-            } else {
-                switch (type) {
-                    case ACTION_BAR:
-                        source.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(core.getChatHead() + message));
-                        break;
-                    case SYSTEM:
-                        source.spigot().sendMessage(ChatMessageType.SYSTEM, new TextComponent(core.getChatHead() + message));
-                        break;
-                    default:
-                        source.spigot().sendMessage(ChatMessageType.CHAT, new TextComponent(core.getChatHead() + message));
-                }
-            }
+            Helper.sendChatPacket(source, type, core.getChatHead() + message);
         }
 
         @Override
         public void sendMessageKey(@NotNull ChatType type, @NotNull String key, Object... args) {
-            if (MC_VERSION.lower(v1_9_2)) {
-                source.sendMessage(core.getChatHead() + core.trans(key, args));
-            } else {
-                switch (type) {
-                    case ACTION_BAR:
-                        source.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(core.getChatHead() + core.trans(key, args)));
-                        break;
-                    case SYSTEM:
-                        source.spigot().sendMessage(ChatMessageType.SYSTEM, new TextComponent(core.getChatHead() + core.trans(key, args)));
-                        break;
-                    default:
-                        source.spigot().sendMessage(ChatMessageType.CHAT, new TextComponent(core.getChatHead() + core.trans(key, args)));
-                }
-            }
+            Helper.sendChatPacket(source, type, core.getChatHead() + core.trans(key, args));
         }
     }
 }

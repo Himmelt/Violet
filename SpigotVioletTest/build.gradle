@@ -1,0 +1,13 @@
+dependencies {
+    compileOnly rootProject
+    compileOnly project(':SpigotViolet')
+    compileOnly 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'
+}
+
+processResources {
+    inputs.property "version", project.version
+    from(sourceSets.main.resources.srcDirs) {
+        include 'plugin.yml'
+        expand 'version': project.version.replaceAll("-SNAPSHOT", "")
+    }
+}

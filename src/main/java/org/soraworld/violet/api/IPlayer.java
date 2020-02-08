@@ -10,6 +10,8 @@ public interface IPlayer extends ICommandSender {
 
     void sendChat(@NotNull ChatType type, @NotNull String message);
 
+    void sendChatKey(@NotNull ChatType type, @NotNull String key, Object... args);
+
     void sendMessage(@NotNull ChatType type, String message);
 
     void sendMessageKey(@NotNull ChatType type, @NotNull String key, Object... args);
