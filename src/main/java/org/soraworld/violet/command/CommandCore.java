@@ -7,6 +7,7 @@ import org.soraworld.hocon.util.Reflects;
 import org.soraworld.violet.api.ICommandSender;
 import org.soraworld.violet.api.IPlayer;
 import org.soraworld.violet.api.IPlugin;
+import org.soraworld.violet.core.PluginCore;
 import org.soraworld.violet.inject.Cmd;
 import org.soraworld.violet.inject.Tab;
 import org.soraworld.violet.util.ListUtils;
@@ -53,6 +54,14 @@ public final class CommandCore {
         this.plugin = plugin;
         this.usage = cmd.usage();
         this.description = cmd.description();
+    }
+
+    public CommandCore(@NotNull IPlugin plugin, @NotNull PluginCore core) {
+        this.name = plugin.id();
+        this.perm = null;
+        this.ingame = false;
+        this.parent = null;
+        this.plugin = plugin;
     }
 
     public @NotNull String getName() {

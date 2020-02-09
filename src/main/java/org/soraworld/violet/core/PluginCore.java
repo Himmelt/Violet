@@ -66,6 +66,7 @@ public final class PluginCore {
     private final IPlugin plugin;
     private final Options options = Options.build();
     private final Injector injector = new Injector();
+    private final CommandCore command;
     private final HashMap<String, String> langMap = new HashMap<>();
     private final HashMap<String, Object> internalConfigs = new HashMap<>();
     private final HashMap<String, Object> externalConfigs = new HashMap<>();
@@ -92,6 +93,7 @@ public final class PluginCore {
         this.rootPath = plugin.getRootPath();
         this.logger = new Logger(rootPath.resolve("logs"));
         this.injector.addValue(this.logger);
+        this.command = new CommandCore(plugin, this);
         this.options.registerType(new UUIDSerializer());
         this.options.setUseDefaultCommentKey(true);
         this.options.setTranslator(Options.COMMENT, this::trans);
@@ -525,8 +527,12 @@ public final class PluginCore {
     }
 
     public void onEnable() {
-        scan();
         load();
+//        if (!plugin.registerCommand(command)) {
+//            plugin.consoleKey("mainCmdRegFail");
+//        }
+        scan();
+        // TODO scan 之后再注册
         plugin.onPluginEnable();
         enableActions.forEach(Runnable::run);
         plugin.consoleKey("pluginEnabled", plugin.id() + "-" + plugin.version());
