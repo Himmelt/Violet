@@ -3,7 +3,7 @@ version: ${version}
 author: Himmelt
 main: org.soraworld.violettest.VioletTest
 website: https://github.com/Himmelt/Violet
-description: Violet Test Plugin.
+description: Violet Spigot Test Plugin.
 depend:
   - Violet
 permissions:
