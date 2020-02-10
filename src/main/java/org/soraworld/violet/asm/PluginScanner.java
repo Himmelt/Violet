@@ -25,13 +25,11 @@ public final class PluginScanner {
     private PluginScanner() {
     }
 
-    @NotNull
-    public static Set<ClassInfo> scan(@NotNull File jarFile) {
+    public static @NotNull Set<ClassInfo> scan(@NotNull File jarFile) {
         return scan(jarFile, null);
     }
 
-    @NotNull
-    public static Set<ClassInfo> scan(@NotNull File jarFile, Predicate<ClassInfo> filter) {
+    public static @NotNull Set<ClassInfo> scan(@NotNull File jarFile, Predicate<ClassInfo> filter) {
         HashSet<ClassInfo> set = new HashSet<>();
         try (JarFile jar = new JarFile(jarFile)) {
             Enumeration<JarEntry> et = jar.entries();

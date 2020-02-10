@@ -54,4 +54,8 @@ public interface IMessenger {
     void notifyOps(@NotNull String message);
 
     void notifyOpsKey(@NotNull String key, Object... args);
+
+    void notifyOps(@NotNull ChatType type, @NotNull String message);
+
+    void notifyOpsKey(@NotNull ChatType type, @NotNull String key, Object... args);
 }

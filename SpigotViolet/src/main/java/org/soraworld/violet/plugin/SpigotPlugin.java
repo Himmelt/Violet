@@ -3,6 +3,7 @@ package org.soraworld.violet.plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +12,8 @@ import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.command.CommandCore;
 import org.soraworld.violet.command.SpigotCommand;
 import org.soraworld.violet.core.PluginCore;
+import org.soraworld.violet.text.ChatType;
+import org.soraworld.violet.wrapper.Wrapper;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -151,7 +154,7 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
 
     @Override
     public void broadcastKey(@NotNull String key, Object... args) {
-        broadcast(trans(key, args));
+        Bukkit.broadcastMessage(core.trans(key, args));
     }
 
     @Override
@@ -187,7 +190,7 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
 
     @Override
     public void broadcast(@NotNull String message) {
-
+        Bukkit.broadcastMessage(core.getChatHead() + message);
     }
 
     @Override
@@ -207,12 +210,42 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
 
     @Override
     public void notifyOps(@NotNull String message) {
-
+        String text = core.getChatHead() + message;
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.isOp()) {
+                player.sendMessage(text);
+            }
+        }
     }
 
     @Override
     public void notifyOpsKey(@NotNull String key, Object... args) {
+        String text = core.getChatHead() + core.trans(key, args);
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.isOp()) {
+                player.sendMessage(text);
+            }
+        }
+    }
 
+    @Override
+    public void notifyOps(@NotNull ChatType type, @NotNull String message) {
+        String text = core.getChatHead() + message;
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.isOp()) {
+                Wrapper.wrapper(player).sendMessage(type, text);
+            }
+        }
+    }
+
+    @Override
+    public void notifyOpsKey(@NotNull ChatType type, @NotNull String key, Object... args) {
+        String text = core.getChatHead() + core.trans(key, args);
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player.isOp()) {
+                Wrapper.wrapper(player).sendMessage(type, text);
+            }
+        }
     }
 
     @Override

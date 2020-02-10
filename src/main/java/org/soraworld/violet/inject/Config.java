@@ -14,6 +14,4 @@ public @interface Config {
     boolean separate() default false;
 
     boolean clazz() default false;
-
-    String mcversion() default "";
 }

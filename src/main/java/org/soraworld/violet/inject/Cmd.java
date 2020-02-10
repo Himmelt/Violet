@@ -6,7 +6,6 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE, ElementType.FIELD})
 @Documented
 public @interface Cmd {
-
     String plugin() default "";
 
     String name() default "";
@@ -24,6 +23,4 @@ public @interface Cmd {
     String usage() default "";
 
     String description() default "";
-
-    String mcversion() default "";
 }

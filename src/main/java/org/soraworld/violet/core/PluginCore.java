@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import org.soraworld.hocon.node.*;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.ICommandSender;
+import org.soraworld.violet.api.IConfig;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.asm.ClassInfo;
 import org.soraworld.violet.asm.PluginScanner;
@@ -14,7 +15,7 @@ import org.soraworld.violet.command.CommandCore;
 import org.soraworld.violet.inject.Cmd;
 import org.soraworld.violet.inject.Config;
 import org.soraworld.violet.inject.Inject;
-import org.soraworld.violet.inject.Listener;
+import org.soraworld.violet.inject.InjectListener;
 import org.soraworld.violet.log.Logger;
 import org.soraworld.violet.serializers.UUIDSerializer;
 import org.soraworld.violet.text.ChatColor;
@@ -170,10 +171,16 @@ public final class PluginCore {
                 ((NodeMap) general).modify(this);
             }
             setDebug(debug);
+            if (!setLang(lang) && !"en_us".equalsIgnoreCase(lang)) {
+                setLang("en_us");
+            }
             internalConfigs.forEach((id, config) -> {
                 Node node = rootNode.get(id);
                 if (node instanceof NodeMap) {
                     ((NodeMap) node).modify(config);
+                    if (config instanceof IConfig) {
+                        ((IConfig) config).afterLoad();
+                    }
                 }
             });
             externalConfigs.forEach((id, config) -> {
@@ -182,17 +189,17 @@ public final class PluginCore {
                         FileNode node = new FileNode(rootPath.resolve(id + ".conf").toFile(), options);
                         node.load();
                         node.modify(config);
+                        if (config instanceof IConfig) {
+                            ((IConfig) config).afterLoad();
+                        }
                     } catch (Exception e) {
-                        // TODO hint
+                        plugin.consoleKey("externalLoadFailed", id);
                         debug(e);
                     }
                 } else {
                     plugin.consoleKey("configIdEqualsPluginId", id);
                 }
             });
-            if (!setLang(lang) && !"en_us".equalsIgnoreCase(lang)) {
-                setLang("en_us");
-            }
             reloadSuccess = true;
             if (!plugin.version().equalsIgnoreCase(version)) {
                 plugin.consoleKey("versionChanged", version, plugin.version());
@@ -223,6 +230,9 @@ public final class PluginCore {
             rootNode.set("general", general);
             internalConfigs.forEach((id, config) -> {
                 NodeMap node = new NodeMap(options, trans("comment.type." + id));
+                if (config instanceof IConfig) {
+                    ((IConfig) config).beforeSave();
+                }
                 node.extract(config);
                 rootNode.set(id, node);
             });
@@ -232,10 +242,14 @@ public final class PluginCore {
                     try {
                         FileNode node = new FileNode(rootPath.resolve(id + ".conf").toFile(), options);
                         node.addHead(trans("comment.type." + id));
+                        if (config instanceof IConfig) {
+                            ((IConfig) config).beforeSave();
+                        }
                         node.extract(config);
                         node.save();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        plugin.consoleKey("externalSaveFailed", id);
+                        debug(e);
                     }
                 } else {
                     plugin.consoleKey("configIdEqualsPluginId", id);
@@ -373,18 +387,10 @@ public final class PluginCore {
         this.logger.log(text);
     }
 
-    public void beforeLoad() {
-        // TODO
-    }
-
-    public void afterLoad() {
-        // TODO
-    }
-
     private @NotNull Consumer<ClassInfo> configScanner() {
         return info -> {
             if (info.hasAnnotation(Config.class)) {
-                plugin.console("Try construct @Config -> " + info.getName());
+                plugin.console("Try inject config -> " + info.getName());
                 try {
                     Class<?> clazz = Class.forName(info.getName(), false, PluginCore.class.getClassLoader());
                     injector.inject(clazz);
@@ -393,9 +399,9 @@ public final class PluginCore {
                     if (CONFIG_ID.matcher(id).matches()) {
                         if (config.separate()) {
                             if (id.equalsIgnoreCase(plugin.id())) {
-                                plugin.consoleKey("configIdEqualsPluginId", id);
+                                plugin.console("External config [" + id + "] can't be same with plugin id.");
                             } else if (externalConfigs.containsKey(id)) {
-                                plugin.consoleKey("externalConfigIdExist", id);
+                                plugin.console("External config [" + id + "] exist.");
                             } else {
                                 injector.inject(clazz);
                                 if (!config.clazz()) {
@@ -407,11 +413,11 @@ public final class PluginCore {
                                     injector.addValue(clazz);
                                     externalConfigs.put(id, clazz);
                                 }
-                                plugin.consoleKey("injectExternalConfig", id);
+                                plugin.console("Scan and inject external config [" + id + "] .");
                             }
                         } else {
                             if (internalConfigs.containsKey(id)) {
-                                plugin.consoleKey("internalConfigIdExist", id);
+                                plugin.console("Internal config [" + id + "] exist.");
                             } else {
                                 injector.inject(clazz);
                                 if (!config.clazz()) {
@@ -423,11 +429,11 @@ public final class PluginCore {
                                     injector.addValue(clazz);
                                     internalConfigs.put(id, clazz);
                                 }
-                                plugin.consoleKey("injectInternalConfig", id);
+                                plugin.console("Scan and inject internal config [" + id + "] .");
                             }
                         }
                     } else {
-                        plugin.consoleKey("illegalConfigId", id);
+                        plugin.console("Illegal config id [" + id + "], please use [a-zA-Z_].");
                     }
                 } catch (Throwable e) {
                     e.printStackTrace();
@@ -439,7 +445,7 @@ public final class PluginCore {
     private @NotNull Consumer<ClassInfo> commandScanner() {
         return info -> {
             if (info.hasAnnotation(Cmd.class)) {
-                plugin.console("Try construct @Cmd -> " + info.getName());
+                plugin.consoleKey("tryInjectCommand", info.getName());
                 try {
                     Class<?> clazz = Class.forName(info.getName(), false, PluginCore.class.getClassLoader());
                     injector.inject(clazz);
@@ -473,11 +479,8 @@ public final class PluginCore {
 
     private @NotNull Consumer<ClassInfo> listenerScanner() {
         return info -> {
-            if (info.hasAnnotation(Listener.class)) {
-                // TODO mcversion
-                //     if (MC_VERSION.match(listener.mcversion())){
-                // }
-                plugin.console("Try construct @Listener -> " + info.getName());
+            if (info.hasAnnotation(InjectListener.class)) {
+                plugin.consoleKey("tryInjectListener", info.getName());
                 try {
                     Class<?> clazz = Class.forName(info.getName(), false, PluginCore.class.getClassLoader());
                     injector.inject(clazz);
@@ -497,7 +500,7 @@ public final class PluginCore {
 
     private @NotNull Consumer<ClassInfo> injectScanner() {
         return info -> {
-            if (info.hasAnnotation(Inject.class) || info.hasAnnotation(Config.class) || info.hasAnnotation(Cmd.class) || info.hasAnnotation(Listener.class)) {
+            if (info.hasAnnotation(Inject.class) || info.hasAnnotation(Config.class) || info.hasAnnotation(Cmd.class) || info.hasAnnotation(InjectListener.class)) {
                 try {
                     Class<?> clazz = Class.forName(info.getName(), false, PluginCore.class.getClassLoader());
                     injector.inject(clazz);
@@ -521,7 +524,7 @@ public final class PluginCore {
     }
 
     public void onEnable() {
-        Set<ClassInfo> classes = PluginScanner.scan(plugin.getJarFile());
+        Set<ClassInfo> classes = PluginScanner.scan(plugin.getJarFile(), info -> info.matchMcVersion(MC_VERSION));
         classes.forEach(info -> configScanner().accept(info));
         load();
         classes.forEach(info -> commandScanner().accept(info));

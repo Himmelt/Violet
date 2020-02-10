@@ -3,6 +3,7 @@ package org.soraworld.violettest;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.inject.InjectListener;
+import org.soraworld.violet.inject.McVer;
 import org.soraworld.violet.text.ChatColor;
 import org.soraworld.violet.text.ChatType;
 import org.soraworld.violet.util.Helper;
@@ -18,19 +19,20 @@ import org.spongepowered.api.world.World;
  * @author Himmelt
  */
 @InjectListener
-public class PlayerEventListener {
+@McVer("[1.7.10,1.10.2]")
+public class PlayerEventListener2 {
 
     @Inject
     private IPlugin plugin;
 
     static {
-        System.out.println("Test null @McVer");
+        System.out.println("Test @McVer(\"[1.7.10,1.10.2]\")");
     }
 
     @Listener
     public void onPlayerInteract(InteractItemEvent.Secondary event, @First Player player) {
         Location<World> look = Helper.getLookAt(player, 30);
         Wrapper.wrapper(player).sendMessage(ChatType.ACTION_BAR, ChatColor.GREEN + "look:" + (look == null ? "null" : look.getBlockType()));
-        plugin.notifyOps("You are Op !!!!!!!!!!!");
+        plugin.notifyOps("You are Op 22222 !!!!!!!!!!!");
     }
 }

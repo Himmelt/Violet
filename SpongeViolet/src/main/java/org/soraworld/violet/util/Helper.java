@@ -1,5 +1,6 @@
 package org.soraworld.violet.util;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
@@ -14,7 +15,7 @@ import org.spongepowered.api.world.World;
 public final class Helper {
     private static PermissionService service;
 
-    public static boolean isOp(Player player) {
+    public static boolean isOp(@NotNull Player player) {
         if (service == null) {
             Sponge.getServiceManager().getRegistration(PermissionService.class).ifPresent(p -> service = p.getProvider());
         }
@@ -22,7 +23,7 @@ public final class Helper {
     }
 
     @Nullable
-    public static Location<World> getLookAt(Player player, double distance) {
+    public static Location<World> getLookAt(@NotNull Player player, double distance) {
         BlockRay<World> ray = BlockRay.from(player)
                 .skipFilter(BlockRay.onlyAirFilter())
                 .stopFilter(BlockRay.allFilter()).build();

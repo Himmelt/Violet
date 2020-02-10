@@ -6,10 +6,13 @@ import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.command.CommandCore;
 import org.soraworld.violet.command.SpongeCommand;
 import org.soraworld.violet.core.PluginCore;
+import org.soraworld.violet.text.ChatType;
 import org.soraworld.violet.util.FileUtils;
+import org.soraworld.violet.util.Helper;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
@@ -17,6 +20,7 @@ import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.chat.ChatTypes;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -59,7 +63,6 @@ public class SpongePlugin implements IPlugin {
 
     @Listener
     public void onEnable(GameInitializationEvent event) {
-        // TODO makesure sync for spigot , worlds load ??
         core.onEnable();
     }
 
@@ -67,7 +70,6 @@ public class SpongePlugin implements IPlugin {
     public void onDisable(GameStoppingServerEvent event) {
         core.onDisable();
     }
-
 
     @Override
     public final @NotNull Path getRootPath() {
@@ -216,12 +218,44 @@ public class SpongePlugin implements IPlugin {
 
     @Override
     public void notifyOps(@NotNull String message) {
-
+        Text text = Text.of(core.getChatHead() + message);
+        for (Player player : Sponge.getServer().getOnlinePlayers()) {
+            if (Helper.isOp(player)) {
+                player.sendMessage(text);
+            }
+        }
     }
 
     @Override
     public void notifyOpsKey(@NotNull String key, Object... args) {
+        Text text = Text.of(core.getChatHead() + core.trans(key, args));
+        for (Player player : Sponge.getServer().getOnlinePlayers()) {
+            if (Helper.isOp(player)) {
+                player.sendMessage(text);
+            }
+        }
+    }
 
+    @Override
+    public void notifyOps(@NotNull ChatType type, @NotNull String message) {
+        org.spongepowered.api.text.chat.ChatType chatType = type == ChatType.ACTION_BAR ? ChatTypes.ACTION_BAR : type == ChatType.SYSTEM ? ChatTypes.SYSTEM : ChatTypes.CHAT;
+        Text text = chatType == ChatTypes.ACTION_BAR ? Text.of(message) : Text.of(core.getChatHead() + message);
+        for (Player player : Sponge.getServer().getOnlinePlayers()) {
+            if (Helper.isOp(player)) {
+                player.sendMessage(chatType, text);
+            }
+        }
+    }
+
+    @Override
+    public void notifyOpsKey(@NotNull ChatType type, @NotNull String key, Object... args) {
+        org.spongepowered.api.text.chat.ChatType chatType = type == ChatType.ACTION_BAR ? ChatTypes.ACTION_BAR : type == ChatType.SYSTEM ? ChatTypes.SYSTEM : ChatTypes.CHAT;
+        Text text = chatType == ChatTypes.ACTION_BAR ? Text.of(core.trans(key, args)) : Text.of(core.getChatHead() + core.trans(key, args));
+        for (Player player : Sponge.getServer().getOnlinePlayers()) {
+            if (Helper.isOp(player)) {
+                player.sendMessage(chatType, text);
+            }
+        }
     }
 
     @Override
