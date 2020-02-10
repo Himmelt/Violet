@@ -25,3 +25,22 @@ processResources {
         expand 'version': project.version.replaceAll("-SNAPSHOT", "")
     }
 }
+
+publishing {
+    publications {
+        mavenRelease(MavenPublication) {
+            from components.java
+            groupId = 'org.soraworld'
+            artifactId = 'violet-spigot'
+            version = project.version
+            artifact sourcesJar
+        }
+        mavenSnapshot(MavenPublication) {
+            from components.java
+            groupId = 'org.soraworld'
+            artifactId = 'violet-spigot'
+            version = project.version
+            artifact sourcesJar
+        }
+    }
+}

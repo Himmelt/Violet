@@ -26,3 +26,22 @@ jar {
     }
     includeEmptyDirs = false
 }
+
+publishing {
+    publications {
+        mavenRelease(MavenPublication) {
+            from components.java
+            groupId = 'org.soraworld'
+            artifactId = 'violet-sponge'
+            version = project.version
+            artifact sourcesJar
+        }
+        mavenSnapshot(MavenPublication) {
+            from components.java
+            groupId = 'org.soraworld'
+            artifactId = 'violet-sponge'
+            version = project.version
+            artifact sourcesJar
+        }
+    }
+}

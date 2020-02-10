@@ -1,3 +1,12 @@
+buildscript {
+    repositories {
+        maven { url 'https://plugins.gradle.org/m2/' }
+    }
+    dependencies {
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.7.2"
+    }
+}
+
 apply plugin: 'java'
 apply plugin: 'maven'
 
@@ -24,9 +33,16 @@ dependencies {
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.jfrog.artifactory'
 
     group rootProject.group
     version rootProject.version
+
+    def _BINTRAY_USER = System.getenv('BINTRAY_USER')
+    def _BINTRAY_KEY = System.getenv('BINTRAY_KEY')
+    def _REPO_KEY = version.contains("SNAPSHOT") ? 'oss-snapshot-local' : 'oss-release-local'
+    def _PUBLISH_CFG = version.contains("SNAPSHOT") ? 'mavenSnapshot' : 'mavenRelease'
 
     sourceCompatibility = targetCompatibility = 1.8
 
@@ -59,6 +75,21 @@ subprojects {
     artifacts {
         archives jar
         archives sourcesJar
+    }
+
+    artifactory {
+        setContextUrl('https://oss.jfrog.org/artifactory')
+        publish {
+            repository {
+                repoKey = _REPO_KEY
+                username = _BINTRAY_USER
+                password = _BINTRAY_KEY
+                maven = true
+            }
+            defaults {
+                publications(_PUBLISH_CFG)
+            }
+        }
     }
 }
 
