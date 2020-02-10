@@ -10,6 +10,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +33,12 @@ public class SpongeCommand implements CommandCallable {
 
     @Override
     public @NotNull List<String> getSuggestions(@NotNull CommandSource source, @NotNull String args, @Nullable Location<World> targetPosition) {
-        return core.tabComplete(Wrapper.wrapper(source), new Args(args));
+        String[] ss = args.trim().split("[ ]+");
+        if (!args.isEmpty() && args.endsWith(" ")) {
+            ss = Arrays.copyOf(ss, ss.length + 1);
+            ss[ss.length - 1] = "";
+        }
+        return core.tabComplete(Wrapper.wrapper(source), new Args(ss));
     }
 
     @Override

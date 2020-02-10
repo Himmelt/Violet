@@ -4,9 +4,11 @@ import org.jetbrains.annotations.NotNull;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.plugin.SpongePlugin;
 import org.soraworld.violet.text.ChatColor;
+import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.plugin.Plugin;
 import org.spongepowered.api.plugin.PluginContainer;
 
+import javax.inject.Inject;
 import java.nio.file.Path;
 
 /**
@@ -22,7 +24,8 @@ import java.nio.file.Path;
 )
 public final class VioletTest extends SpongePlugin {
 
-    public VioletTest(Path path, PluginContainer container) {
+    @Inject
+    public VioletTest(@ConfigDir(sharedRoot = false) Path path, PluginContainer container) {
         super(path, container);
     }
 
