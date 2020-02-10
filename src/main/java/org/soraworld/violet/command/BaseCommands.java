@@ -2,6 +2,7 @@ package org.soraworld.violet.command;
 
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.ICommandSender;
+import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.core.PluginCore;
 import org.soraworld.violet.inject.Cmd;
 import org.soraworld.violet.inject.Inject;
@@ -18,22 +19,24 @@ import java.util.LinkedHashSet;
 public final class BaseCommands {
 
     @Inject
-    private PluginCore plugin;
+    private IPlugin plugin;
+    @Inject
+    private PluginCore core;
 
     @Cmd(admin = true, tabs = {"zh_cn", "en_us"})
     public final SubExecutor<ICommandSender> lang = (cmd, sender, args) -> {
         if (args.notEmpty()) {
-            String oldLang = plugin.getLang();
-            if (plugin.setLang(args.first())) {
-                sender.sendMessageKey("setLang", plugin.getLang());
-                if (!plugin.getLang().equalsIgnoreCase(oldLang)) {
-                    plugin.asyncSave(null);
+            String oldLang = core.getLang();
+            if (core.setLang(args.first())) {
+                plugin.sendMessageKey(sender, "setLang", core.getLang());
+                if (!core.getLang().equalsIgnoreCase(oldLang)) {
+                    core.asyncSave(null);
                 }
             } else {
-                sender.sendMessageKey("setLangFailed", args.first());
+                plugin.sendMessageKey(sender, "setLangFailed", args.first());
             }
         } else {
-            sender.sendMessageKey("getLang", plugin.getLang());
+            plugin.sendMessageKey(sender, "getLang", core.getLang());
         }
     };
 
@@ -45,31 +48,31 @@ public final class BaseCommands {
                 sub.execute(sender, args.next());
             }
         } else {
-            plugin.asyncSave(result -> sender.sendMessageKey(result ? "configSaved" : "configSaveFailed"));
+            core.asyncSave(result -> plugin.sendMessageKey(sender, result ? "configSaved" : "configSaveFailed"));
         }
     };
 
     @Cmd(admin = true)
     public final SubExecutor<ICommandSender> debug = (cmd, sender, args) -> {
-        plugin.setDebug(!plugin.isDebug());
-        sender.sendMessageKey(plugin.isDebug() ? "debugON" : "debugOFF");
+        core.setDebug(!core.isDebug());
+        plugin.sendMessageKey(sender, core.isDebug() ? "debugON" : "debugOFF");
     };
 
     @Cmd(admin = true, tabs = {"lang"})
     public final SubExecutor<ICommandSender> reload = (cmd, sender, args) -> {
         if ("lang".equalsIgnoreCase(args.first())) {
-            plugin.setLang(plugin.getLang());
-            sender.sendMessageKey("reloadLang");
+            core.setLang(core.getLang());
+            plugin.sendMessageKey(sender, "reloadLang");
         } else {
-            sender.sendMessageKey(plugin.load() ? "configLoaded" : "configLoadFailed");
+            plugin.sendMessageKey(sender, core.load() ? "configLoaded" : "configLoadFailed");
         }
     };
 
     @Cmd(admin = true)
-    public final SubExecutor<ICommandSender> extract = (cmd, sender, args) -> sender.sendMessageKey(plugin.extract() ? "extracted" : "extractFailed");
+    public final SubExecutor<ICommandSender> extract = (cmd, sender, args) -> plugin.sendMessageKey(sender, core.extract() ? "extracted" : "extractFailed");
 
     @Cmd(admin = true)
-    public final SubExecutor<ICommandSender> backup = (cmd, sender, args) -> plugin.asyncBackup(result -> sender.sendMessageKey(result ? "backupSuccess" : "backupFailed"));
+    public final SubExecutor<ICommandSender> backup = (cmd, sender, args) -> core.asyncBackup(result -> plugin.sendMessageKey(sender, result ? "backupSuccess" : "backupFailed"));
 
     @Cmd
     public final SubExecutor<ICommandSender> help = (cmd, sender, args) -> {
@@ -78,7 +81,7 @@ public final class BaseCommands {
             if (sub != null) {
                 sub.sendUsage(sender);
             } else {
-                sender.sendMessageKey("noSuchSubCmd", args.first());
+                plugin.sendMessageKey(sender, "noSuchSubCmd", args.first());
             }
         } else {
             LinkedHashSet<CommandCore> subs = new LinkedHashSet<>(cmd.getParent().getSubs());

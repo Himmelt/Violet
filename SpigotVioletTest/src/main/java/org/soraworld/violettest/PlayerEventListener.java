@@ -17,6 +17,6 @@ public class PlayerEventListener implements org.bukkit.event.Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         Block look = Helper.getLookAt(event.getPlayer(), 30);
-        Wrapper.wrapper(event.getPlayer()).sendChat(ChatType.ACTION_BAR, ChatColor.GREEN + "look:" + (look == null ? "null" : look.getType()));
+        Wrapper.wrapper(event.getPlayer()).sendMessage(ChatType.ACTION_BAR, ChatColor.GREEN + "look:" + (look == null ? "null" : look.getType()));
     }
 }

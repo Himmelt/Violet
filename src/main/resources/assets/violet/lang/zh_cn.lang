@@ -39,7 +39,8 @@ bStatsSendFailed = "统计信息发送失败!"
 
 extractNoSuchSub = "&c类 %s 中没有名为 %s 的字段，lambda 提取失败."
 noSuchSubCmd = "没有名为 %s 的子命令."
-commandRegFailed = "命令 %s 向插件 %s 注册失败."
+mainCmdRegFail = "&c主命令 %s 注册失败 !"
+commandRegFailed = "&c命令 %s 注册失败 !"
 nullCommandMap = "&cCommandMap 反射失败 !!!!!"
 
 backupSuccess = "配置文件夹备份成功."

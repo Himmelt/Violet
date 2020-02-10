@@ -7,7 +7,6 @@ import org.soraworld.hocon.util.Reflects;
 import org.soraworld.violet.api.ICommandSender;
 import org.soraworld.violet.api.IPlayer;
 import org.soraworld.violet.api.IPlugin;
-import org.soraworld.violet.core.PluginCore;
 import org.soraworld.violet.inject.Cmd;
 import org.soraworld.violet.inject.Tab;
 import org.soraworld.violet.util.ListUtils;
@@ -56,7 +55,7 @@ public final class CommandCore {
         this.description = cmd.description();
     }
 
-    public CommandCore(@NotNull IPlugin plugin, @NotNull PluginCore core) {
+    public CommandCore(@NotNull IPlugin plugin) {
         this.name = plugin.id();
         this.perm = null;
         this.ingame = false;
@@ -237,7 +236,7 @@ public final class CommandCore {
     }
 
     public void sendUsage(ICommandSender sender) {
-        sender.sendMessageKey("cmdUsage", getUsage());
+        plugin.sendMessageKey(sender, "cmdUsage", getUsage());
     }
 
     public CommandCore getSub(String name) {
@@ -279,10 +278,10 @@ public final class CommandCore {
                 if (!ingame || sender instanceof IPlayer) {
                     executor.execute(this, sender, args);
                 } else {
-                    sender.sendMessageKey("onlyPlayer");
+                    plugin.sendMessageKey(sender, "onlyPlayer");
                 }
             } else {
-                sender.sendMessageKey("noCommandPerm", perm);
+                plugin.sendMessageKey(sender, "noCommandPerm", perm);
             }
         } else {
             sendUsage(sender);
@@ -323,10 +322,10 @@ public final class CommandCore {
     }
 
     public Collection<CommandCore> getSubs() {
-        return subs.values();
+        return Collections.unmodifiableCollection(subs.values());
     }
 
     public Collection<String> getSubKeys() {
-        return subs.keySet();
+        return Collections.unmodifiableCollection(subs.keySet());
     }
 }

@@ -23,7 +23,7 @@ import java.util.List;
  */
 public class SpigotPlugin extends JavaPlugin implements IPlugin {
 
-    private final PluginCore core = new PluginCore(this);
+    private final PluginCore core;
     private static final CommandMap COMMAND_MAP;
 
     static {
@@ -47,6 +47,7 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
         if (!Violet.VIOLET_VERSION.match(violetVersion())) {
             throw new RuntimeException("Plugin " + id() + " incompatible with server violet@" + Violet.VIOLET_VERSION + " , need violet@" + violetVersion());
         }
+        core = new PluginCore(this);
     }
 
     @Override

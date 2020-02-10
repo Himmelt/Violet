@@ -3,7 +3,6 @@ package org.soraworld.violet.wrapper;
 import org.jetbrains.annotations.NotNull;
 import org.soraworld.violet.api.ICommandSender;
 import org.soraworld.violet.api.IPlayer;
-import org.soraworld.violet.core.PluginCore;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.text.ChatType;
 import org.spongepowered.api.command.CommandSource;
@@ -16,9 +15,6 @@ import org.spongepowered.api.text.chat.ChatTypes;
  */
 @Inject
 public final class Wrapper {
-
-    @Inject
-    private static PluginCore core;
 
     public static ICommandSender wrapper(@NotNull CommandSource source) {
         if (source instanceof Player) {
@@ -46,18 +42,8 @@ public final class Wrapper {
         }
 
         @Override
-        public void sendChat(@NotNull String message) {
-            source.sendMessage(Text.of(message));
-        }
-
-        @Override
         public void sendMessage(@NotNull String message) {
-            source.sendMessage(Text.of(core.getChatHead() + message));
-        }
-
-        @Override
-        public void sendMessageKey(@NotNull String key, Object... args) {
-            source.sendMessage(Text.of(core.getChatHead() + core.trans(key, args)));
+            source.sendMessage(Text.of(message));
         }
     }
 
@@ -68,7 +54,7 @@ public final class Wrapper {
         }
 
         @Override
-        public void sendChat(@NotNull ChatType type, @NotNull String message) {
+        public void sendMessage(@NotNull ChatType type, @NotNull String message) {
             switch (type) {
                 case ACTION_BAR:
                     source.sendMessage(ChatTypes.ACTION_BAR, Text.of(message));
@@ -78,48 +64,6 @@ public final class Wrapper {
                     break;
                 default:
                     source.sendMessage(ChatTypes.CHAT, Text.of(message));
-            }
-        }
-
-        @Override
-        public void sendChatKey(@NotNull ChatType type, @NotNull String key, Object... args) {
-            switch (type) {
-                case ACTION_BAR:
-                    source.sendMessage(ChatTypes.ACTION_BAR, Text.of(core.trans(key, args)));
-                    break;
-                case SYSTEM:
-                    source.sendMessage(ChatTypes.SYSTEM, Text.of(core.trans(key, args)));
-                    break;
-                default:
-                    source.sendMessage(ChatTypes.CHAT, Text.of(core.trans(key, args)));
-            }
-        }
-
-        @Override
-        public void sendMessage(@NotNull ChatType type, String message) {
-            switch (type) {
-                case ACTION_BAR:
-                    source.sendMessage(ChatTypes.ACTION_BAR, Text.of(core.getChatHead() + message));
-                    break;
-                case SYSTEM:
-                    source.sendMessage(ChatTypes.SYSTEM, Text.of(core.getChatHead() + message));
-                    break;
-                default:
-                    source.sendMessage(ChatTypes.CHAT, Text.of(core.getChatHead() + message));
-            }
-        }
-
-        @Override
-        public void sendMessageKey(@NotNull ChatType type, @NotNull String key, Object... args) {
-            switch (type) {
-                case ACTION_BAR:
-                    source.sendMessage(ChatTypes.ACTION_BAR, Text.of(core.getChatHead() + core.trans(key, args)));
-                    break;
-                case SYSTEM:
-                    source.sendMessage(ChatTypes.SYSTEM, Text.of(core.getChatHead() + core.trans(key, args)));
-                    break;
-                default:
-                    source.sendMessage(ChatTypes.CHAT, Text.of(core.getChatHead() + core.trans(key, args)));
             }
         }
     }

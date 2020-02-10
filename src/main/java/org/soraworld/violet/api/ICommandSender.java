@@ -9,9 +9,5 @@ import org.jetbrains.annotations.Nullable;
 public interface ICommandSender {
     boolean hasPermission(@Nullable String permission);
 
-    void sendChat(@NotNull String message);
-
     void sendMessage(@NotNull String message);
-
-    void sendMessageKey(@NotNull String key, Object... args);
 }

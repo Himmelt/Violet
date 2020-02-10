@@ -24,6 +24,9 @@ import java.util.zip.GZIPOutputStream;
  */
 public class Metrics {
 
+    private final IPlugin plugin;
+    private final ScheduledExecutorService service;
+
     private static final String BUKKIT_JSON = "{" +
             "\"serverUUID\":\"" + Violet.getServerId() + "\"," +
             "\"playerAmount\":%playerAmount%," +
@@ -48,6 +51,7 @@ public class Metrics {
             "\"coreCount\":" + Runtime.getRuntime().availableProcessors() + "," +
             "\"plugins\":[%pluginList%]}";
 
+    private static int NEXT_STATS_ID = 0;
     private static final int B_STATS_VERSION = 1;
     private static final int B_STATS_CLASS_REVISION = 2;
     private static final String BUKKIT_URL = "https://bStats.org/submitData/bukkit";
@@ -55,11 +59,15 @@ public class Metrics {
     private static final String PLUGIN_JSON = "{\"pluginName\":\"%name%\",\"id\":\"%id%\",\"pluginVersion\":\"%version%\",\"metricsRevision\":" + B_STATS_CLASS_REVISION + "}";
 
     public Metrics(@NotNull IPlugin plugin) {
-        ScheduledExecutorService service = new ScheduledThreadPoolExecutor(1, task -> {
+        this.plugin = plugin;
+        this.service = new ScheduledThreadPoolExecutor(1, task -> {
             Thread thread = Executors.defaultThreadFactory().newThread(task);
-            thread.setName("bStatus");
+            thread.setName("bStatus-" + plugin.id() + "#" + NEXT_STATS_ID++);
             return thread;
         });
+    }
+
+    public void start() {
         service.scheduleAtFixedRate(() -> plugin.runTask(() -> {
             if (Violet.BUKKIT) {
                 String json = BUKKIT_JSON.replace("%playerAmount%", String.valueOf(Bukkit.getOnlinePlayers().size())).replace("%pluginList%", getPluginsJson());
@@ -83,7 +91,10 @@ public class Metrics {
                 });
             }
         }), 5, 35, TimeUnit.MINUTES);
-        plugin.addDisableAction(service::shutdown);
+    }
+
+    public void shutdown() {
+        service.shutdown();
     }
 
     private static void sendData(String json, String url) throws Exception {

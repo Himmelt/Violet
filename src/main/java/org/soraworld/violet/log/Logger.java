@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 /**
@@ -20,14 +21,16 @@ public final class Logger {
 
     private String lastFile = "";
     private BufferedWriter writer = null;
+    private final AtomicBoolean shutdown = new AtomicBoolean(false);
     private final Object lock = new Object();
+    private final ExecutorService service;
     private final ArrayBlockingQueue<Message> queue = new ArrayBlockingQueue<>(1000);
     private static final Pattern TRUE_COLOR_PATTERN = Pattern.compile("(?i)\u00A7[0-9a-fk-or]");
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static int NEXT_LOGGER_ID = 0;
 
-    @SuppressWarnings("InfiniteLoopStatement")
-    public Logger(@NotNull final Path path) {
+    public Logger(@NotNull final String pluginId, @NotNull final Path path) {
         if (Files.notExists(path)) {
             try {
                 Files.createDirectories(path);
@@ -35,13 +38,13 @@ public final class Logger {
                 e.printStackTrace();
             }
         }
-        ExecutorService service = new ThreadPoolExecutor(1, 1, 10, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1), task -> {
+        service = new ThreadPoolExecutor(1, 1, 10, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1), task -> {
             Thread thread = Executors.defaultThreadFactory().newThread(task);
-            thread.setName("Logger");
+            thread.setName("Logger-" + pluginId + "#" + NEXT_LOGGER_ID++);
             return thread;
         });
         service.execute(() -> {
-            while (true) {
+            while (!shutdown.get()) {
                 if (!queue.isEmpty()) {
                     Message msg = queue.poll();
                     if (msg != null) {
@@ -74,6 +77,9 @@ public final class Logger {
                             e.printStackTrace();
                         }
                     }
+                    if (shutdown.get()) {
+                        return;
+                    }
                     synchronized (lock) {
                         try {
                             lock.wait();
@@ -84,6 +90,14 @@ public final class Logger {
                 }
             }
         });
+    }
+
+    public void shutdown() {
+        shutdown.set(true);
+        synchronized (lock) {
+            lock.notify();
+        }
+        service.shutdown();
     }
 
     public synchronized void log(@NotNull String message) {

@@ -40,6 +40,8 @@ bStatsSendFailed = "Stats data send failed!"
 extractNoSuchSub = "&cClass %s has no field %s witch matching name, lambda extract failed."
 noSuchSubCmd = "No sub command named %s."
 commandRegFailed = "Command %s register to plugin %s failed."
+mainCmdRegFail = "&cMain command %s register failed !"
+commandRegFailed = "&cCommand %s register failed !"
 nullCommandMap = "&cCommandMap reflection failed !!!!!"
 
 backupSuccess = "Backup success."

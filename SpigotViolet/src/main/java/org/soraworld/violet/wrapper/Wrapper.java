@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.soraworld.violet.api.ICommandSender;
 import org.soraworld.violet.api.IPlayer;
-import org.soraworld.violet.core.PluginCore;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.nms.Helper;
 import org.soraworld.violet.text.ChatType;
@@ -15,9 +14,6 @@ import org.soraworld.violet.text.ChatType;
  */
 @Inject
 public final class Wrapper {
-
-    @Inject
-    private static PluginCore core;
 
     public static ICommandSender wrapper(@NotNull CommandSender source) {
         if (source instanceof Player) {
@@ -45,18 +41,8 @@ public final class Wrapper {
         }
 
         @Override
-        public void sendChat(@NotNull String message) {
-            source.sendMessage(message);
-        }
-
-        @Override
         public void sendMessage(@NotNull String message) {
-            source.sendMessage(core.getChatHead() + message);
-        }
-
-        @Override
-        public void sendMessageKey(@NotNull String key, Object... args) {
-            source.sendMessage(core.getChatHead() + core.trans(key, args));
+            source.sendMessage(message);
         }
     }
 
@@ -67,23 +53,8 @@ public final class Wrapper {
         }
 
         @Override
-        public void sendChat(@NotNull ChatType type, @NotNull String message) {
+        public void sendMessage(@NotNull ChatType type, @NotNull String message) {
             Helper.sendChatPacket(source, type, message);
-        }
-
-        @Override
-        public void sendChatKey(@NotNull ChatType type, @NotNull String key, Object... args) {
-            Helper.sendChatPacket(source, type, core.trans(key, args));
-        }
-
-        @Override
-        public void sendMessage(@NotNull ChatType type, String message) {
-            Helper.sendChatPacket(source, type, core.getChatHead() + message);
-        }
-
-        @Override
-        public void sendMessageKey(@NotNull ChatType type, @NotNull String key, Object... args) {
-            Helper.sendChatPacket(source, type, core.getChatHead() + core.trans(key, args));
         }
     }
 }

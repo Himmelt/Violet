@@ -6,6 +6,7 @@ import org.objectweb.asm.ClassReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
@@ -55,6 +56,6 @@ public final class PluginScanner {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return set;
+        return Collections.unmodifiableSet(set);
     }
 }

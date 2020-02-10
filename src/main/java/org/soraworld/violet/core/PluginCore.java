@@ -59,24 +59,24 @@ public final class PluginCore {
     private String colorHead;
     private JsonText jsonHead;
     private boolean reloadSuccess = false;
-    private ChatColor color = ChatColor.WHITE;
+    private CommandCore mainCommand;
 
     /* ---------------------------- Final Properties ---------------------------- */
     private final Path rootPath;
+    private final Logger logger;
     private final IPlugin plugin;
     private final Options options = Options.build();
     private final Injector injector = new Injector();
-    private final CommandCore command;
+    private final ChatColor color;
     private final HashMap<String, String> langMap = new HashMap<>();
+    private final ArrayList<Object> listeners = new ArrayList<>();
+    private final ArrayList<CommandCore> commands = new ArrayList<>();
     private final HashMap<String, Object> internalConfigs = new HashMap<>();
     private final HashMap<String, Object> externalConfigs = new HashMap<>();
     private final CopyOnWriteArrayList<Runnable> enableActions = new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<Runnable> disableActions = new CopyOnWriteArrayList<>();
-    private final TreeMap<Integer, List<Consumer<ClassInfo>>> scannersMap = new TreeMap<>();
     private final AtomicBoolean asyncSaveLock = new AtomicBoolean(false);
     private final AtomicBoolean asyncBackLock = new AtomicBoolean(false);
-
-    private final Logger logger;
 
     /* ---------------------------- Statics ---------------------------- */
     private static final LinkedHashMap<String, IPlugin> PLUGINS = new LinkedHashMap<>();
@@ -88,25 +88,27 @@ public final class PluginCore {
     public PluginCore(@NotNull IPlugin plugin) {
         this.plugin = plugin;
         this.color = plugin.chatColor();
+        this.setHead("[" + plugin.name() + "] ");
         this.injector.addValue(this);
         this.injector.addValue(plugin);
         this.rootPath = plugin.getRootPath();
-        this.logger = new Logger(rootPath.resolve("logs"));
+        this.logger = new Logger(plugin.id(), rootPath.resolve("logs"));
+        this.addDisableAction(logger::shutdown);
         this.injector.addValue(this.logger);
-        this.command = new CommandCore(plugin, this);
         this.options.registerType(new UUIDSerializer());
         this.options.setUseDefaultCommentKey(true);
         this.options.setTranslator(Options.COMMENT, this::trans);
         this.options.setTranslator(Options.READ, ChatColor::colorize);
         this.options.setTranslator(Options.WRITE, ChatColor::fakerize);
-        setHead(defChatHead());
         if (!PLUGINS.containsKey(plugin.id())) {
             PLUGINS.put(plugin.id(), plugin);
         }
         if (plugin.id().equalsIgnoreCase(Violet.PLUGIN_ID)) {
             addEnableAction(() -> {
                 if (Violet.enableStats()) {
-                    new Metrics(plugin);
+                    Metrics metrics = new Metrics(plugin);
+                    metrics.start();
+                    this.addDisableAction(metrics::shutdown);
                 }
             });
             translator = (lang, key) -> langMaps.computeIfAbsent(lang, this::loadLangMap).get(key);
@@ -115,11 +117,11 @@ public final class PluginCore {
 
     public static void listPlugins(ICommandSender sender) {
         for (IPlugin plugin : PLUGINS.values()) {
-            sender.sendMessageKey("pluginInfo", plugin.id(), plugin.version());
+            plugin.sendMessageKey(sender, "pluginInfo", plugin.id(), plugin.version());
         }
     }
 
-    public void setHead(String head) {
+    public void setHead(@NotNull String head) {
         this.colorHead = color + ChatColor.colorize(head) + ChatColor.RESET;
         this.plainHead = ChatColor.stripColor(colorHead);
         this.jsonHead = new JsonText(colorHead);
@@ -349,10 +351,6 @@ public final class PluginCore {
         return text;
     }
 
-    public String defChatHead() {
-        return "[" + plugin.name() + "] ";
-    }
-
     public void debugKey(String key, Object... args) {
         if (debug) {
             plugin.consoleKey(key, args);
@@ -376,32 +374,19 @@ public final class PluginCore {
     }
 
     public void beforeLoad() {
+        // TODO
     }
 
     public void afterLoad() {
+        // TODO
     }
 
-    public void addScanner(int priority, @NotNull Consumer<ClassInfo> scanner) {
-        priority = Math.max(0, Math.min(10, priority));
-        scannersMap.computeIfAbsent(priority, i -> new ArrayList<>()).add(scanner);
-    }
-
-    public void scan() {
-        Set<ClassInfo> classes = PluginScanner.scan(plugin.getJarFile());
-        for (int i = 0; i <= 10; i++) {
-            List<Consumer<ClassInfo>> scanners = scannersMap.get(i);
-            if (scanners != null) {
-                classes.forEach(clazz -> scanners.forEach(scanner -> scanner.accept(clazz)));
-            }
-        }
-    }
-
-    private void addScanners(ClassLoader loader, Path rootPath) {
-        addScanner(0, info -> {
+    private @NotNull Consumer<ClassInfo> configScanner() {
+        return info -> {
             if (info.hasAnnotation(Config.class)) {
                 plugin.console("Try construct @Config -> " + info.getName());
                 try {
-                    Class<?> clazz = Class.forName(info.getName(), false, loader);
+                    Class<?> clazz = Class.forName(info.getName(), false, PluginCore.class.getClassLoader());
                     injector.inject(clazz);
                     Config config = clazz.getAnnotation(Config.class);
                     String id = config.id();
@@ -448,29 +433,33 @@ public final class PluginCore {
                     e.printStackTrace();
                 }
             }
-        });
-        addScanner(1, info -> {
+        };
+    }
+
+    private @NotNull Consumer<ClassInfo> commandScanner() {
+        return info -> {
             if (info.hasAnnotation(Cmd.class)) {
                 plugin.console("Try construct @Cmd -> " + info.getName());
                 try {
-                    Class<?> clazz = Class.forName(info.getName(), false, loader);
+                    Class<?> clazz = Class.forName(info.getName(), false, PluginCore.class.getClassLoader());
                     injector.inject(clazz);
                     Cmd cmd = clazz.getAnnotation(Cmd.class);
                     try {
                         Object instance = clazz.newInstance();
                         injector.inject(instance);
                         CommandCore core = new CommandCore(plugin, cmd);
-                        if (plugin.registerCommand(core)) {
-                            core.extractSub(instance);
-                            core.extractTab(instance);
-                            if (clazz != BaseCommands.class && core.getName().equalsIgnoreCase(plugin.id())) {
+                        core.extractSub(instance);
+                        core.extractTab(instance);
+                        if (core.getName().equalsIgnoreCase(plugin.id())) {
+                            if (clazz != BaseCommands.class) {
                                 BaseCommands base = new BaseCommands();
                                 injector.inject(base);
                                 core.extractSub(base);
                                 core.extractTab(base);
                             }
+                            mainCommand = core;
                         } else {
-                            plugin.consoleKey("commandRegisterFailed", core.getName());
+                            commands.add(core);
                         }
                     } catch (Throwable e) {
                         e.printStackTrace();
@@ -479,20 +468,23 @@ public final class PluginCore {
                     e.printStackTrace();
                 }
             }
-        });
-        addScanner(1, info -> {
+        };
+    }
+
+    private @NotNull Consumer<ClassInfo> listenerScanner() {
+        return info -> {
             if (info.hasAnnotation(Listener.class)) {
                 // TODO mcversion
                 //     if (MC_VERSION.match(listener.mcversion())){
                 // }
                 plugin.console("Try construct @Listener -> " + info.getName());
                 try {
-                    Class<?> clazz = Class.forName(info.getName(), false, loader);
+                    Class<?> clazz = Class.forName(info.getName(), false, PluginCore.class.getClassLoader());
                     injector.inject(clazz);
                     try {
                         Object instance = clazz.newInstance();
                         injector.inject(instance);
-                        plugin.registerListener(instance);
+                        listeners.add(instance);
                     } catch (Throwable e) {
                         e.printStackTrace();
                     }
@@ -500,17 +492,20 @@ public final class PluginCore {
                     e.printStackTrace();
                 }
             }
-        });
-        addScanner(2, info -> {
+        };
+    }
+
+    private @NotNull Consumer<ClassInfo> injectScanner() {
+        return info -> {
             if (info.hasAnnotation(Inject.class) || info.hasAnnotation(Config.class) || info.hasAnnotation(Cmd.class) || info.hasAnnotation(Listener.class)) {
                 try {
-                    Class<?> clazz = Class.forName(info.getName(), false, loader);
+                    Class<?> clazz = Class.forName(info.getName(), false, PluginCore.class.getClassLoader());
                     injector.inject(clazz);
                 } catch (Throwable e) {
                     e.printStackTrace();
                 }
             }
-        });
+        };
     }
 
     public void onLoad() {
@@ -522,17 +517,32 @@ public final class PluginCore {
                 e.printStackTrace();
             }
         }
-        addScanners(plugin.getClass().getClassLoader(), rootPath);
         plugin.onPluginLoad();
     }
 
     public void onEnable() {
+        Set<ClassInfo> classes = PluginScanner.scan(plugin.getJarFile());
+        classes.forEach(info -> configScanner().accept(info));
         load();
-//        if (!plugin.registerCommand(command)) {
-//            plugin.consoleKey("mainCmdRegFail");
-//        }
-        scan();
-        // TODO scan 之后再注册
+        classes.forEach(info -> commandScanner().accept(info));
+        classes.forEach(info -> listenerScanner().accept(info));
+        classes.forEach(info -> injectScanner().accept(info));
+        if (mainCommand == null) {
+            mainCommand = new CommandCore(plugin);
+            BaseCommands base = new BaseCommands();
+            injector.inject(base);
+            mainCommand.extractSub(base);
+            mainCommand.extractTab(base);
+        }
+        if (!plugin.registerCommand(mainCommand)) {
+            plugin.consoleKey("mainCmdRegFail", mainCommand.getName());
+        }
+        commands.forEach(command -> {
+            if (!plugin.registerCommand(command)) {
+                plugin.consoleKey("commandRegFailed", command.getName());
+            }
+        });
+        listeners.forEach(plugin::registerListener);
         plugin.onPluginEnable();
         enableActions.forEach(Runnable::run);
         plugin.consoleKey("pluginEnabled", plugin.id() + "-" + plugin.version());
@@ -562,11 +572,11 @@ public final class PluginCore {
         return colorHead;
     }
 
-    public static IPlugin getPlugin(@NotNull String id) {
+    public static @Nullable IPlugin getPlugin(@NotNull String id) {
         return PLUGINS.get(id);
     }
 
-    public static List<IPlugin> getPlugins() {
+    public static @NotNull List<IPlugin> getPlugins() {
         return new ArrayList<>(PLUGINS.values());
     }
 }

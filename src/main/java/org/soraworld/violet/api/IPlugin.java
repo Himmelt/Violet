@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.command.CommandCore;
 import org.soraworld.violet.core.PluginCore;
+import org.soraworld.violet.text.ChatType;
 
 import java.io.File;
 import java.io.InputStream;
@@ -191,5 +192,45 @@ public interface IPlugin extends IMessenger, IScheduler, I18n {
      */
     default String violetVersion() {
         return Violet.PLUGIN_VERSION;
+    }
+
+    @Override
+    default void sendChat(@NotNull ICommandSender sender, @NotNull String message) {
+        sender.sendMessage(message);
+    }
+
+    @Override
+    default void sendChatKey(@NotNull ICommandSender sender, @NotNull String key, Object... args) {
+        sender.sendMessage(getCore().trans(key, args));
+    }
+
+    @Override
+    default void sendMessage(@NotNull ICommandSender sender, @NotNull String message) {
+        sender.sendMessage(getCore().getChatHead() + message);
+    }
+
+    @Override
+    default void sendMessageKey(@NotNull ICommandSender sender, @NotNull String key, Object... args) {
+        sender.sendMessage(getCore().getChatHead() + getCore().trans(key, args));
+    }
+
+    @Override
+    default void sendChat(@NotNull IPlayer player, @NotNull ChatType type, @NotNull String message) {
+        player.sendMessage(type, message);
+    }
+
+    @Override
+    default void sendChatKey(@NotNull IPlayer player, @NotNull ChatType type, @NotNull String key, Object... args) {
+        player.sendMessage(type, getCore().trans(key, args));
+    }
+
+    @Override
+    default void sendMessage(@NotNull IPlayer player, @NotNull ChatType type, String message) {
+        player.sendMessage(type, getCore().getChatHead() + message);
+    }
+
+    @Override
+    default void sendMessageKey(@NotNull IPlayer player, @NotNull ChatType type, @NotNull String key, Object... args) {
+        player.sendMessage(type, getCore().getChatHead() + getCore().trans(key, args));
     }
 }
