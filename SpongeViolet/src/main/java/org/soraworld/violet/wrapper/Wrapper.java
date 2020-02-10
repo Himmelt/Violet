@@ -1,14 +1,20 @@
 package org.soraworld.violet.wrapper;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.soraworld.violet.api.ICommandSender;
 import org.soraworld.violet.api.IPlayer;
+import org.soraworld.violet.gamemode.GameMode;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.text.ChatType;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatTypes;
+
+import java.util.UUID;
 
 /**
  * @author Himmelt
@@ -16,7 +22,7 @@ import org.spongepowered.api.text.chat.ChatTypes;
 @Inject
 public final class Wrapper {
 
-    public static ICommandSender wrapper(@NotNull CommandSource source) {
+    public static @NotNull ICommandSender wrapper(@NotNull CommandSource source) {
         if (source instanceof Player) {
             return new WrapperPlayer((Player) source);
         } else {
@@ -24,7 +30,17 @@ public final class Wrapper {
         }
     }
 
-    public static IPlayer wrapper(@NotNull Player source) {
+    public static @Nullable IPlayer wrapper(@NotNull String name) {
+        Player source = Sponge.getServer().getPlayer(name).orElse(null);
+        return source == null ? null : wrapper(source);
+    }
+
+    public static @Nullable IPlayer wrapper(@NotNull UUID uuid) {
+        Player source = Sponge.getServer().getPlayer(uuid).orElse(null);
+        return source == null ? null : wrapper(source);
+    }
+
+    public static @NotNull IPlayer wrapper(@NotNull Player source) {
         return new WrapperPlayer(source);
     }
 
@@ -34,6 +50,11 @@ public final class Wrapper {
 
         public WrapperCommandSender(@NotNull T source) {
             this.source = source;
+        }
+
+        @Override
+        public String getName() {
+            return source.getName();
         }
 
         @Override
@@ -61,6 +82,35 @@ public final class Wrapper {
 
         public WrapperPlayer(@NotNull Player player) {
             super(player);
+        }
+
+        @Override
+        public void kick() {
+            source.kick();
+        }
+
+        @Override
+        public void kick(String reason) {
+            source.kick(Text.of(reason));
+        }
+
+        @Override
+        public GameMode gameMode() {
+            Object mode = source.gameMode().get();
+            if (mode == GameModes.CREATIVE) {
+                return GameMode.CREATIVE;
+            } else if (mode == GameModes.ADVENTURE) {
+                return GameMode.ADVENTURE;
+            } else if (mode == GameModes.SPECTATOR) {
+                return GameMode.SPECTATOR;
+            } else {
+                return GameMode.CREATIVE;
+            }
+        }
+
+        @Override
+        public UUID worldId() {
+            return source.getWorld().getUniqueId();
         }
 
         @Override

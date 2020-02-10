@@ -1,13 +1,18 @@
 package org.soraworld.violet.wrapper;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.soraworld.violet.api.ICommandSender;
 import org.soraworld.violet.api.IPlayer;
+import org.soraworld.violet.gamemode.GameMode;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.nms.Helper;
 import org.soraworld.violet.text.ChatType;
+
+import java.util.UUID;
 
 /**
  * @author Himmelt
@@ -15,7 +20,7 @@ import org.soraworld.violet.text.ChatType;
 @Inject
 public final class Wrapper {
 
-    public static ICommandSender wrapper(@NotNull CommandSender source) {
+    public static @NotNull ICommandSender wrapper(@NotNull CommandSender source) {
         if (source instanceof Player) {
             return new WrapperPlayer((Player) source);
         } else {
@@ -23,7 +28,17 @@ public final class Wrapper {
         }
     }
 
-    public static IPlayer wrapper(@NotNull Player source) {
+    public static @Nullable IPlayer wrapper(@NotNull String name) {
+        Player source = Bukkit.getPlayer(name);
+        return source == null ? null : wrapper(source);
+    }
+
+    public static @Nullable IPlayer wrapper(@NotNull UUID uuid) {
+        Player source = Bukkit.getPlayer(uuid);
+        return source == null ? null : wrapper(source);
+    }
+
+    public static @NotNull IPlayer wrapper(@NotNull Player source) {
         return new WrapperPlayer(source);
     }
 
@@ -33,6 +48,11 @@ public final class Wrapper {
 
         public WrapperCommandSender(@NotNull T source) {
             this.source = source;
+        }
+
+        @Override
+        public String getName() {
+            return source.getName();
         }
 
         @Override
@@ -60,6 +80,35 @@ public final class Wrapper {
 
         public WrapperPlayer(@NotNull Player player) {
             super(player);
+        }
+
+        @Override
+        public void kick() {
+            source.kickPlayer("");
+        }
+
+        @Override
+        public void kick(String reason) {
+            source.kickPlayer(reason);
+        }
+
+        @Override
+        public GameMode gameMode() {
+            switch (source.getGameMode()) {
+                case CREATIVE:
+                    return GameMode.CREATIVE;
+                case ADVENTURE:
+                    return GameMode.ADVENTURE;
+                case SPECTATOR:
+                    return GameMode.SPECTATOR;
+                default:
+                    return GameMode.SURVIVAL;
+            }
+        }
+
+        @Override
+        public UUID worldId() {
+            return source.getWorld().getUID();
         }
 
         @Override
