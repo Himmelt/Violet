@@ -10,4 +10,8 @@ public interface ICommandSender {
     boolean hasPermission(@Nullable String permission);
 
     void sendMessage(@NotNull String message);
+
+    Object getHandle();
+
+    <C> C getHandle(Class<C> clazz);
 }

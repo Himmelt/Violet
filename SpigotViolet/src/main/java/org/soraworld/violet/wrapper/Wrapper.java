@@ -44,6 +44,16 @@ public final class Wrapper {
         public void sendMessage(@NotNull String message) {
             source.sendMessage(message);
         }
+
+        @Override
+        public T getHandle() {
+            return source;
+        }
+
+        @Override
+        public <C> C getHandle(Class<C> clazz) {
+            return (C) source;
+        }
     }
 
     private static class WrapperPlayer extends WrapperCommandSender<Player> implements IPlayer {
