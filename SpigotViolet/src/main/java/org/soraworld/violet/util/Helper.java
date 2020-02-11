@@ -1,4 +1,4 @@
-package org.soraworld.violet.nms;
+package org.soraworld.violet.util;
 
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
@@ -19,6 +19,9 @@ import static org.soraworld.violet.version.McVersion.v1_7_10;
  * @author Himmelt
  */
 public final class Helper {
+
+    private Helper() {
+    }
 
     public static void sendChatPacket(@NotNull Player player, @NotNull ChatType type, @NotNull String text) {
         if (MC_VERSION == v1_7_10) {

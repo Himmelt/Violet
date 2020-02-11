@@ -9,8 +9,8 @@ import org.soraworld.violet.api.ICommandSender;
 import org.soraworld.violet.api.IPlayer;
 import org.soraworld.violet.gamemode.GameMode;
 import org.soraworld.violet.inject.Inject;
-import org.soraworld.violet.nms.Helper;
 import org.soraworld.violet.text.ChatType;
+import org.soraworld.violet.util.Helper;
 
 import java.util.UUID;
 

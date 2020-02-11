@@ -13,7 +13,11 @@ import org.spongepowered.api.world.World;
  * @author Himmelt
  */
 public final class Helper {
+
     private static PermissionService service;
+
+    private Helper() {
+    }
 
     public static boolean isOp(@NotNull Player player) {
         if (service == null) {

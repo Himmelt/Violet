@@ -6,9 +6,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.soraworld.violet.api.IPlugin;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.inject.InjectListener;
-import org.soraworld.violet.nms.Helper;
 import org.soraworld.violet.text.ChatColor;
 import org.soraworld.violet.text.ChatType;
+import org.soraworld.violet.util.Helper;
 import org.soraworld.violet.wrapper.Wrapper;
 
 /**
