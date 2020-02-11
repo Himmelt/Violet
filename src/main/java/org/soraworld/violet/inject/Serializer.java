@@ -9,6 +9,5 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Documented
-public @interface McVer {
-    String value() default "";
+public @interface Serializer {
 }

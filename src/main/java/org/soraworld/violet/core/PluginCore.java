@@ -3,6 +3,7 @@ package org.soraworld.violet.core;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.soraworld.hocon.node.*;
+import org.soraworld.hocon.serializer.TypeSerializer;
 import org.soraworld.violet.Violet;
 import org.soraworld.violet.api.ICommandSender;
 import org.soraworld.violet.api.IConfig;
@@ -12,10 +13,7 @@ import org.soraworld.violet.asm.PluginScanner;
 import org.soraworld.violet.bstats.Metrics;
 import org.soraworld.violet.command.BaseCommands;
 import org.soraworld.violet.command.CommandCore;
-import org.soraworld.violet.inject.Cmd;
-import org.soraworld.violet.inject.Config;
-import org.soraworld.violet.inject.Inject;
-import org.soraworld.violet.inject.InjectListener;
+import org.soraworld.violet.inject.*;
 import org.soraworld.violet.log.Logger;
 import org.soraworld.violet.serializers.UUIDSerializer;
 import org.soraworld.violet.text.ChatColor;
@@ -114,6 +112,10 @@ public final class PluginCore {
             });
             translator = (lang, key) -> langMaps.computeIfAbsent(lang, this::loadLangMap).get(key);
         }
+    }
+
+    public void registerSerializer(TypeSerializer<?, ?> serializer) {
+        this.options.registerType(serializer);
     }
 
     public static void listPlugins(ICommandSender sender) {
@@ -387,6 +389,27 @@ public final class PluginCore {
         this.logger.log(text);
     }
 
+    private @NotNull Consumer<ClassInfo> serializerScanner() {
+        return info -> {
+            if (info.hasAnnotation(Serializer.class)) {
+                plugin.console("Try inject serializer -> " + info.getName());
+                try {
+                    Class<?> clazz = Class.forName(info.getName(), false, PluginCore.class.getClassLoader());
+                    if (TypeSerializer.class.isAssignableFrom(clazz)) {
+                        injector.inject(clazz);
+                        TypeSerializer<?, ?> serializer = (TypeSerializer<?, ?>) clazz.newInstance();
+                        injector.inject(serializer);
+                        options.registerType(serializer);
+                    } else {
+                        plugin.console(ChatColor.RED + "Type " + info.getName() + " DOES'T extends TypeSerializer !!");
+                    }
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+    }
+
     private @NotNull Consumer<ClassInfo> configScanner() {
         return info -> {
             if (info.hasAnnotation(Config.class)) {
@@ -500,7 +523,8 @@ public final class PluginCore {
 
     private @NotNull Consumer<ClassInfo> injectScanner() {
         return info -> {
-            if (info.hasAnnotation(Inject.class) || info.hasAnnotation(Config.class) || info.hasAnnotation(Cmd.class) || info.hasAnnotation(InjectListener.class)) {
+            if (info.hasAnnotation(Inject.class) || info.hasAnnotation(Config.class) || info.hasAnnotation(Cmd.class)
+                    || info.hasAnnotation(InjectListener.class) || info.hasAnnotation(Serializer.class)) {
                 try {
                     Class<?> clazz = Class.forName(info.getName(), false, PluginCore.class.getClassLoader());
                     injector.inject(clazz);
@@ -525,6 +549,7 @@ public final class PluginCore {
 
     public void onEnable() {
         Set<ClassInfo> classes = PluginScanner.scan(plugin.getJarFile(), info -> info.matchMcVersion(MC_VERSION));
+        classes.forEach(info -> serializerScanner().accept(info));
         classes.forEach(info -> configScanner().accept(info));
         load();
         classes.forEach(info -> commandScanner().accept(info));

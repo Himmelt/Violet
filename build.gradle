@@ -8,10 +8,16 @@ buildscript {
 }
 
 apply plugin: 'java'
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.artifactory'
 
 group = 'org.soraworld'
 version = '2.5.0-SNAPSHOT'
+
+def _BINTRAY_USER = System.getenv('BINTRAY_USER')
+def _BINTRAY_KEY = System.getenv('BINTRAY_KEY')
+def _REPO_KEY = version.contains("SNAPSHOT") ? 'oss-snapshot-local' : 'oss-release-local'
+def _PUBLISH_CFG = version.contains("SNAPSHOT") ? 'mavenSnapshot' : 'mavenRelease'
 
 sourceCompatibility = targetCompatibility = 1.8
 
@@ -38,11 +44,6 @@ subprojects {
 
     group rootProject.group
     version rootProject.version
-
-    def _BINTRAY_USER = System.getenv('BINTRAY_USER')
-    def _BINTRAY_KEY = System.getenv('BINTRAY_KEY')
-    def _REPO_KEY = version.contains("SNAPSHOT") ? 'oss-snapshot-local' : 'oss-release-local'
-    def _PUBLISH_CFG = version.contains("SNAPSHOT") ? 'mavenSnapshot' : 'mavenRelease'
 
     sourceCompatibility = targetCompatibility = 1.8
 
@@ -95,4 +96,49 @@ subprojects {
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+    includeEmptyDirs = false
+}
+
+artifacts {
+    archives jar
+    archives sourcesJar
+}
+
+artifactory {
+    setContextUrl('https://oss.jfrog.org/artifactory')
+    publish {
+        repository {
+            repoKey = _REPO_KEY
+            username = _BINTRAY_USER
+            password = _BINTRAY_KEY
+            maven = true
+        }
+        defaults {
+            publications(_PUBLISH_CFG)
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenRelease(MavenPublication) {
+            from components.java
+            groupId = 'org.soraworld'
+            artifactId = 'violet-api'
+            version = project.version
+            artifact sourcesJar
+        }
+        mavenSnapshot(MavenPublication) {
+            from components.java
+            groupId = 'org.soraworld'
+            artifactId = 'violet-api'
+            version = project.version
+            artifact sourcesJar
+        }
+    }
 }

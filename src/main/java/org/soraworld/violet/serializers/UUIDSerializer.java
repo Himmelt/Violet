@@ -25,7 +25,6 @@ public final class UUIDSerializer extends TypeSerializer<UUID, NodeBase> {
         }
     }
 
-
     @Override
     public @NotNull NodeBase serialize(@NotNull Type fieldType, @NotNull UUID value, @NotNull Options options) {
         return new NodeBase(options, value.toString());
