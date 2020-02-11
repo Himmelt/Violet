@@ -1,6 +1,7 @@
 package org.soraworld.violet.wrapper;
 
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -8,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.soraworld.violet.api.ICommandSender;
 import org.soraworld.violet.api.IPlayer;
+import org.soraworld.violet.api.IUser;
 import org.soraworld.violet.gamemode.GameMode;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.text.ChatType;
@@ -41,6 +43,14 @@ public final class Wrapper {
     public static @Nullable IPlayer wrapper(@NotNull UUID uuid) {
         Player source = Bukkit.getPlayer(uuid);
         return source == null ? null : wrapper(source);
+    }
+
+    public static @NotNull IUser wrapper(@NotNull OfflinePlayer source) {
+        if (source instanceof Player) {
+            return new WrapperPlayer((Player) source);
+        } else {
+            return new WrapperUser(source);
+        }
     }
 
     public static @NotNull org.soraworld.violet.world.Location wrapper(@NotNull Block block) {
@@ -127,6 +137,38 @@ public final class Wrapper {
         @Override
         public void sendMessage(@NotNull ChatType type, @NotNull String message) {
             Helper.sendChatPacket(source, type, message);
+        }
+    }
+
+    private static class WrapperUser implements IUser {
+
+        private final OfflinePlayer source;
+
+        private WrapperUser(OfflinePlayer source) {
+            this.source = source;
+        }
+
+        @Override
+        public UUID uuid() {
+            return source.getUniqueId();
+        }
+
+        @Override
+        public String getName() {
+            return source.getName();
+        }
+
+        @Override
+        public OfflinePlayer getHandle() {
+            return source;
+        }
+
+        @Override
+        public <C> C getHandle(Class<C> clazz) {
+            if (clazz.isAssignableFrom(source.getClass())) {
+                return (C) source;
+            }
+            return null;
         }
     }
 }

@@ -9,14 +9,12 @@ import java.util.UUID;
 /**
  * @author Himmelt
  */
-public interface IPlayer extends ICommandSender {
+public interface IPlayer extends IUser, ICommandSender {
     void kick();
 
     void kick(String reason);
 
     GameMode gameMode();
-
-    UUID uuid();
 
     UUID worldId();
 

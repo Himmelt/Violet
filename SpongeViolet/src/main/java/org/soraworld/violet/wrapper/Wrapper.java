@@ -4,12 +4,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.soraworld.violet.api.ICommandSender;
 import org.soraworld.violet.api.IPlayer;
+import org.soraworld.violet.api.IUser;
 import org.soraworld.violet.gamemode.GameMode;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.text.ChatType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatTypes;
@@ -34,6 +36,14 @@ public final class Wrapper {
 
     public static @NotNull IPlayer wrapper(@NotNull Player source) {
         return new WrapperPlayer(source);
+    }
+
+    public static @NotNull IUser wrapper(@NotNull User source) {
+        if (source instanceof Player) {
+            return new WrapperPlayer((Player) source);
+        } else {
+            return new WrapperUser(source);
+        }
     }
 
     public static @Nullable IPlayer wrapper(@NotNull String name) {
@@ -139,6 +149,38 @@ public final class Wrapper {
                 default:
                     source.sendMessage(ChatTypes.CHAT, Text.of(message));
             }
+        }
+    }
+
+    private static class WrapperUser implements IUser {
+
+        private final User source;
+
+        private WrapperUser(User source) {
+            this.source = source;
+        }
+
+        @Override
+        public UUID uuid() {
+            return source.getUniqueId();
+        }
+
+        @Override
+        public String getName() {
+            return source.getName();
+        }
+
+        @Override
+        public User getHandle() {
+            return source;
+        }
+
+        @Override
+        public <C> C getHandle(Class<C> clazz) {
+            if (clazz.isAssignableFrom(source.getClass())) {
+                return (C) source;
+            }
+            return null;
         }
     }
 }
