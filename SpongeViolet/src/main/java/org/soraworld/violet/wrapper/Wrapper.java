@@ -13,6 +13,8 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatTypes;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 import java.util.UUID;
 
@@ -30,6 +32,10 @@ public final class Wrapper {
         }
     }
 
+    public static @NotNull IPlayer wrapper(@NotNull Player source) {
+        return new WrapperPlayer(source);
+    }
+
     public static @Nullable IPlayer wrapper(@NotNull String name) {
         Player source = Sponge.getServer().getPlayer(name).orElse(null);
         return source == null ? null : wrapper(source);
@@ -40,8 +46,8 @@ public final class Wrapper {
         return source == null ? null : wrapper(source);
     }
 
-    public static @NotNull IPlayer wrapper(@NotNull Player source) {
-        return new WrapperPlayer(source);
+    public static @NotNull org.soraworld.violet.world.Location wrapper(@NotNull Location<World> location) {
+        return new org.soraworld.violet.world.Location(location.getExtent().getUniqueId(), location.getX(), location.getY(), location.getZ());
     }
 
     private static class WrapperCommandSender<T extends CommandSource> implements ICommandSender {

@@ -1,6 +1,7 @@
 package org.soraworld.violet.wrapper;
 
 import org.bukkit.Bukkit;
+import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +29,10 @@ public final class Wrapper {
         }
     }
 
+    public static @NotNull IPlayer wrapper(@NotNull Player source) {
+        return new WrapperPlayer(source);
+    }
+
     public static @Nullable IPlayer wrapper(@NotNull String name) {
         Player source = Bukkit.getPlayer(name);
         return source == null ? null : wrapper(source);
@@ -38,8 +43,8 @@ public final class Wrapper {
         return source == null ? null : wrapper(source);
     }
 
-    public static @NotNull IPlayer wrapper(@NotNull Player source) {
-        return new WrapperPlayer(source);
+    public static @NotNull org.soraworld.violet.world.Location wrapper(@NotNull Block block) {
+        return new org.soraworld.violet.world.Location(block.getWorld().getUID(), block.getX(), block.getY(), block.getZ());
     }
 
     private static class WrapperCommandSender<T extends CommandSender> implements ICommandSender {
