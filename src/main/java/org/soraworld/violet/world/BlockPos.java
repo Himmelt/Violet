@@ -33,4 +33,19 @@ public final class BlockPos {
     public UUID getWorldId() {
         return worldId;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 19 * hash + worldId.hashCode();
+        hash = 19 * hash + (int) (Double.doubleToLongBits(this.x) ^ (Double.doubleToLongBits(this.x) >>> 32));
+        hash = 19 * hash + (int) (Double.doubleToLongBits(this.y) ^ (Double.doubleToLongBits(this.y) >>> 32));
+        hash = 19 * hash + (int) (Double.doubleToLongBits(this.z) ^ (Double.doubleToLongBits(this.z) >>> 32));
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof BlockPos && worldId.equals(((BlockPos) obj).worldId) && x == ((BlockPos) obj).x && y == ((BlockPos) obj).y && z == ((BlockPos) obj).z;
+    }
 }
