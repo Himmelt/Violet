@@ -74,7 +74,10 @@ public final class Wrapper {
 
         @Override
         public <C> C getHandle(Class<C> clazz) {
-            return (C) source;
+            if (clazz.isAssignableFrom(source.getClass())) {
+                return (C) source;
+            }
+            return null;
         }
     }
 
@@ -106,6 +109,11 @@ public final class Wrapper {
             } else {
                 return GameMode.CREATIVE;
             }
+        }
+
+        @Override
+        public UUID uuid() {
+            return source.getUniqueId();
         }
 
         @Override

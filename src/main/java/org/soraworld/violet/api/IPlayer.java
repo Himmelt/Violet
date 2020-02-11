@@ -16,6 +16,8 @@ public interface IPlayer extends ICommandSender {
 
     GameMode gameMode();
 
+    UUID uuid();
+
     UUID worldId();
 
     void sendMessage(@NotNull ChatType type, @NotNull String message);
