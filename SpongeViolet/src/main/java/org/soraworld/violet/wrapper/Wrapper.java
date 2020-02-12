@@ -8,6 +8,7 @@ import org.soraworld.violet.api.IUser;
 import org.soraworld.violet.gamemode.GameMode;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.text.ChatType;
+import org.soraworld.violet.world.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
@@ -56,8 +57,8 @@ public final class Wrapper {
         return source == null ? null : wrapper(source);
     }
 
-    public static @NotNull org.soraworld.violet.world.Location wrapper(@NotNull Location<World> location) {
-        return new org.soraworld.violet.world.Location(location.getExtent().getUniqueId(), location.getX(), location.getY(), location.getZ());
+    public static @NotNull BlockPos wrapper(@NotNull Location<World> location) {
+        return new BlockPos(location.getExtent().getUniqueId(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
     }
 
     private static class WrapperCommandSender<T extends CommandSource> implements ICommandSender {

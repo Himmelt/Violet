@@ -11,6 +11,7 @@ import org.soraworld.violet.util.FileUtils;
 import org.soraworld.violet.util.Helper;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCallable;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
@@ -99,7 +100,7 @@ public class SpongePlugin implements IPlugin {
 
     @Override
     public String version() {
-        return container.getVersion().orElse("x.y.z");
+        return container.getVersion().orElse("0.0.0");
     }
 
     @Override
@@ -124,40 +125,12 @@ public class SpongePlugin implements IPlugin {
         return registerCommand(new SpongeCommand(core), aliases);
     }
 
-    @Override
-    public boolean registerCommand(@NotNull Object command, String... aliases) {
-        if (command instanceof CommandCallable) {
-            return Sponge.getCommandManager().register(this, (CommandCallable) command, aliases).isPresent();
-        }
-        return false;
+    public boolean registerCommand(@NotNull CommandCallable command, String... aliases) {
+        return Sponge.getCommandManager().register(this, command, aliases).isPresent();
     }
 
-    @Override
-    public boolean registerCommand(@NotNull Object command, @NotNull List<String> aliases) {
-        if (command instanceof CommandCallable) {
-            return Sponge.getCommandManager().register(this, (CommandCallable) command, aliases).isPresent();
-        }
-        return false;
-    }
-
-    @Override
-    public boolean setLang(String lang) {
-        return core.setLang(lang);
-    }
-
-    @Override
-    public String getLang() {
-        return core.getLang();
-    }
-
-    @Override
-    public String trans(@NotNull String key, Object... args) {
-        return core.trans(key, args);
-    }
-
-    @Override
-    public boolean extract() {
-        return core.extract();
+    public boolean registerCommand(@NotNull CommandCallable command, @NotNull List<String> aliases) {
+        return Sponge.getCommandManager().register(this, command, aliases).isPresent();
     }
 
     @Override
@@ -166,54 +139,8 @@ public class SpongePlugin implements IPlugin {
     }
 
     @Override
-    public void consoleKey(String key, Object... args) {
-        console(core.trans(key, args));
-    }
-
-    @Override
-    public void log(@NotNull String text) {
-        core.log(text);
-    }
-
-    @Override
-    public void logKey(@NotNull String key, Object... args) {
-        core.log(core.trans(key, args));
-    }
-
-    @Override
-    public void consoleLog(@NotNull String text) {
-        console(text);
-        log(text);
-    }
-
-    @Override
-    public void consoleLogKey(@NotNull String key, Object... args) {
-        consoleLog(core.trans(key, args));
-    }
-
-    @Override
     public void broadcast(@NotNull String message) {
         Sponge.getServer().getBroadcastChannel().send(Text.of(core.getChatHead() + message));
-    }
-
-    @Override
-    public void broadcastKey(@NotNull String key, Object... args) {
-        Sponge.getServer().getBroadcastChannel().send(Text.of(core.getChatHead() + core.trans(key, args)));
-    }
-
-    @Override
-    public void debug(@NotNull String message) {
-        core.debug(message);
-    }
-
-    @Override
-    public void debug(@NotNull Throwable e) {
-        core.debug(e);
-    }
-
-    @Override
-    public void debugKey(@NotNull String key, Object... args) {
-        core.debugKey(key, args);
     }
 
     @Override
@@ -227,30 +154,9 @@ public class SpongePlugin implements IPlugin {
     }
 
     @Override
-    public void notifyOpsKey(@NotNull String key, Object... args) {
-        Text text = Text.of(core.getChatHead() + core.trans(key, args));
-        for (Player player : Sponge.getServer().getOnlinePlayers()) {
-            if (Helper.isOp(player)) {
-                player.sendMessage(text);
-            }
-        }
-    }
-
-    @Override
     public void notifyOps(@NotNull ChatType type, @NotNull String message) {
         org.spongepowered.api.text.chat.ChatType chatType = type == ChatType.ACTION_BAR ? ChatTypes.ACTION_BAR : type == ChatType.SYSTEM ? ChatTypes.SYSTEM : ChatTypes.CHAT;
         Text text = chatType == ChatTypes.ACTION_BAR ? Text.of(message) : Text.of(core.getChatHead() + message);
-        for (Player player : Sponge.getServer().getOnlinePlayers()) {
-            if (Helper.isOp(player)) {
-                player.sendMessage(chatType, text);
-            }
-        }
-    }
-
-    @Override
-    public void notifyOpsKey(@NotNull ChatType type, @NotNull String key, Object... args) {
-        org.spongepowered.api.text.chat.ChatType chatType = type == ChatType.ACTION_BAR ? ChatTypes.ACTION_BAR : type == ChatType.SYSTEM ? ChatTypes.SYSTEM : ChatTypes.CHAT;
-        Text text = chatType == ChatTypes.ACTION_BAR ? Text.of(core.trans(key, args)) : Text.of(core.getChatHead() + core.trans(key, args));
         for (Player player : Sponge.getServer().getOnlinePlayers()) {
             if (Helper.isOp(player)) {
                 player.sendMessage(chatType, text);
@@ -276,5 +182,37 @@ public class SpongePlugin implements IPlugin {
     @Override
     public void runTaskLaterAsync(@NotNull Runnable task, long delay) {
         Sponge.getScheduler().createAsyncExecutor(this).schedule(task, delay * 50, TimeUnit.MILLISECONDS);
+    }
+
+    public void sendChat(@NotNull CommandSource sender, @NotNull String message) {
+        sender.sendMessage(Text.of(message));
+    }
+
+    public void sendChatKey(@NotNull CommandSource sender, @NotNull String key, Object... args) {
+        sender.sendMessage(Text.of(core.trans(key, args)));
+    }
+
+    public void sendMessage(@NotNull CommandSource sender, @NotNull String message) {
+        sender.sendMessage(Text.of(core.getChatHead() + message));
+    }
+
+    public void sendMessageKey(@NotNull CommandSource sender, @NotNull String key, Object... args) {
+        sender.sendMessage(Text.of(core.getChatHead() + core.trans(key, args)));
+    }
+
+    public void sendChat(@NotNull Player player, @NotNull ChatType type, @NotNull String message) {
+        Helper.sendChatType(player, type, message);
+    }
+
+    public void sendChatKey(@NotNull Player player, @NotNull ChatType type, @NotNull String key, Object... args) {
+        Helper.sendChatType(player, type, core.trans(key, args));
+    }
+
+    public void sendMessage(@NotNull Player player, @NotNull ChatType type, String message) {
+        Helper.sendChatType(player, type, core.getChatHead() + message);
+    }
+
+    public void sendMessageKey(@NotNull Player player, @NotNull ChatType type, @NotNull String key, Object... args) {
+        Helper.sendChatType(player, type, core.getChatHead() + core.trans(key, args));
     }
 }

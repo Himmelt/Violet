@@ -55,7 +55,10 @@ public class Version {
         return this.major == version.major && this.minor == version.minor && this.patch == version.patch;
     }
 
-    public boolean match(@NotNull String version) {
+    public boolean match(String version) {
+        if (version == null || version.isEmpty()) {
+            return true;
+        }
         if (VERSION_ALONE.matcher(version).matches()) {
             return this.value == parse(version).value;
         } else if (VERSION_RANGE.matcher(version).matches()) {

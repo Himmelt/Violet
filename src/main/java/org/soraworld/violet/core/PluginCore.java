@@ -577,6 +577,7 @@ public final class PluginCore {
         if (plugin.id().equalsIgnoreCase(Violet.PLUGIN_ID)) {
             plugin.consoleLogKey("serverRunning", getServerId(), MC_VERSION);
         }
+        plugin.runTaskLater(plugin::afterEnable, 1);
     }
 
     public void onDisable() {

@@ -137,7 +137,7 @@ public final class Wrapper {
 
         @Override
         public void sendMessage(@NotNull ChatType type, @NotNull String message) {
-            Helper.sendChatPacket(source, type, message);
+            Helper.sendChatType(source, type, message);
         }
     }
 

@@ -3,6 +3,7 @@ package org.soraworld.violet.plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -13,7 +14,7 @@ import org.soraworld.violet.command.CommandCore;
 import org.soraworld.violet.command.SpigotCommand;
 import org.soraworld.violet.core.PluginCore;
 import org.soraworld.violet.text.ChatType;
-import org.soraworld.violet.wrapper.Wrapper;
+import org.soraworld.violet.util.Helper;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -100,26 +101,18 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
         return registerCommand(new SpigotCommand(core));
     }
 
-    @Override
-    public boolean registerCommand(@NotNull Object command, String... aliases) {
-        if (command instanceof Command) {
-            if (aliases.length > 0) {
-                ((Command) command).setAliases(Arrays.asList(aliases));
-            }
-            return COMMAND_MAP != null && COMMAND_MAP.register(id(), (Command) command);
+    public boolean registerCommand(@NotNull Command command, @NotNull String... aliases) {
+        if (aliases.length > 0) {
+            command.setAliases(Arrays.asList(aliases));
         }
-        return false;
+        return COMMAND_MAP != null && COMMAND_MAP.register(id(), command);
     }
 
-    @Override
-    public boolean registerCommand(@NotNull Object command, @NotNull List<String> aliases) {
-        if (command instanceof Command) {
-            if (aliases.size() > 0) {
-                ((Command) command).setAliases(aliases);
-            }
-            return COMMAND_MAP != null && COMMAND_MAP.register(id(), (Command) command);
+    public boolean registerCommand(@NotNull Command command, @NotNull List<String> aliases) {
+        if (aliases.size() > 0) {
+            command.setAliases(aliases);
         }
-        return false;
+        return COMMAND_MAP != null && COMMAND_MAP.register(id(), command);
     }
 
     @Override
@@ -153,59 +146,13 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
     }
 
     @Override
-    public void broadcastKey(@NotNull String key, Object... args) {
-        Bukkit.broadcastMessage(core.trans(key, args));
-    }
-
-    @Override
     public void console(@NotNull String message) {
         Bukkit.getConsoleSender().sendMessage(core.getChatHead() + message);
     }
 
     @Override
-    public void consoleKey(String key, Object... args) {
-        console(trans(key, args));
-    }
-
-    @Override
-    public void log(@NotNull String text) {
-        core.log(text);
-    }
-
-    @Override
-    public void logKey(@NotNull String key, Object... args) {
-        log(trans(key, args));
-    }
-
-    @Override
-    public void consoleLog(@NotNull String text) {
-        console(text);
-        log(text);
-    }
-
-    @Override
-    public void consoleLogKey(@NotNull String key, Object... args) {
-        consoleLog(trans(key, args));
-    }
-
-    @Override
     public void broadcast(@NotNull String message) {
         Bukkit.broadcastMessage(core.getChatHead() + message);
-    }
-
-    @Override
-    public void debug(@NotNull String message) {
-        core.debug(message);
-    }
-
-    @Override
-    public void debug(@NotNull Throwable e) {
-        core.debug(e);
-    }
-
-    @Override
-    public void debugKey(@NotNull String key, Object... args) {
-        core.debugKey(key, args);
     }
 
     @Override
@@ -219,52 +166,44 @@ public class SpigotPlugin extends JavaPlugin implements IPlugin {
     }
 
     @Override
-    public void notifyOpsKey(@NotNull String key, Object... args) {
-        String text = core.getChatHead() + core.trans(key, args);
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.isOp()) {
-                player.sendMessage(text);
-            }
-        }
-    }
-
-    @Override
     public void notifyOps(@NotNull ChatType type, @NotNull String message) {
         String text = core.getChatHead() + message;
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.isOp()) {
-                Wrapper.wrapper(player).sendMessage(type, text);
+                sendMessage(player, type, text);
             }
         }
     }
 
-    @Override
-    public void notifyOpsKey(@NotNull ChatType type, @NotNull String key, Object... args) {
-        String text = core.getChatHead() + core.trans(key, args);
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player.isOp()) {
-                Wrapper.wrapper(player).sendMessage(type, text);
-            }
-        }
+    public void sendChat(@NotNull CommandSender sender, @NotNull String message) {
+        sender.sendMessage(message);
     }
 
-    @Override
-    public boolean setLang(String lang) {
-        return core.setLang(lang);
+    public void sendChatKey(@NotNull CommandSender sender, @NotNull String key, Object... args) {
+        sender.sendMessage(core.trans(key, args));
     }
 
-    @Override
-    public String getLang() {
-        return core.getLang();
+    public void sendMessage(@NotNull CommandSender sender, @NotNull String message) {
+        sender.sendMessage(core.getChatHead() + message);
     }
 
-    @Override
-    public String trans(@NotNull String key, Object... args) {
-        return core.trans(key, args);
+    public void sendMessageKey(@NotNull CommandSender sender, @NotNull String key, Object... args) {
+        sender.sendMessage(core.getChatHead() + core.trans(key, args));
     }
 
-    @Override
-    public boolean extract() {
-        return core.extract();
+    public void sendChat(@NotNull Player player, @NotNull ChatType type, @NotNull String message) {
+        Helper.sendChatType(player, type, message);
+    }
+
+    public void sendChatKey(@NotNull Player player, @NotNull ChatType type, @NotNull String key, Object... args) {
+        Helper.sendChatType(player, type, core.trans(key, args));
+    }
+
+    public void sendMessage(@NotNull Player player, @NotNull ChatType type, String message) {
+        Helper.sendChatType(player, type, core.getChatHead() + message);
+    }
+
+    public void sendMessageKey(@NotNull Player player, @NotNull ChatType type, @NotNull String key, Object... args) {
+        Helper.sendChatType(player, type, core.getChatHead() + core.trans(key, args));
     }
 }

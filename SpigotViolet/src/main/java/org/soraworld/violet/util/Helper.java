@@ -23,7 +23,7 @@ public final class Helper {
     private Helper() {
     }
 
-    public static void sendChatPacket(@NotNull Player player, @NotNull ChatType type, @NotNull String text) {
+    public static void sendChatType(@NotNull Player player, @NotNull ChatType type, @NotNull String text) {
         if (MC_VERSION == v1_7_10) {
             player.sendMessage(text);
         } else if (MC_VERSION.matchCraft(1, 8, 1)) {

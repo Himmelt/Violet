@@ -10,14 +10,13 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.List;
 
 /**
  * The interface Plugin.
  *
  * @author Himmelt
  */
-public interface IPlugin extends IMessenger, IScheduler, I18n {
+public interface IPlugin extends IMessenger, IScheduler {
 
     /**
      * Name string.
@@ -132,6 +131,8 @@ public interface IPlugin extends IMessenger, IScheduler, I18n {
 
     /**
      * Add enable action.
+     * 所有的 enable action 必须在 enable 之前添加。
+     * 推荐在 {@link IPlugin#onPluginLoad()} 处添加。
      *
      * @param action the action
      */
@@ -164,24 +165,6 @@ public interface IPlugin extends IMessenger, IScheduler, I18n {
     boolean registerCommand(@NotNull CommandCore core);
 
     /**
-     * Register command boolean.
-     *
-     * @param command the command
-     * @param aliases the aliases
-     * @return the boolean
-     */
-    boolean registerCommand(@NotNull Object command, String... aliases);
-
-    /**
-     * Register command boolean.
-     *
-     * @param command the command
-     * @param aliases the aliases
-     * @return the boolean
-     */
-    boolean registerCommand(@NotNull Object command, @NotNull List<String> aliases);
-
-    /**
      * 运行所需 violet 的版本.
      * 例如:
      * - 2.5.0
@@ -192,6 +175,66 @@ public interface IPlugin extends IMessenger, IScheduler, I18n {
      */
     default String violetVersion() {
         return Violet.PLUGIN_VERSION;
+    }
+
+    default String trans(@NotNull String key, Object... args) {
+        return getCore().trans(key, args);
+    }
+
+    @Override
+    default void consoleKey(String key, Object... args) {
+        console(getCore().trans(key, args));
+    }
+
+    @Override
+    default void log(@NotNull String text) {
+        getCore().log(text);
+    }
+
+    @Override
+    default void logKey(@NotNull String key, Object... args) {
+        getCore().log(getCore().trans(key, args));
+    }
+
+    @Override
+    default void consoleLog(@NotNull String text) {
+        console(text);
+        log(text);
+    }
+
+    @Override
+    default void consoleLogKey(@NotNull String key, Object... args) {
+        consoleLog(getCore().trans(key, args));
+    }
+
+    @Override
+    default void broadcastKey(@NotNull String key, Object... args) {
+        broadcast(getCore().trans(key, args));
+    }
+
+    @Override
+    default void debug(@NotNull String message) {
+        getCore().debug(message);
+    }
+
+    @Override
+    default void debug(@NotNull Throwable e) {
+        getCore().debug(e);
+    }
+
+    @Override
+    default void debugKey(@NotNull String key, Object... args) {
+        getCore().debugKey(key, args);
+    }
+
+    @Override
+    default void notifyOpsKey(@NotNull String key, Object... args) {
+        notifyOps(getCore().trans(key, args));
+    }
+
+    @Override
+    default void notifyOpsKey(@NotNull ChatType type, @NotNull String key, Object... args) {
+        notifyOps(type, getCore().trans(key, args));
     }
 
     @Override
