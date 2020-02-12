@@ -2,7 +2,6 @@ package org.soraworld.violet.wrapper;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +13,6 @@ import org.soraworld.violet.gamemode.GameMode;
 import org.soraworld.violet.inject.Inject;
 import org.soraworld.violet.text.ChatType;
 import org.soraworld.violet.util.Helper;
-import org.soraworld.violet.world.BlockPos;
 
 import java.util.UUID;
 
@@ -52,10 +50,6 @@ public final class Wrapper {
         } else {
             return new WrapperUser(source);
         }
-    }
-
-    public static BlockPos wrapper(@NotNull Block block) {
-        return new BlockPos(block.getWorld().getUID(), block.getX(), block.getY(), block.getZ());
     }
 
     private static class WrapperCommandSender<T extends CommandSender> implements ICommandSender {
